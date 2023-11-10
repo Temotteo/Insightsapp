@@ -1282,7 +1282,7 @@ def login():
             result = cursor.execute(cmd)
             result = cursor.fetchall()
 
-            session['last_org'] = result[6]
+            session['last_org'] = str(result[6])
 
             # Upadate session parameters
             session['logged_in'] = True
