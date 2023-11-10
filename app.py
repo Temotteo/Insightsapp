@@ -1273,6 +1273,7 @@ def login():
                 # Close connection
                 conn.close()
                 return redirect(url_for('login'))
+            
         elif pass_check == 'ok':
             # Reset login attempts on successful login
             session['login_attempts'] = 0
@@ -1280,7 +1281,7 @@ def login():
             # Get last org id from user
             cmd = "SELECT * FROM usuarios WHERE" + ' "user"=' + "'" + username + "'"
             result = cursor.execute(cmd)
-            result = cursor.fetchall()
+            result = cursor.fetchone()
 
             session['last_org'] = str(result[6])
 
@@ -1293,7 +1294,7 @@ def login():
             flash('Login com Sucesso', 'success')
             # Close connection
             conn.close()
-            return redirect(url_for('tasks'))
+            return redirect(url_for('tasks', dados = str(result[6])))
 
     return render_template('login.html')
 
@@ -1736,13 +1737,13 @@ def addfunction():
 @app.route("/<name>")
 def hello(name):
     flash('Pagina nao existe', 'danger')
-    return render_template('home.html') 
+    return render_template('home.html')
 
 
 
 
 if __name__ == '__main__': 
     app.secret_key='secret123'
-    app.run(debug=True)
-    #http_server = WSGIServer(('', 5000), app)
-    #http_server.serve_forever()
+    #app.run(debug=True)
+    http_server = WSGIServer(('', 5000), app)
+    http_server.serve_forever()
