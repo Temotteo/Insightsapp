@@ -1,0 +1,43 @@
+{% extends 'layout.html'%}
+
+
+{% block body%}
+  <h1>ONGs</h1>
+  <hr>
+  <table class="table table-striped">
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Contact1</th>
+      <th>Contact2</th>
+      <th>City</th>
+      <th>Sale Phase</th>
+      <th>Actions</th>
+   
+      
+      
+      
+    </tr>
+    {% for cliente in dados %}
+      <tr>
+        <td>{{cliente[4]}}</td> 
+        <td>{{cliente[0]}}</td> 
+        <td>{{cliente[1]}}</td>
+        <td>{{cliente[2]}}</td>
+        <td>{{cliente[3]}}</td>
+        <td>{{cliente[6]}}</td>
+        <td>{{cliente[8]}}</td>
+        <td>
+          <a href="#" class="btn btn-primary" title="Show" style="margin-right: 5px;"><i class="fa fa-eye"></i></button>
+          <a href="add_call/{{cliente[4]}}" class="btn btn-success" title="Call" style="margin-right: 5px;"><i class="fa fa-phone"></i></button>
+          
+        </td>
+       
+        
+      </tr>
+    {% endfor %}
+  </table>
+
+
+{% endblock %}

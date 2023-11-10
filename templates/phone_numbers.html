@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail Phone Number Extractor</title>
+</head>
+<body>
+    <h1>Gmail Phone Number Extractor</h1>
+
+    <form method="post" action="/phone_numbers">
+        <label for="subject">Enter Subject:</label>
+        <input type="text" id="subject" name="subject" required>
+        <button type="submit">Search</button>
+    </form>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div>
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% if all_phone_numbers %}
+        <h2>Phone Numbers Found:</h2>
+        <ul>
+            {% for number in all_phone_numbers %}
+                <li>{{ number }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>

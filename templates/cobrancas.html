@@ -1,0 +1,35 @@
+{% extends 'layout.html'%}
+
+
+{% block body%}
+  <h1>Cobrancas</h1>
+  <hr>
+  <table class="table table-striped">
+    <tr>
+      <th>ID</th>
+      <th>Factura</th>
+      <th>Cliente</th>
+      <th>Descricao</th>
+      <th>Valor</th>
+      <th>Estado</th>
+      <th>Data de Pagamento</th>
+      <th>Astraso</th>
+      <th></th>
+    </tr>
+    {% for requisicoe in cobrancas %}
+      <tr>
+        <td>{{requisicoe[7]}}</td>
+        <td>{{requisicoe[0]}}</td>
+        <td>{{requisicoe[1]}}</td>
+        <td>{{requisicoe[2]}}</td>
+        <td>{{requisicoe[3]}}</td>
+        <td>{{requisicoe[4]}}</td>
+        <td>{{requisicoe[5]}}</td>
+        <td>{{requisicoe[6]}}</td>
+        <td>Pagar</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+
+{% endblock %}

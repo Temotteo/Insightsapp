@@ -1,0 +1,100 @@
+{% extends 'layout.html'%}
+
+<style>
+    /* Estilos CSS para colocar os formulários lado a lado com espaço entre eles */
+    .form-container {
+        display: flex;
+    }
+
+    /* Estilos adicionais para os formulários */
+    .form-container form {
+        margin-right: 200px; /* Adicione margem à direita para separação */
+    }
+
+    
+</style>
+
+
+{% block body%}
+<div class="container my-5">
+
+    <h1>Controle de Caixa</h1>
+    <p>Saldo atual: {{ saldo }}</p>
+    <hr>
+
+    {% from "includes/_formhelpers.html" import render_field %}
+
+
+            <div class="form-container">
+                
+                <h2>Registrar Entrada</h2>
+                <form action="/registrar_entrada" method="POST">
+                    <label for="entrada_valor">Valor (MZN):</label>
+                    <input type="number" id="entrada_valor" name="valor" step="0.01" required>
+                    <br>
+                    <br>
+
+                    <input type="submit" value="Registrar Entrada" class="btn btn-success">
+                </form>
+
+            </div>
+
+            <div class="form-container">    
+                <h2>Registrar Saída</h2>
+                <form action="/registrar_saida" method="POST">
+                    <label for="saida_valor">Valor (MZN):</label>
+                    <input type="number" id="saida_valor" name="valor" step="0.01" required>
+                    <br>
+                    <br>
+
+                    <!-- Adicione o campo de evidência (nota) -->
+                    <label for="evidencia">Evidência (Link):</label>
+                    <textarea id="evidencia" name="evidencia" rows="1" cols="25" required></textarea>
+                    <br>
+                    <br>
+                    <input type="submit" value="Registrar Saída" class="btn btn-success">
+                </form>
+
+            </div>
+    
+    <hr>
+    <h2>Últimas 10 Transações</h2>
+    
+  
+    <table class="table table-striped">
+        <tr>
+            <th>Operação</th>
+            <th>Valor</th>
+            <th>Saldo</th>
+            <th>Data</th>
+            <th>Requisição</th>                        
+            <th>Evidência</th>
+      
+        </tr>
+    
+        {% for transacao in last_10_transactions %}
+         <tr>
+          <td>{{transacao[0]}}</td>
+          <td>{{transacao[1]}}</td>
+          <td>{{transacao[2]}}</td>
+          <td>{{transacao[4]}}</td>
+          <td>{{transacao[5]}}</td>
+
+          <td>
+            {% if transacao[3] %}
+              <a href="{{ transacao[3] }}" target="_blank" class="btn btn-default pull-right">Evidência</a>
+            {% endif %}
+          </td>
+          
+          
+        </tr>
+    
+        {% endfor %}
+    
+    </table>
+
+    
+
+</div>
+
+{% endblock %}    

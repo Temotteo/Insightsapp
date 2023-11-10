@@ -1,0 +1,27 @@
+{% extends 'layout2.html'%}
+
+
+{% block body%}
+  <h1>Historico SMSs</h1>
+  <hr>
+  <table class="table table-striped">
+    <tr>
+      <th>ID</th>
+      <th>Data</th>
+      <th>From</th>
+      <th>To</th>
+      <th>Body</th>
+    </tr>
+    {% for x in sms %}
+      <tr>
+        <td>{{x[5]}}</td>
+        <td>{{x[6]}}</td>
+        <td>{{x[0]}}</td>
+        <td>{{x[1]}}</td>
+        <td>{{x[2]}}</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+
+{% endblock %}

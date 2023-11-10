@@ -1,0 +1,35 @@
+{% extends 'layout.html'%}
+
+
+{% block body%}
+  <h1>Propostas</h1>
+  <hr>
+  <table class="table table-striped">
+    <tr>
+      <th>ID</th>
+      <th>Cliente</th>
+      <th>Responsavel</th>
+      <th>Estado</th>
+      <th>Pasta</th>
+            
+    </tr>
+    {% for c in dados %}
+      <tr>
+        <td>{{c[0]}}</td> 
+        <td>{{c[5]}}</td> 
+        <td>{{c[2]}}</td>
+        <td>{{c[4]}}</td>
+
+        <td>
+            {% if c[1] %}
+              <a href="{{ c[1] }}" target="_blank" class="btn btn-default">Pasta</a>
+            {% endif %}
+        </td>
+
+        
+      </tr>
+    {% endfor %}
+  </table>
+
+
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h4>Credencial do clientes</h4>
+  {% from "includes/_formhelpers.html" import render_field %}
+  <form method="POST" action="">
+    <div class="form-group">
+      {{render_field(form.cliente, class_="form-control")}}
+    </div>
+    <div class="form-group">
+        {{render_field(form.local, class_="form-control")}}
+      </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-group col-md-4">
+            <label for="valor">
+                {{render_field(form.user, class_="form-control")}}
+            </label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group col-md-4">
+                <label for="valor">
+                {{render_field(form.password, class_="form-control")}}
+                </label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group col-md-4">
+                <label for="valor">
+                {{render_field(form.ipadress, class_="form-control")}}
+                </label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group col-md-4">
+                <label for="valor">
+                {{render_field(form.ippublico, class_="form-control")}}
+                </label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group col-md-4">
+                <label for="valor">
+                {{render_field(form.senha_wifi, class_="form-control")}}
+                </label>
+            </div>
+        </div>
+      <div class="col">
+            <div class="form-group col-md-4">
+                <label for="valor">
+                {{render_field(form.user_router, class_="form-control")}}
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+            <div class="form-group col-md-4">
+                <label for="valor">
+                {{render_field(form.senha_router, class_="form-control")}}
+                </label>   
+            </div>
+        </div>
+     <div class="col">
+            <div class="form-group col-md-4">
+                <label for="valor">
+                {{render_field(form.ipadress_router, class_="form-control")}}
+                </label>
+            </div>
+        </div>
+    
+    <div class="form-group">
+        <p><input type="submit" class="btn btn-success" value="Submit"></p>
+    </div>
+  </form> 
+
+{% endblock %} 

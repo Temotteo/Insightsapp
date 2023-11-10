@@ -1,0 +1,117 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.0/main.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.js"></script>
+ 
+{% endblock %}
+
+{% block body %}
+ 
+<h1>{{client[0]}}</h1>
+<hr>
+  <h3></h3>
+  {% from "includes/_formhelpers.html" import render_field %}
+
+  <form id="task-form" method="POST" action="">
+    <div class="container mt-5"></div>
+     <div class="left-container">
+        <div class="form-group col-md-4">
+        {{ render_field(form.text, class_="form-control") }}
+        </div>
+        <div class="form-group col-md-4">
+          {{render_field(form.action, class_="form-control")}}
+        </div>
+      </div> 
+      <div class="container mt-5">
+        <div class="right-container">
+          <h6 style="font-size: 14px; font-weight: bold;">Calendar</h6>
+          <div class="input-group mb-3 col-md-4">
+            {{ form.calendar(class_="form-control stringfield datepicker", placeholder="Select a date", readonly=true, style="background-color: white;") }}
+            <div class="input-group-append">
+            <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+          </div>
+
+          <!--div class="input-group mb-3 col-md-4">
+            <input type="text" class="form-control stringfield datepicker" placeholder="Select a date" readonly style="background-color: white;">
+              <div class="input-group-append">
+              <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+            </div-->
+
+            <div class="form-group col-md-4">
+              {{render_field(form.time, class_="form-control")}}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <p><input type="submit" class="btn btn-success" value="Submit"></p>
+        </div>
+      </div>
+      
+    </div>
+    
+    </form>
+ 
+
+
+  
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('.datepicker').datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: false,
+        todayHighlight: true
+      });
+    });
+
+  
+  </script>
+
+  <!--input type="text" class="timepicker" />
+
+  Initialize the Timepicker-->
+
+  <script>
+    $(document).ready(function() {
+      $('.timepicker').timepicker({
+        timeFormat: 'HH:mm',
+        interval: 15,
+        scrollbar: true
+      });
+    });
+  </script>
+
+
+
+    <h4>Timeline</h4>
+      <hr>
+      <table class="table table-striped">
+        <tr>
+          
+          <th>Hora</th>
+          <th>Descricao</th>
+          <th>Accao</th>
+          <th>User</th>
+          <th></th>
+          <th></th>
+        </tr>
+        {% for line in calendar_data %}
+          <tr>
+            
+            <td>{{ line[8] }}</td>
+            <td>{{ line[2] }}</td>
+            <td>{{ line[4] }}</td>
+            <td>{{ line[1] }}</td>
+            <td></td>
+            <td></td>
+            </tr>
+        {% endfor %}
+      </table>
+  
+{% endblock %}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Cardinal</title>
+    <link rel="icon" type="image/png" href="https://i.ibb.co/SxcVjFM/favicon-32x32.png">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      // Log out the user if they've been inactive for 5 minutes
+      $(document).ready(function() {
+        var idleTime = 0;
+        $(document).mousemove(function() {
+          idleTime = 0;
+        });
+        $(document).keypress(function() {
+          idleTime = 0;
+        });
+        setInterval(function() {
+          idleTime += 1;
+          if (idleTime > 300) { //5 minutes
+            window.location.href = "/logout";
+          }
+        }, 1000);
+      });
+    </script>
+
+    <style>
+      small {
+        font-size: smaller;
+        color: aqua;
+      }
+    </style>
+  </head>
+  <body>
+    {% include 'includes/_navbar.html' %}
+    <div class="container">
+      {% include 'includes/_messages.html' %}
+      {% block body %}{% endblock %}
+    </div>
+    
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    
+    
+
+
+  </body>
+  <!-- FOOTER -->
+  <hr>
+  <footer class="container">
+    <div class="footer">
+      <p>&copy;2015-2023 Cardinal Systems,Ltd </p>
+    </div>
+
+  </footer>
+
+
+</html>

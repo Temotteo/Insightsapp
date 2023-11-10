@@ -1,0 +1,65 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h1>Facturas Pendentes</h1>
+  <hr>
+  <table class="table table-striped">
+    <tr>
+      <th>Factura</th>
+      <th>Cliente</th>
+      
+      <th>Valor</th>
+      <th>Cobranças</th>
+      <th></th>
+    </tr>
+    {% for row in dados %}
+      <tr>
+        <td>{{ row[0] }}</td>
+        <td>{{ row[1] }}</td>
+        
+        <td>{{ row[3] }}</td>
+        <td>
+          {% if invoice_updates[row[0]] %}
+            <ul>
+              {% for update in invoice_updates[row[0]] %}
+                <li>{{ update.update_date }} - {{ update.sales_team_member }}: {{ update.update_text }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            Por cobrar  
+          {% endif %}
+        </td>
+        <td>
+          <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#addUpdateModal{{ row[0] }}">
+            Cobrar
+          </button>
+        </td>
+      </tr>
+
+      <!-- Add Update Modal for each invoice -->
+      <div class="modal fade" id="addUpdateModal{{ row[0] }}" tabindex="-1" role="dialog" aria-labelledby="addUpdateModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addUpdateModalLabel">Adicionar cobrança para factura {{ row[0] }}</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form method="post" action="{{ url_for('add_update', invoice_id=row[0]) }}">
+                <div class="form-group">
+                  <label for="update_text">Feedback da cobrança:</label>
+                  <textarea class="form-control" id="update_text" name="update_text" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Adicionar cobrança</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </table>
+
+  <a class="btn btn-success" href="/addinvoices">Adicionar Factura</a>
+{% endblock %}

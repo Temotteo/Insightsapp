@@ -1,0 +1,85 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h2>Cadastro de Clientes</h2>
+  <hr>
+  {% from "includes/_formhelpers.html" import render_field %}
+  <form method="POST" action="">
+    <div class="form-group">
+        {{render_field(form.interested, class_="form-control")}}
+      </div>
+    <div class="form-group">
+      {{render_field(form.name, class_="form-control")}}
+    </div>
+    <div class="form-group">
+        {{render_field(form.email, class_="form-control")}}
+    </div>
+    <div class="form-group">
+        {{render_field(form.email2, class_="form-control")}}
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-group col-md-4">
+            <label for="valor">
+                {{render_field(form.contact1, class_="form-control")}}
+            </label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group col-md-4">
+                <label for="valor">
+                {{render_field(form.contact2, class_="form-control")}}
+                </label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group col-md-4">
+                <label for="valor">
+                {{render_field(form.city, class_="form-control")}}
+                </label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group col-md-4">
+                <label for="valor">
+                {{render_field(form.residence, class_="form-control")}}
+                </label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group col-md-4">
+                <label for="valor">
+                {{render_field(form.phase, class_="form-control")}}
+                </label>
+            </div>
+        </div>
+      <div class="col">
+            <div class="form-group col-md-4">
+                <label for="valor">
+                {{render_field(form.sale, class_="form-control")}}
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+     <div class="col">
+            <div class="form-group col-md-4">
+                <label for="valor">
+                {{render_field(form.areas, class_="form-control")}}
+                </label>
+            </div>
+        </div>
+     <div class="col">
+            <div class="form-group col-md-4">
+                <label for="valor">
+                {{render_field(form.know, class_="form-control")}}
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <p><input type="submit" class="btn btn-success" value="Cadastrar"></p>
+    </div>
+  </form> 
+
+{% endblock %} 

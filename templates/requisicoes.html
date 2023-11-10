@@ -1,0 +1,33 @@
+{% extends 'layout.html'%}
+
+
+{% block body%}
+  <h1>Requisições</h1>
+  <hr>
+  <table class="table table-striped">
+    <tr>
+      <th>ID</th>
+      <th>Site</th>
+      <th>Requisições</th>
+      <th>Data</th>
+      <th>Custo</th>
+      <th></th>
+      <th></th>
+    </tr>
+    {% for requisicoe in requisicoes %}
+      <tr>
+        <td>{{requisicoe[0]}}</td>
+        <td>{{requisicoe[3]}}</td>
+        <td>{{requisicoe[1]}}</td>
+        <td>{{requisicoe[6]}}</td>
+        <td>{{requisicoe[5]}}</td>
+        <td><a href="/edit_request/{{requisicoe[0]}}" class="btn btn-default pull-right">Edit</a></td>
+        <td><a href="/pagamento/{{requisicoe[0]}}" class="btn btn-danger">Pay</a></td>
+      </tr>
+    {% endfor %}
+  </table>
+  <a class="btn btn-success" href="/addrequest"> Add Request</a>
+
+
+
+{% endblock %}

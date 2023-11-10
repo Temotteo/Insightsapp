@@ -1,0 +1,37 @@
+{% extends 'layout.html'%}
+
+
+{% block body%}
+  <h4>Funcoes do sistema</h4>
+  <hr>
+  <table class="table table-striped">
+    <tr>
+      <th>ID</th>
+      <th>Function</th>
+      <th>Estado</th>
+      <th>Criado por:</th>
+      <th>Data</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      
+    
+
+    </tr>
+    {% for func in funcao %}
+      <tr>
+        <td>{{func[0]}}</td>
+        <td>{{func[1]}}</td>
+        <td>{{func[2]}}</td>
+        <td>{{func[3]}}</td>
+        <td>{{func[4]}}</td>
+        <td><a href="#" class="btn btn-default pull-right">Edit</a></td>
+        <td><a href="#" class="btn btn-danger">apagar</a></td>
+      </tr>
+    {% endfor %}
+  </table>
+  <a class="btn btn-success" href="/addfunction"> New Function</a>
+
+
+
+{% endblock %}

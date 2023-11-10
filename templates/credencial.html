@@ -1,0 +1,40 @@
+{% extends 'layout.html'%}
+
+
+{% block body%}
+  <h3>Credencial</h3>
+  <hr>
+  <table class="table table-striped">
+    <tr>
+      <th>Client</th>
+      <th>Site</th>
+      <th>User</th>
+      <th>Password</th>
+      <th>IPadress</th>
+      <th>Public IP</th>
+      <th>WI-Fi Password</th>
+      <th>Router User</th>
+      <th>Router Password</th>
+      <th>IPadress Router</th>
+    </tr>
+
+    {% for cred in credencial %}
+      <tr>
+        <td>{{cred[1]}}</td>
+        <td>{{cred[3]}}</td>
+        <td>{{cred[4]}}</td>
+        <td>{{cred[2]}}</td>
+        <td>{{cred[5]}}</td>
+        <td>{{cred[6]}}</td>
+        <td>{{cred[7]}}</td>
+        <td>{{cred[8]}}</td>
+        <td>{{cred[9]}}</td>
+        <td>{{cred[10]}}</td>
+        <td>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  <a class="btn btn-success" href="/addcredencial">Add Credencial</a>
+
+{% endblock %}

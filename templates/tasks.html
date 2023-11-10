@@ -1,0 +1,62 @@
+{% extends 'layout.html'%}
+
+{% block body%}
+
+    <h1>Actividades</h1>
+    <hr>
+
+    <form method="POST" action="/add_task">
+        <label for="task_title">Nova tarefa:</label>
+        <input type="text" name="task_title" required title="Obrigatório">
+        
+        <label for="due_date">Prazo:</label>
+        <input type="date" name="due_date" required>
+    
+        <label for="agent">Funcionário:</label>
+        <select name="agent" required>
+            <option value="" disabled selected>Escolha um funcionário</option>
+            {% if session.username == 'Temoteo' or session.username == 'Onesia' %}
+                <option value="Tomas">Tomas</option>
+                <option value="Onesia">Onesia</option>
+                <option value="Temoteo">Temoteo</option>
+                <!-- Add more options as needed -->
+            {% else %}
+                {% if session.username == 'Tomas' %}
+                    <option value="Tomas">Tomas</option>
+                {% endif %}
+                
+                
+            {% endif %}
+        </select>
+    
+        <button type="submit">Adicionar Tarefa</button>
+    </form>
+    
+    
+    <h2>Tarefas:</h2>
+    <ul>
+        {% for task in tasks %}
+          {% if session.username != "Tomas" or  session.username == task[5] %}
+            <li> <strong>{{ task[1] }}</strong> | Prazo: {{ task[2] }} | {% if task[6] %}  Completed at: {{ task[4] }}{% endif %}
+                {% if not task[7] and not task[6] %}
+                    <a href="/accept_task/{{ task[0] }}">Aceitar</a>
+                              
+                {% endif %}
+                
+                {% if not task[6] and task[7] %}
+                    <a href="/complete_task/{{ task[0] }}">Terminar</a>
+                {% endif %}
+
+                {% if task[6] and task[7] %}
+                    (Terminado)
+                {% endif %}
+            </li>
+            <ul>
+                <li>Hora de inicio: {{ task[3] }}</li>
+                <li>Responsavel: {{ task[5] }}</li>
+            </ul>
+          {% endif %}  
+        {% endfor %}
+    </ul>
+   
+{% endblock %}

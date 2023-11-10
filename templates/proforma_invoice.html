@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proforma Invoice</title>
+    <style>
+        body {
+            font-family: 'Helvetica', sans-serif;
+            margin: 40px;
+        }
+
+        h1 {
+            color: #1E4D92;
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #1E4D92;
+            color: #fff;
+        }
+
+        #download-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #1E4D92;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Proforma Invoice</h1>
+
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+
+        <label for="invoice_number">Invoice Number:</label>
+        {{ form.invoice_number }}
+        <br>
+
+        <label for="date">Date:</label>
+        {{ form.date }}
+        <br>
+
+        <label for="customer_name">Customer Name:</label>
+        {{ form.customer_name }}
+        <br>
+
+        <!-- Add a loop for multiple items -->
+        {% for item in form.items %}
+            <div>
+                <label for="{{ item.description.id }}">Item Description:</label>
+                {{ item.description }}
+                <br>
+
+                <label for="{{ item.quantity.id }}">Quantity:</label>
+                {{ item.quantity }}
+                <br>
+
+                <label for="{{ item.price.id }}">Price:</label>
+                {{ item.price }}
+                <br>
+            </div>
+        {% endfor %}
+
+        {{ form.add_item }}
+        {{ form.generate_invoice }}
+    </form>
+
+    <!-- Display the PDF download button -->
+    {% if pdf_content %}
+        <a id="download-btn" href="/download" download="proforma_invoice.pdf">Download PDF</a>
+    {% endif %}
+</body>
+</html>

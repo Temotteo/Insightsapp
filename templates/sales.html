@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sales Metrics</title>
+</head>
+<body>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Sales Agent</th>
+            <th>Number of Calls/Contacts</th>
+            <th>New Customers</th>
+            <th>Number of Meetings Booked</th>
+        </tr>
+        {% for row in data %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+            <td>{{ row[4] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="/plot">View Metrics Plot</a>
+</body>
+</html>

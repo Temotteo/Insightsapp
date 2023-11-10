@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h1>Testar SMS</h1>
+  
+  <p><a class="btn btn-default pull-right" href="/sms">SMS Logs</a></p>
+  <hr>
+
+  {% from "includes/_formhelpers.html" import render_field %}
+  <form method="POST" action="">
+    <div class="form-group">
+      {{render_field(form.site, class_="form-control")}}
+    </div>
+    <div class="form-group">
+      {{render_field(form.contacto, class_="form-control")}}
+    </div>
+    <div class="form-group">
+      {{render_field(form.sms, class_="form-control")}}
+    </div>
+    <p><input type="submit" class="btn btn-success" value="Agendar Envio"></p>
+  </form>
+  
+
+{% endblock %}

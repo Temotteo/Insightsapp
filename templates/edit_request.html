@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h1>Edit Request</h1>
+  {% from "includes/_formhelpers.html" import render_field %}
+  <form method="POST" action="">
+    <div class="form-group">
+      {{ render_field(form.cliente, class_="form-control", id="editor") }}
+    </div>
+    <div class="form-group">
+      {{ render_field(form.requisicao, class_="form-control", id="editor") }}
+    </div>
+    <div class="form-group">
+        {{ render_field(form.valor, class_="form-control", id="editor") }}
+      </div>
+    <p><input class="btn btn-success" type="submit" value="Gravar">
+  </form>
+{% endblock %}
