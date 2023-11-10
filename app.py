@@ -1233,6 +1233,7 @@ def login():
         for z in result:
             if z[1] == username and z[5] != True:
                 username_check = 'ok'
+                valid_user = z[1]
                 break
             
             else:
@@ -1275,9 +1276,20 @@ def login():
         elif pass_check == 'ok':
             # Reset login attempts on successful login
             session['login_attempts'] = 0
+            
+            # Get last org id from user
+            cmd = "SELECT * FROM usuarios WHERE" + ' "user"=' + "'" + valid_user + "'"
+            result = cursor.execute(cmd)
+            result = cursor.fetchall()
 
+            session['last_org'] = result[6]
+
+            # Upadate session parameters
             session['logged_in'] = True
             session['username'] = username
+
+            
+
             flash('Login com Sucesso', 'success')
             # Close connection
             conn.close()
