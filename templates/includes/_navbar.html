@@ -36,7 +36,7 @@
             {% if session.logged_in %}
             
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Login as {{session.username}} at Org:{{session.last_org}}<span class="caret"></span></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Login as {{session.username}} at Org: <strong>{{session.last_org}}</strong> <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li class="dropdown-header">Minhas actividades</li>
                 <li><a href="/tasks">Actividades</a></li>
