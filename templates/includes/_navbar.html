@@ -13,25 +13,9 @@
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
             {% if session.logged_in %}
-            <li><a href="/pendentes">Tickets</a></li>
+            
             <li><a href="/testes">Testes-SMS</a></li>
-            
-            
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Depertamento de Admin & Fin<span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li class="dropdown-header">Requisições</li>
-                <li><a href="/requisicoes">Requisições</a></li>
-                <li><a href="/addrequest">Nova Requisiçao</a></li>
-                <li role="separator" class="divider"></li>
-                <li class="dropdown-header">Facturas</li>
-                <li><a href="/invoices">Facturas Pendentes</a></li>
-                <li role="separator" class="divider"></li>
-                <li class="dropdown-header">Caixa</li>
-                <li><a href="/saldo">Controle de caixa</a></li>
-              </ul>
-            </li>
-
+                       
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Depertamento de Vendas<span class="caret"></span></a>
               <ul class="dropdown-menu">
