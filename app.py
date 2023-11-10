@@ -1278,7 +1278,7 @@ def login():
             session['login_attempts'] = 0
             
             # Get last org id from user
-            cmd = "SELECT * FROM usuarios WHERE" + ' "user"=' + "'" + valid_user + "'"
+            cmd = "SELECT * FROM usuarios WHERE" + ' "user"=' + "'" + username + "'"
             result = cursor.execute(cmd)
             result = cursor.fetchall()
 
