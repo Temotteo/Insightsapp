@@ -1679,26 +1679,6 @@ def funcao():
     return render_template('funcao.html', funcao = dados)
 
 
-@app.route('/calcula', methods=['GET', 'POST'])
-@is_logged_in
-def calcula():
-    num1 = float(request.form['num1'])
-    num2 = float(request.form['num2'])
-    operator = request.form['operator']
-    result = None
-    
-    print('pass 09')
-
-    if operator == '+':
-        result = num1 + num2
-    elif operator == '-':
-        result = num1 - num2
-    elif operator == '*':
-        result = num1 * num2
-    elif operator == '/':
-        result = num1 / num2
-
-    return render_template('calculator.html', result=result)
 
 
 
