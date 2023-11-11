@@ -1661,22 +1661,7 @@ def addcredencial():
     return render_template('addcredencial.html', form = form)
 
 
-@app.route('/funcao')
-@is_logged_in
-def funcao():
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM funcao_software ORDER BY id_funcao")
-
-    dados=cursor.fetchall()
-
-
-    conn.close()
-
-    return render_template('funcao.html', funcao = dados)
 
 
 
