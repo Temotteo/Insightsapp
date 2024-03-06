@@ -1550,6 +1550,7 @@ def create_camp():
             # If the base table exists, create a new table with an auto-incrementing suffix
             new_table_name = get_next_table_name(cursor, base_table_name_to_check)
             create_table(cursor, new_table_name)
+            flash('Campanha criada', 'success')
             print(f'Table "{new_table_name}" created.')
         else:
             print(f'Table "{base_table_name_to_check}" does not exist.')
@@ -1562,7 +1563,7 @@ def create_camp():
         cursor.close()
         connection.close()
 
-    flash('Campanha criada', 'success')
+    
 
     return redirect(url_for('campanhas'))
     
