@@ -39,7 +39,6 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
-from pdfminer.high_level import extract_text
 
 
 app = Flask(__name__)
