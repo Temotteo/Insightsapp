@@ -244,6 +244,21 @@ conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@
 
 # Create cursor
 cursor = conn.cursor()
+
+create_table_query = '''
+    CREATE TABLE IF NOT EXISTS contacts (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(50) NOT NULL,
+        location VARCHAR(100),
+        phone VARCHAR(15),
+        gender VARCHAR(10),
+        org_id VARCHAR(10)
+    );
+    '''
+
+cursor.execute(create_table_query)
+
+conn.commit()
     
 cmd = 'SELECT * from cliente ORDER by id_cliente'
         
@@ -318,7 +333,13 @@ def create_table_if_not_exists(connection):
     '''
     
     cursor.execute(create_table_query)
+
     connection.commit()
+
+
+    
+
+
     cursor.close()
 
 # Check if user logged in
@@ -345,6 +366,46 @@ class ProformaInvoiceForm(FlaskForm):
     items = FieldList(FormField(ItemForm), min_entries=1)
     add_item = SubmitField('Add Item')
     generate_invoice = SubmitField('Generate Invoice')
+
+
+# Add contact
+@app.route('/add_contact', methods=['GET', 'POST'])
+def add_contact():
+    
+    name = request.form.get('name')
+    location = request.form.get('location')
+    phone = request.form.get('phone')
+    gender = request.form.get('gender')
+    org_id = session['org_id']
+
+    #Connect to database
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+
+    # Create cursor
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM contacts where org_id = "+"'"+ str(org_id)+"'")
+    contacts = cursor.fetchall()
+
+    
+    
+    if request.method == 'POST':
+        # Insert a new contact into the database
+        insert_query = '''
+            INSERT INTO contacts (name, location, phone, gender, org_id)
+            VALUES (%s, %s, %s, %s, %s)
+            '''
+        cursor.execute(insert_query, (name, location, phone, gender, org_id))
+        conn.commit()
+
+        return render_template('add_contat.html', contacts=contacts)
+
+    # Close connection
+    conn.close()
+
+    return render_template('add_contat.html', contacts=contacts)
+
+
 
 # Proforma Invoice
 
@@ -677,6 +738,22 @@ def db():
     return render_template('dashboard.html')
 
 
+@app.route('/campanhas')
+@is_logged_in
+def campanhas():
+
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM campanhas")
+
+    dados=cursor.fetchall()
+
+    # Close connection
+    conn.close()
+
+    return render_template('campanhas.html', campanhas = dados)
 
 
 @app.route('/pendentes')
@@ -1283,11 +1360,14 @@ def login():
             result = cursor.execute(cmd)
             result = cursor.fetchone()
 
-            session['last_org'] = str(result[6])
+            
 
             # Upadate session parameters
             session['logged_in'] = True
             session['username'] = username
+
+            session['last_org'] = str(result[6])
+            session['org_id'] = str(result[6])
 
             
 
@@ -1709,6 +1789,6 @@ def hello(name):
 
 if __name__ == '__main__': 
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()

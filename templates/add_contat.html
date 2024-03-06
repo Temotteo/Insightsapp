@@ -1,0 +1,56 @@
+{% extends 'layout.html'%}
+
+
+{% block body%}
+
+<h1>Add Contact</h1>
+<hr>
+{% from "includes/_formhelpers.html" import render_field %}
+<form action="/add_contact" method="post">
+    <div class="form-group">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required><br>
+    </div> 
+
+    <div class="form-group">
+    <label for="location">Location:</label>
+    <input type="text" id="location" name="location"><br>
+    </div>
+    
+    <div class="form-group">
+    <label for="phone">Phone:</label>
+    <input type="text" id="phone" name="phone"><br>
+    </div>
+
+    <div class="form-group">
+    <label for="gender">Gender:</label>
+    <input type="text" id="gender" name="gender"><br>
+    </div>
+    
+    
+    <input type="submit" class="btn btn-success" value="Add Contact">
+</form>
+
+<hr>
+<h2>Contact List</h2>
+
+<table class="table table-striped">
+    <tr>
+        <th>Name</th>
+        <th>Location</th>
+        <th>Phone</th>
+        <th>Gender</th>
+        <th>Organization ID</th>
+    </tr>
+    {% for contact in contacts %}
+    <tr>
+        <td>{{ contact[1] }}</td>
+        <td>{{ contact[2] }}</td>
+        <td>{{ contact[3] }}</td>
+        <td>{{ contact[4] }}</td>
+        <td>{{ contact[5] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
