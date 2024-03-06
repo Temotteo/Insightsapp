@@ -47,6 +47,34 @@ app = Flask(__name__)
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
 
+def create_table(cursor, new_table_name):
+    # Create a new table with an auto-incrementing ID column
+    query = sql.SQL("""
+        CREATE TABLE {} (
+            id_campanha SERIAL PRIMARY KEY,
+            orgid VARCHAR(10)
+        )
+    """).format(sql.Identifier(new_table_name))
+    
+    cursor.execute(query)
+
+def table_exists(cursor, table_name):
+    # Check if the specified table exists
+    query = sql.SQL("SELECT EXISTS (SELECT 1 FROM public.tables WHERE table_name = %s)")
+    cursor.execute(query, (table_name,))
+    exists = cursor.fetchone()[0]
+
+    return exists
+
+def get_next_table_name(cursor, base_table_name):
+    # Find the next available table name by incrementing the suffix
+    suffix = 1
+    while table_exists(cursor, f"{base_table_name}_{suffix}"):
+        suffix += 1
+
+    return f"{base_table_name}_{suffix}"
+
+
 def get_gmail_service():
     with open('templates/client_secret_556945350236-q43vh7j4jefgc876hfnm7oag9kk6hc6f.apps.googleusercontent.com.json', 'r') as f:
         client_config = json.load(f)
@@ -1504,6 +1532,40 @@ def del_tiket(id):
 
     return redirect(url_for('pendentes'))
 
+
+@app.route('/create_camp')
+@is_logged_in
+def create_camp():
+    
+    base_table_name_to_check = 'campanha'
+
+    try:
+        
+
+        # Connect to the PostgreSQL database
+        connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        cursor = connection.cursor()
+
+        if table_exists(cursor, base_table_name_to_check):
+            # If the base table exists, create a new table with an auto-incrementing suffix
+            new_table_name = get_next_table_name(cursor, base_table_name_to_check)
+            create_table(cursor, new_table_name)
+            print(f'Table "{new_table_name}" created.')
+        else:
+            print(f'Table "{base_table_name_to_check}" does not exist.')
+
+    except Exception as e:
+        print(f"Error: {e}")
+
+    finally:
+        # Close the database connection
+        cursor.close()
+        connection.close()
+
+    flash('Campanha criada', 'success')
+
+    return redirect(url_for('campanhas'))
+    
 
 # Logout
 @app.route('/logout')
