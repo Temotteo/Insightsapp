@@ -52,7 +52,7 @@ def create_table(cursor, new_table_name):
     query = sql.SQL("""
         CREATE TABLE {} (
             id_campanha SERIAL PRIMARY KEY,
-            orgid VARCHAR(10)
+            orgid VARCHAR(50)
         )
     """).format(sql.Identifier(new_table_name))
     
@@ -60,7 +60,7 @@ def create_table(cursor, new_table_name):
 
 def table_exists(cursor, table_name):
     # Check if the specified table exists
-    query = sql.SQL("SELECT EXISTS (SELECT 1 FROM public.tables WHERE table_name = %s)")
+    query = sql.SQL("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = %s)")
     cursor.execute(query, (table_name,))
     exists = cursor.fetchone()[0]
 
@@ -1546,11 +1546,18 @@ def create_camp():
         connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
         cursor = connection.cursor()
 
+
         if table_exists(cursor, base_table_name_to_check):
             # If the base table exists, create a new table with an auto-incrementing suffix
             new_table_name = get_next_table_name(cursor, base_table_name_to_check)
             create_table(cursor, new_table_name)
-            flash('Campanha criada', 'success')
+
+            # Include into main campagn list
+            cursor.execute('INSERT INTO public.campanhas (orgid, campanha_ref) VALUES (%s, %s)',(session['org_id'],new_table_name))
+
+            connection.commit()
+
+            flash('Campanha criada: '+new_table_name, 'success')
             print(f'Table "{new_table_name}" created.')
         else:
             print(f'Table "{base_table_name_to_check}" does not exist.')
@@ -1562,8 +1569,6 @@ def create_camp():
         # Close the database connection
         cursor.close()
         connection.close()
-
-    
 
     return redirect(url_for('campanhas'))
     
