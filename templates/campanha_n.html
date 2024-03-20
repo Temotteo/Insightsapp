@@ -1,0 +1,30 @@
+{% extends 'layout.html'%}
+
+
+{% block body%}
+<div class="container my-5">
+
+  <h1>{{campanha}}</h1>
+  <hr>
+  <table class="table table-striped">
+    <tr>
+      
+      <th>Pergunta</th>
+      
+
+    </tr>
+    {% for column in columns_list %}
+      <tr>
+        <td>{{ column }}</td>
+        
+        
+      </tr>
+    {% endfor %}
+    
+  </table>
+  <a class="btn btn-success" href="/create_col/{{campanha}}">Add Col</a>
+  
+  
+  
+
+{% endblock %}

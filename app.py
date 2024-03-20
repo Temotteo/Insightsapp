@@ -46,17 +46,76 @@ app = Flask(__name__)
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
+# Dummy survey data for demonstration
+survey_questions = [
+    'Question 1: How satisfied are you with our service?',
+    'Question 2: Would you recommend our product to others?',
+    'Question 3: How likely are you to purchase from us again?'
+]
+
+survey_responses = [
+    {'question': 'Question 1', 'options': ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied', 'Very Dissatisfied'], 'counts': [15, 25, 10, 5, 3]},
+    {'question': 'Question 2', 'options': ['Yes', 'No'], 'counts': [30, 10]},
+    {'question': 'Question 3', 'options': ['Very Likely', 'Likely', 'Neutral', 'Unlikely', 'Very Unlikely'], 'counts': [20, 15, 10, 8, 5]}
+]
+
+def list_columns(cursor, table_name, column_prefix):
+    try:
+        # Get a list of column names for the specified table and column name prefix
+        cursor.execute(
+            "SELECT column_name FROM information_schema.columns WHERE table_name = %s AND column_name LIKE %s",
+            (table_name, f'{column_prefix}%')
+        )
+        columns_list = [row[0] for row in cursor.fetchall()]
+
+        print(columns_list)
+
+        return columns_list
+
+    except Exception as e:
+        print(f"Error in list_columns: {e}")
+        return None
+
 
 def create_table(cursor, new_table_name):
     # Create a new table with an auto-incrementing ID column
+    # Create a new table with specified columns and default values
     query = sql.SQL("""
         CREATE TABLE {} (
             id_campanha SERIAL PRIMARY KEY,
-            orgid VARCHAR(50)
+            orgid VARCHAR(50),
+            t_name VARCHAR(50) DEFAULT %s
         )
     """).format(sql.Identifier(new_table_name))
     
-    cursor.execute(query)
+    default_value = new_table_name  # Example default value based on table name
+
+    cursor.execute(query, (default_value,))
+
+
+def add_column(cursor, table_name, column_name, column_type):
+    # Add a new column to the specified table
+    query = sql.SQL("ALTER TABLE {} ADD COLUMN {} {}").format(
+        sql.Identifier(table_name),
+        sql.Identifier(column_name),
+        sql.SQL(column_type)
+    )
+    print(query) 
+    cursor.execute(query)    
+    
+
+def get_next_column_name(cursor, base_column_name,table_name):
+    # Get a list of existing column names
+    cursor.execute(f"SELECT column_name FROM information_schema.columns WHERE table_name = %s", (table_name,))
+    existing_columns = [row[0] for row in cursor.fetchall()]
+
+    # Find the next available column name by incrementing the suffix
+    suffix = 1
+    while f"{base_column_name}_{suffix}" in existing_columns:
+        suffix += 1
+
+    return f"{base_column_name}_{suffix}"
+
 
 def table_exists(cursor, table_name):
     # Check if the specified table exists
@@ -1532,6 +1591,33 @@ def del_tiket(id):
 
     return redirect(url_for('pendentes'))
 
+@app.route('/campanha_n/<string:id>')
+@is_logged_in
+def campanha_n(id):
+    table_name_to_list = id
+    column_prefix_to_list = 'pergunta'
+
+    try:
+        
+        # Connect to the PostgreSQL database
+        connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        cursor = connection.cursor()
+
+        # Get a list of columns for the specified table and column name prefix
+        columns_list = list_columns(cursor, table_name_to_list, column_prefix_to_list)
+
+        
+    except Exception as e:
+        print(f"Error: {e}")
+
+    finally:
+        # Close the database connection
+        cursor.close()
+        connection.close()
+    
+    
+
+    return render_template('campanha_n.html', columns_list = columns_list, campanha=table_name_to_list)
 
 @app.route('/create_camp')
 @is_logged_in
@@ -1566,12 +1652,69 @@ def create_camp():
         print(f"Error: {e}")
 
     finally:
+
+         # Execute query
+        cursor.execute('SELECT * FROM campanhas')
+        
+        dados=cursor.fetchall()
+
         # Close the database connection
         cursor.close()
         connection.close()
 
-    return redirect(url_for('campanhas'))
-    
+    return render_template('campanhas.html', campanhas=dados)
+
+
+@app.route('/create_col/<string:id>')
+@is_logged_in
+def create_col(id):
+    # Assuming id is the name of the table to modify
+    table_name_to_modify = id
+    base_column_name = 'pergunta'
+    print('pergunta start')
+
+    try:
+        
+        # Connect to the PostgreSQL database
+        connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        cursor = connection.cursor()
+
+        print('Connected DB')
+
+        # Get the next column name
+        new_column_name = get_next_column_name(cursor, base_column_name, table_name_to_modify)
+        print(new_column_name)
+
+        # Add a new column with the generated name
+        add_column(cursor, table_name_to_modify, new_column_name, 'VARCHAR(255)')
+        connection.commit()
+
+        result_message = f'Column "{new_column_name}" added to table "{table_name_to_modify}".'
+        print(result_message)
+        
+        flash(result_message, 'success')
+
+    except Exception as e:
+        result_message = f"Error: {e}"
+        connection.rollback()
+
+    finally:
+        # Execute query
+        cursor.execute('SELECT * FROM '+id)
+        
+        dados=cursor.fetchall()
+
+        # Close the database connection
+        cursor.close()
+        connection.close()
+
+    return render_template('campanha_n.html', campanhas=dados, campanha=id)
+
+
+@app.route('/survey_dashboard')
+def survey_dashboard():
+    return render_template('survey_dashboard.html', questions=survey_questions, responses=survey_responses)
+
 
 # Logout
 @app.route('/logout')
@@ -1852,9 +1995,8 @@ def hello(name):
 
 
 
-
 if __name__ == '__main__': 
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()

@@ -15,13 +15,13 @@
         <label for="agent">Funcionário:</label>
         <select name="agent" required>
             <option value="" disabled selected>Escolha um funcionário</option>
-            {% if session.username == 'Temoteo' or session.username == 'Onesia' %}
+            {% if session.username == 'Temoteo' %}
                 <option value="Tomas">Tomas</option>
                 <option value="Onesia">Onesia</option>
                 <option value="Temoteo">Temoteo</option>
                 <!-- Add more options as needed -->
             {% else %}
-                {% if session.username == 'Tomas' %}
+                {% if session.username == 'Marta' or session.username == 'Nelio' %}
                     <option value="Tomas">Tomas</option>
                 {% endif %}
                 
