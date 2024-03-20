@@ -40,7 +40,7 @@
           {% if (session.username != "Nelio" or session.username != "Marta") or  session.username == task[5] %}
             <li> <strong>{{ task[1] }}</strong> | Prazo: {{ task[2] }} | {% if task[6] %}  Completed at: {{ task[4] }}{% endif %}
                 {% if not task[7] and not task[6] %}
-                    <a href="/accept_task/{{ task[0] }}">Aceitar</a>
+                    <a href="/accept_task/{{ task[0] }}">Iniciar</a>
                               
                 {% endif %}
                 
