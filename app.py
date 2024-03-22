@@ -1619,6 +1619,7 @@ def campanha_n(id):
 
     return render_template('campanha_n.html', columns_list = columns_list, campanha=table_name_to_list)
 
+
 @app.route('/create_camp')
 @is_logged_in
 def create_camp():
@@ -1679,8 +1680,7 @@ def create_col(id):
         connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
         cursor = connection.cursor()
 
-        print('Connected DB')
-
+        
         # Get the next column name
         new_column_name = get_next_column_name(cursor, base_column_name, table_name_to_modify)
         print(new_column_name)
@@ -1708,7 +1708,8 @@ def create_col(id):
         cursor.close()
         connection.close()
 
-    return render_template('campanha_n.html', campanhas=dados, campanha=id)
+    return redirect(url_for('campanha_n',id=id))
+
 
 
 @app.route('/survey_dashboard')
