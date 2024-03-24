@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+        .btn-container {
+            text-align: left;
+            margin-top: 20px;
+        }
+        .back-btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dashboard </h1>
+        
+
+        
+    </div>
+
+    <div class="container">
+        <h2>{{ table_name }}</h2>
+        <!-- Create a canvas element to render the chart -->
+        <canvas id="myChart"></canvas>
+
+        <!-- Button to go back -->
+        <div class="btn-container">
+            <button class="btn btn-success" onclick="goBack()">Voltar</button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript function to navigate back
+        function goBack() {
+            window.history.back();
+        }
+
+        // Get data passed from Flask
+        var labels = {{ labels | tojson }};
+        var counts = {{ counts | tojson }};
+
+        // Create the chart
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'pie', // Change the chart type to 'pie'
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Option Counts',
+                    data: counts,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)', // Red
+                        'rgba(54, 162, 235, 0.6)', // Blue
+                        'rgba(255, 206, 86, 0.6)', // Yellow
+                        'rgba(75, 192, 192, 0.6)', // Green
+                        'rgba(153, 102, 255, 0.6)' // Purple
+                        // Add more colors if needed
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)', // Red
+                        'rgba(54, 162, 235, 1)', // Blue
+                        'rgba(255, 206, 86, 1)', // Yellow
+                        'rgba(75, 192, 192, 1)', // Green
+                        'rgba(153, 102, 255, 1)' // Purple
+                        // Add more colors if needed
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            var dataset = data.datasets[tooltipItem.datasetIndex];
+                            var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                                return previousValue + currentValue;
+                            });
+                            var currentValue = dataset.data[tooltipItem.index];
+                            var percentage = Math.round((currentValue / total) * 100);
+                            return labels[tooltipItem.index] + ': ' + percentage + '%';
+                        }
+                    }
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            fontColor: '#333'
+                        },
+                        gridLines: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    }],
+                    xAxes: [{
+                        ticks: {
+                            fontColor: '#333'
+                        },
+                        gridLines: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    }]
+                }
+            }
+        });
+    </script>
+</body>
+</html>

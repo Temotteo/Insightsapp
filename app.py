@@ -59,6 +59,22 @@ survey_responses = [
     {'question': 'Question 3', 'options': ['Very Likely', 'Likely', 'Neutral', 'Unlikely', 'Very Unlikely'], 'counts': [20, 15, 10, 8, 5]}
 ]
 
+
+def create_table_for_column(cursor, table_name, column_name):
+    # Create a new table with the name "actual_campaign_column_name"
+    new_table_name = str(table_name+'_'+column_name)
+    query = sql.SQL("""
+        CREATE TABLE {} (
+            id SERIAL PRIMARY KEY,
+            orgid VARCHAR(50),
+            opcao VARCHAR(100) DEFAULT 'Opcao de resposta',
+            count_ Integer DEFAULT 0                      
+        )
+    """).format(sql.Identifier(new_table_name))
+    print('dentro')
+    cursor.execute(query)
+
+
 def list_columns(cursor, table_name, column_prefix):
     try:
         # Get a list of column names for the specified table and column name prefix
@@ -983,6 +999,9 @@ class TaskForm(Form):
     action= SelectField('Next action:',coerce=str,choices=[("Call","Call"),("Meeting","Meeting"),("submission of proposal","submission of proposal")])
     calendar = StringField('Calendar')
     
+class OptionForm(Form):
+    opcao = StringField('Opção:',[validators.Length(min=3, max=120),validators.DataRequired()])
+    
     
     
 class addcredencialForm(Form):
@@ -1591,6 +1610,36 @@ def del_tiket(id):
 
     return redirect(url_for('pendentes'))
 
+
+@app.route('/addoption/<string:id>', methods=['GET', 'POST'])
+@is_logged_in
+def addoption(id):
+    form = OptionForm(request.form)
+    
+    if request.method == 'POST':
+        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        cursor = conn.cursor()
+
+        # Query
+        query = sql.SQL("INSERT INTO {} (opcao) VALUES (%s)").format(sql.Identifier(id))
+
+        # Execute query with parameterized value
+        cursor.execute(query, (form.opcao.data,))
+
+       
+
+        # Commit to DB
+        conn.commit()
+
+        # Close connection
+        conn.close()
+
+        flash('Opcao adicionada com Successo', 'success')
+
+        return redirect(url_for('perguntas', id=id))
+
+    return render_template('addoption.html', form=form)
+
 @app.route('/campanha_n/<string:id>')
 @is_logged_in
 def campanha_n(id):
@@ -1687,10 +1736,23 @@ def create_col(id):
 
         # Add a new column with the generated name
         add_column(cursor, table_name_to_modify, new_column_name, 'VARCHAR(255)')
+        
+        # Query
+        query = "INSERT INTO display_ref(id,ref) VALUES ('"+id+"_"+new_column_name+"','Inicialise a informacao da pergunta')"
+
+        print(query)
+
+        # Execute query with parameterized value
+        cursor.execute(query)
+        
         connection.commit()
 
         result_message = f'Column "{new_column_name}" added to table "{table_name_to_modify}".'
         print(result_message)
+
+        # Create a new table for the new column
+        create_table_for_column(cursor, table_name_to_modify, new_column_name)
+        connection.commit()
         
         flash(result_message, 'success')
 
@@ -1711,11 +1773,57 @@ def create_col(id):
     return redirect(url_for('campanha_n',id=id))
 
 
+@app.route('/perguntas/<string:id>')
+@is_logged_in
+def perguntas(id):
+
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * from "+id)
+
+    dados=cursor.fetchall()
+
+
+    conn.close()
+
+    return render_template('perguntas.html', dados = dados, pergunta = id)
+
 
 @app.route('/survey_dashboard')
 def survey_dashboard():
     return render_template('survey_dashboard.html', questions=survey_questions, responses=survey_responses)
 
+
+@app.route('/dashboard2/<string:table_name>')
+@is_logged_in
+def dashboard2(table_name):
+    # Connect to the database
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+
+    # Execute the SQL query to fetch data from the specified table
+    cursor.execute(f"SELECT opcao, count_ FROM public.{table_name}")
+    rows = cursor.fetchall()
+
+    # Prepare data for chart
+    labels = [row[0] for row in rows]
+    counts = [row[1] for row in rows]
+    
+    # Display ref
+    cursor.execute(f"SELECT ref FROM display_ref where id='{table_name}'")
+    rows = cursor.fetchone()
+
+    table_name = rows[0]
+
+    print(rows[0])
+
+    # Close the cursor and connection
+    cursor.close()
+    conn.close()
+
+    return render_template('dashboard2.html', labels=labels, counts=counts, table_name=table_name)
 
 # Logout
 @app.route('/logout')
