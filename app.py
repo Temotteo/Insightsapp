@@ -846,8 +846,8 @@ def plot_graph():
 def send_sms(msg,dst,sender_id):
   
   print(sender_id)
-  account_sid = "AC4f01d89462ed43327920d1cab6b2958e"
-  auth_token = "744fd939feef9905bae86d1ecda07910"
+  account_sid = "AC952933e9303a9c0021be3c0ce432caec"
+  auth_token = "5e14a5105201307f6d9a77af3fd81853"
 
   client = Client(account_sid, auth_token)
   message = client.messages.create(body=msg,from_=sender_id,to=dst)
