@@ -2220,6 +2220,7 @@ def submit():
     return 'Respostas enviadas com sucesso!'
 
 @app.route('/respostas')
+@is_logged_in
 def ver_respostas():
     respostas = obter_respostas()
     return render_template('ver_respostas.html', respostas=respostas)
