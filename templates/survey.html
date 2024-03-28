@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ survey_title }}</title>
+</head>
+<body>
+    <h1>{{ survey_title }}</h1>
+    <form id="surveyForm" action="/submit_survey" method="post">
+        {% set question_index = 0 %}
+        {% for question_data in questions %}
+            <div class="question">
+                <h2>{{ question_data['question'] }}</h2>
+                <div class="options">
+                    {% for option in question_data['options'] %}
+                        <div class="option">
+                            <input type="radio" id="question_{{ question_index }}_option_{{ loop.index }}" name="question_{{ question_index }}_option" value="{{ option }}">
+                            <label for="question_{{ question_index }}_option_{{ loop.index }}">{{ option }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% set question_index = question_index + 1 %}
+        {% endfor %}
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

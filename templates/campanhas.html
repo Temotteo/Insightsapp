@@ -9,6 +9,7 @@
   <table class="table table-striped">
     <tr>
       <th>ID</th>
+      <th>Campanha</th>
       <th>Projecto</th>
       
     
@@ -20,10 +21,11 @@
     {% for pendente in campanhas %}
       <tr>
         <td>{{pendente[0]}}</td>
-        <td>{{pendente[1]}}</td>
+        <td>{{pendente[3]}}</td>
+        <td>{{pendente[2]}}</td>
        
 
-        <td><a href="campanha_n/{{pendente[3]}}" class="btn btn-default pull-right">Col</a></td>
+        <td><a href="campanha_n/{{pendente[3]}}" class="btn btn-default pull-right">Perguntas</a></td>
         <td><a href="assign_ticket/{{pendente[0]}}" class="btn btn-default pull-right">Assign</a></td>
         <td>
           <form action="{{url_for('del_tiket', id=pendente[0])}}" method="post">

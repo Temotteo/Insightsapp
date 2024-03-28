@@ -10,21 +10,24 @@
     <tr>
       
       <th>Pergunta</th>
+      <th>Conteudo</th>
       
+      <th></th>
 
     </tr>
     {% for column in columns_list %}
       <tr>
         <td>{{ column }}</td>
+        <td>{{ column }}</td>
 
-        <td><a href="/perguntas/{{campanha}}_{{column}}" class="btn btn-default pull-right">Opcoes</a></td>
+        <td><a href="/perguntas/{{campanha}}_{{column}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
         
         
       </tr>
     {% endfor %}
     
   </table>
-  <a class="btn btn-success" href="/create_col/{{campanha}}">Add Col</a>
+  <a class="btn btn-success" href="/create_col/{{campanha}}">Adicionar Pergunta</a>
   
   
   

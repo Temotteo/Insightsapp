@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Questionário de Personalidade SRV</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: rgb(241, 241, 241);
+}
+
+input[type="text"] {
+  width: 50%; /* Reduzindo o tamanho da caixa de texto para o nome */
+  padding: 50px;
+  margin-bottom: 10px;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+}
+.container {
+  width: 80%;
+  margin: 50px auto;
+}
+
+form {
+  background-color: #cbfaeaf6;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+input[type="text"],
+textarea {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+}
+
+input[type="submit"] {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+input[type="submit"]:hover {
+  background-color: #45a049;
+}
+
+label {
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1 style="text-align: center;">Questionário de Personalidade SRV</h1>
+  <form action="/submit" method="post">
+    <label for="nome">Nome Completo:</label>
+    <input type="text" id="nome" name="nome" required>
+    
+    <label for="pergunta1">1. Como você se considera em relação à sua habilidade de comunicação e persuasão?</label>
+    <textarea id="pergunta1" name="pergunta1" rows="4"></textarea>
+
+    <label for="pergunta2">2. Qual é a sua abordagem em relação a estabelecer e manter relacionamentos comerciais?</label>
+    <textarea id="pergunta2" name="pergunta2" rows="4"></textarea>
+
+    <label for="pergunta3">3. Como você lida com o desafio da rejeição em vendas?</label>
+    <textarea id="pergunta3" name="pergunta3" rows="4"></textarea>
+
+    <label for="pergunta4">4. Qual é a sua abordagem ao lidar com objeções dos clientes durante uma venda?</label>
+    <textarea id="pergunta4" name="pergunta4" rows="4"></textarea>
+
+    <label for="pergunta5">5. Como você se motiva para alcançar suas metas?</label>
+    <textarea id="pergunta5" name="pergunta5" rows="4"></textarea>
+
+    <label for="pergunta6">6. Qual é a sua abordagem ao lidar com clientes difíceis ou exigentes?</label>
+    <textarea id="pergunta6" name="pergunta6" rows="4"></textarea>
+
+    <label for="pergunta7">7. Como você se mantém atualizado sobre as últimas tendências e desenvolvimentos no mercado?</label>
+    <textarea id="pergunta7" name="pergunta7" rows="4"></textarea>
+
+    <label for="pergunta8">8. Qual é a sua abordagem para trabalhar em equipe para alcançar metas de vendas?</label>
+    <textarea id="pergunta8" name="pergunta8" rows="4"></textarea>
+
+    <label for="pergunta9">9. Qual é a sua perspectiva salarial para o cargo?</label>
+    <textarea id="pergunta9" name="pergunta9" rows="4"></textarea>
+
+    <label for="pergunta10">10. Você está aberto(a) a receber uma porcentagem de comissão sobre as vendas realizadas, além do salário base?</label>
+    <textarea id="pergunta10" name="pergunta10" rows="4"></textarea>
+
+    <label for="pergunta11">11. Achas que receber comissão das vendas poderia motivá-lo(a) a aumentar seu desempenho e alcançar melhores resultados de vendas? Justifique.</label>
+    <textarea id="pergunta11" name="pergunta11" rows="4"></textarea>
+
+    <label for="pergunta12">12. Tens alguma preocupação ou hesitação em relação ao modelo de remuneração baseado em comissão de vendas? Justifique.</label>
+    <textarea id="pergunta12" name="pergunta12" rows="4"></textarea>
+
+    <label for="pergunta13">13. Já teve experiências anteriores trabalhando com comissão de vendas? Se sim, como você avalia essa experiência? Se não, diga a sua opinião sobre o assunto.</label>
+    <textarea id="pergunta13" name="pergunta13" rows="4"></textarea>
+
+    <label for="pergunta14">14. Estás disposto(a) a assumir o risco associado à remuneração baseada em comissão, em troca da oportunidade de aumentar significativamente seus ganhos com base no desempenho de vendas?</label>
+    <textarea id="pergunta14" name="pergunta14" rows="4"></textarea>
+
+    <label for="pergunta15">15. Tens alguma sugestão ou preferência em relação à estrutura de remuneração que gostaria de compartilhar?</label>
+    <textarea id="pergunta15" name="pergunta15" rows="4"></textarea>
+
+    <input type="submit" value="Enviar">
+  </form>
+</div>
+</body>
+</html>

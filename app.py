@@ -59,6 +59,82 @@ survey_responses = [
     {'question': 'Question 3', 'options': ['Very Likely', 'Likely', 'Neutral', 'Unlikely', 'Very Unlikely'], 'counts': [20, 15, 10, 8, 5]}
 ]
 
+def criar_tabela():
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cur = conn.cursor()
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS respostas (
+        nome TEXT PRIMARY KEY,
+        pergunta1 TEXT,
+        pergunta2 TEXT,
+        pergunta3 TEXT,
+        pergunta4 TEXT,
+        pergunta5 TEXT,
+        pergunta6 TEXT,
+        pergunta7 TEXT,
+        pergunta8 TEXT,
+        pergunta9 TEXT,
+        pergunta10 TEXT,
+        pergunta11 TEXT,
+        pergunta12 TEXT,
+        pergunta13 TEXT,
+        pergunta14 TEXT,
+        pergunta15 TEXT
+    )
+    """)
+    conn.commit()
+    conn.close()
+
+def obter_respostas():
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM respostas")
+    respostas = cur.fetchall()
+    conn.close()
+    return respostas
+
+
+# Display Ref
+def display_ref(cursor,ref):
+    # Display ref
+    cursor.execute(f"SELECT ref FROM display_ref where id='{ref}'")
+    return cursor.fetchone()[0]
+
+
+# Function to fetch survey title and column titles from the database
+def get_survey_data(cursor, survey_name):
+    # Fetch survey title
+    cursor.execute("SELECT projecto FROM campanhas WHERE campanha_ref = %s", (survey_name,))
+    survey_title = cursor.fetchone()[0]
+
+    # Fetch column names starting with "pergunta"
+    cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name = %s AND column_name LIKE %s", (survey_name, 'pergunta%'))
+    questions = [row[0] for row in cursor.fetchall()]
+
+    questions2 = []
+    for row in questions:
+        ref=survey_name+"_"+row
+        # Display ref
+        cursor.execute(f"SELECT ref FROM display_ref where id='{ref}'")
+        question = cursor.fetchone()
+        
+        
+
+        # Query
+        query = sql.SQL("SELECT opcao FROM {}").format(sql.Identifier(survey_name+"_"+row))
+
+        # Execute query with parameterized value
+        cursor.execute(query)
+
+
+        #cursor.execute("SELECT opcao FROM %s_%s", (str(survey_name), row))
+        options = cursor.fetchall()
+        
+        questions2.append({"question": question, "options": options})
+
+    print(questions2)
+    return survey_title, questions2
+
 
 def create_table_for_column(cursor, table_name, column_name):
     # Create a new table with the name "actual_campaign_column_name"
@@ -1654,7 +1730,9 @@ def campanha_n(id):
 
         # Get a list of columns for the specified table and column name prefix
         columns_list = list_columns(cursor, table_name_to_list, column_prefix_to_list)
-
+        
+        # Campanha
+        table_name_to_list = display_ref(cursor,table_name_to_list)
         
     except Exception as e:
         print(f"Error: {e}")
@@ -1824,6 +1902,19 @@ def dashboard2(table_name):
     conn.close()
 
     return render_template('dashboard2.html', labels=labels, counts=counts, table_name=table_name)
+
+
+# Route to render the survey form
+@app.route('/survey/<string:survey_name>')
+def survey(survey_name):
+    # Connect to the database
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+    
+    # Fetch survey title and column titles from the database
+    survey_title, questions = get_survey_data(cursor, survey_name)
+
+    return render_template('survey.html', survey_title=survey_title, questions=questions)
 
 # Logout
 @app.route('/logout')
@@ -2094,7 +2185,44 @@ def addfunction():
 
     return render_template('addfunction.html', form = form)
 
+@app.route('/candidaturas')
+def formulario():
+    return render_template('formulario.html')
 
+@app.route('/submit', methods=['POST'])
+def submit():
+    criar_tabela()
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cur = conn.cursor()
+    cur.execute("""
+    INSERT INTO respostas (nome, pergunta1, pergunta2, pergunta3, pergunta4, pergunta5, pergunta6, pergunta7, pergunta8, pergunta9, pergunta10, pergunta11, pergunta12, pergunta13, pergunta14, pergunta15)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (
+        request.form['nome'],
+        request.form['pergunta1'],
+        request.form['pergunta2'],
+        request.form['pergunta3'],
+        request.form['pergunta4'],
+        request.form['pergunta5'],
+        request.form['pergunta6'],
+        request.form['pergunta7'],
+        request.form['pergunta8'],
+        request.form['pergunta9'],
+        request.form['pergunta10'],
+        request.form['pergunta11'],
+        request.form['pergunta12'],
+        request.form['pergunta13'],
+        request.form['pergunta14'],
+        request.form['pergunta15']
+    ))
+    conn.commit()
+    conn.close()
+    return 'Respostas enviadas com sucesso!'
+
+@app.route('/respostas')
+def ver_respostas():
+    respostas = obter_respostas()
+    return render_template('ver_respostas.html', respostas=respostas)
 
 # Esta deve ser sempre a ultima funcao
 @app.route("/<name>")

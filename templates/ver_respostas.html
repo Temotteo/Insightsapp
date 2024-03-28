@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Respostas do Formulário</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f2f2f2;
+            border-radius: 10px;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .question {
+            margin-bottom: 10px;
+        }
+
+        .question span {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Respostas do Formulário</h1>
+        {% for resposta in respostas %}
+        <div class="card">
+            <h2>Resposta ID: {{ resposta[0] }}</h2>
+            <div class="question">
+                <span>Pergunta 1:</span> {{ resposta[1] }}
+            </div>
+            <div class="question">
+                <span>Pergunta 2:</span> {{ resposta[2] }}
+            </div>
+            <div class="question">
+                <span>Pergunta 3:</span> {{ resposta[3] }}
+            </div>
+            <div class="question">
+                <span>Pergunta 4:</span> {{ resposta[4] }}
+            </div>
+            <div class="question">
+                <span>Pergunta 5:</span> {{ resposta[5] }}
+            </div>
+            <div class="question">
+                <span>Pergunta 6:</span> {{ resposta[6] }}
+            </div>
+            <div class="question">
+                <span>Pergunta 7:</span> {{ resposta[8] }}
+            </div>
+            <div class="question">
+                <span>Pergunta 8:</span> {{ resposta[8] }}
+            </div>
+            <div class="question">
+                <span>Pergunta 9:</span> {{ resposta[9] }}
+            </div>
+            <div class="question">
+                <span>Pergunta 10:</span> {{ resposta[10] }}
+            </div>
+            <div class="question">
+                <span>Pergunta 11:</span> {{ resposta[11] }}
+            </div>
+            <div class="question">
+                <span>Pergunta 12:</span> {{ resposta[12] }}
+            </div>
+            <div class="question">
+                <span>Pergunta 13:</span> {{ resposta[13] }}
+            </div>
+            <div class="question">
+                <span>Pergunta 14:</span> {{ resposta[14] }}
+            </div>
+            <div class="question">
+                <span>Pergunta 15:</span> {{ resposta[15] }}
+            </div>
+            <!-- Adicione mais divs para as outras perguntas -->
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
