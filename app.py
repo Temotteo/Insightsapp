@@ -90,10 +90,7 @@ def authenticate_twilio_request():
     return True
 
 
-@app.route('/audio/<path:filename>')
-def serve_audio(filename):
-    # Serve the audio file from the 'static' directory
-    return send_from_directory('static/audio', filename)
+
 
 def criar_tabela():
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
@@ -1376,6 +1373,7 @@ def addinvoices():
 
     return render_template('addinvoices.html', form = form)
 
+
 @app.route('/addrequest', methods=['GET', 'POST'])
 @is_logged_in
 def addrequest():
@@ -1752,6 +1750,7 @@ def addoption(id):
 
     return render_template('addoption.html', form=form)
 
+
 @app.route('/campanha_n/<string:id>')
 @is_logged_in
 def campanha_n(id):
@@ -1951,6 +1950,7 @@ def survey(survey_name):
     survey_title, questions = get_survey_data(cursor, survey_name)
 
     return render_template('survey.html', survey_title=survey_title, questions=questions)
+
 
 # Logout
 @app.route('/logout')
