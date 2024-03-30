@@ -2241,8 +2241,8 @@ def handle_question():
 # Start IVR campaign route
 @app.route('/start_ivr_campaign', methods=['POST'])
 def start_ivr_campaign():
-    if not authenticate_twilio_request():
-        return Response("Unauthorized", 401)
+    #if not authenticate_twilio_request():
+    #    return Response("Unauthorized", 401)
 
     #phone_numbers = get_phone_numbers_from_database()
     phone_numbers = ['+258878030030','+258842915468']
