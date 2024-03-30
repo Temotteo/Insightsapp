@@ -2181,7 +2181,9 @@ def addcredencial():
     return render_template('addcredencial.html', form = form)
 
 
-
+@app.route('/ivr_test')
+def ivr_test():
+    return render_template('ivr_test.html')
 
 # IVR route
 @app.route('/ivr', methods=['POST'])
