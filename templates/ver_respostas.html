@@ -1,101 +1,54 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Respostas do Formulário</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f2f2f2;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #f2f2f2;
-            border-radius: 10px;
-        }
-
-        .card {
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            padding: 20px;
-        }
-
-        .card h2 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .question {
-            margin-bottom: 10px;
-        }
-
-        .question span {
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Respostas do Formulário</h1>
-        {% for resposta in respostas %}
-        <div class="card">
-            <h2>Resposta ID: {{ resposta[0] }}</h2>
-            <div class="question">
-                <span>Pergunta 1:</span> {{ resposta[1] }}
-            </div>
-            <div class="question">
-                <span>Pergunta 2:</span> {{ resposta[2] }}
-            </div>
-            <div class="question">
-                <span>Pergunta 3:</span> {{ resposta[3] }}
-            </div>
-            <div class="question">
-                <span>Pergunta 4:</span> {{ resposta[4] }}
-            </div>
-            <div class="question">
-                <span>Pergunta 5:</span> {{ resposta[5] }}
-            </div>
-            <div class="question">
-                <span>Pergunta 6:</span> {{ resposta[6] }}
-            </div>
-            <div class="question">
-                <span>Pergunta 7:</span> {{ resposta[8] }}
-            </div>
-            <div class="question">
-                <span>Pergunta 8:</span> {{ resposta[8] }}
-            </div>
-            <div class="question">
-                <span>Pergunta 9:</span> {{ resposta[9] }}
-            </div>
-            <div class="question">
-                <span>Pergunta 10:</span> {{ resposta[10] }}
-            </div>
-            <div class="question">
-                <span>Pergunta 11:</span> {{ resposta[11] }}
-            </div>
-            <div class="question">
-                <span>Pergunta 12:</span> {{ resposta[12] }}
-            </div>
-            <div class="question">
-                <span>Pergunta 13:</span> {{ resposta[13] }}
-            </div>
-            <div class="question">
-                <span>Pergunta 14:</span> {{ resposta[14] }}
-            </div>
-            <div class="question">
-                <span>Pergunta 15:</span> {{ resposta[15] }}
-            </div>
-            <!-- Adicione mais divs para as outras perguntas -->
+<div class="container">
+    <h1>Respostas do Formulário</h1>
+    {% for resposta in respostas %}
+    <div class="card">
+        <h2>Resposta ID: {{ resposta[0] }}</h2>
+        <div class="question">
+            <span>1. Como você se considera em relação à sua habilidade de comunicação e persuasão?</span><br> {{ resposta[1] }}
         </div>
-        {% endfor %}
+        <div class="question">
+            <span>2. Qual é a sua abordagem em relação a estabelecer e manter relacionamentos comerciais?</span><br> {{ resposta[2] }}
+        </div>
+        <div class="question">
+            <span>3. Como você lida com o desafio da rejeição em vendas?</span><br> {{ resposta[3] }}
+        </div>
+        <div class="question">
+            <span>4. Qual é a sua abordagem ao lidar com objeções dos clientes durante uma venda?</span><br> {{ resposta[4] }}
+        </div>
+        <div class="question">
+            <span>5. Como você se motiva para alcançar suas metas?</span><br> {{ resposta[5] }}
+        </div>
+        <div class="question">
+            <span>6. Qual é a sua abordagem ao lidar com clientes difíceis ou exigentes?</span><br> {{ resposta[6] }}
+        </div>
+        <div class="question">
+            <span>7. Como você se mantém atualizado sobre as últimas tendências e desenvolvimentos no mercado?</span><br> {{ resposta[8] }}
+        </div>
+        <div class="question">
+            <span>8. Qual é a sua abordagem para trabalhar em equipe para alcançar metas de vendas?</span><br> {{ resposta[8] }}
+        </div>
+        <div class="question">
+            <span>9. Qual é a sua perspectiva salarial para o cargo?</span><br> {{ resposta[9] }}
+        </div>
+        <div class="question">
+            <span>10. Você está aberto(a) a receber uma porcentagem de comissão sobre as vendas realizadas, além do salário base?:</span><br> {{ resposta[10] }}
+        </div>
+        <div class="question">
+            <span>11. Achas que receber comissão das vendas poderia motivá-lo(a) a aumentar seu desempenho e alcançar melhores resultados de vendas? Justifique.</span><br> {{ resposta[11] }}
+        </div>
+        <div class="question">
+            <span>12. Tens alguma preocupação ou hesitação em relação ao modelo de remuneração baseado em comissão de vendas? Justifique.</span><br> {{ resposta[12] }}
+        </div>
+        <div class="question">
+            <span>13. Já teve experiências anteriores trabalhando com comissão de vendas? Se sim, como você avalia essa experiência? Se não, diga a sua opinião sobre o assunto.</span><br> {{ resposta[13] }}
+        </div>
+        <div class="question">
+            <span>14. Estás disposto(a) a assumir o risco associado à remuneração baseada em comissão, em troca da oportunidade de aumentar significativamente seus ganhos com base no desempenho de vendas?</span><br> {{ resposta[14] }}
+        </div>
+        <div class="question">
+            <span>15. Tens alguma sugestão ou preferência em relação à estrutura de remuneração que gostaria de compartilhar?</span><br> {{ resposta[15] }}
+        </div>
+        <!-- Adicione mais divs para as outras perguntas -->
     </div>
-</body>
-</html>
+    {% endfor %}
+</div>
