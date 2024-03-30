@@ -74,6 +74,14 @@ QUESTION_AUDIO_URLS = [
     "http://yourdomain.com/audio/question6.mp3",
 ]
 
+# Authentication function
+def authenticate_twilio_request():
+    if (request.values.get('AccountSid') != TWILIO_ACCOUNT_SID or
+            request.values.get('AuthToken') != TWILIO_AUTH_TOKEN):
+        return False
+    return True
+
+
 def criar_tabela():
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cur = conn.cursor()
@@ -2238,12 +2246,6 @@ def start_ivr_campaign():
 
     return 'IVR campaign started successfully'
 
-# Authentication function
-def authenticate_twilio_request():
-    if (request.values.get('AccountSid') != TWILIO_ACCOUNT_SID or
-            request.values.get('AuthToken') != TWILIO_AUTH_TOKEN):
-        return False
-    return True
 
 
 
@@ -2312,7 +2314,7 @@ def submit():
     return 'Respostas enviadas com sucesso!'
 
 @app.route('/respostas')
-@is_logged_in
+#@is_logged_in
 def ver_respostas():
     respostas = obter_respostas()
     return render_template('ver_respostas.html', respostas=respostas)
