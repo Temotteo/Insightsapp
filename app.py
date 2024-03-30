@@ -2,7 +2,7 @@ import os
 from twilio.rest import Client
 from twilio.twiml.voice_response import VoiceResponse
 
-from flask import Flask, render_template, request, session, flash, session, logging, url_for, redirect, Response
+from flask import Flask, render_template, request, session, flash, session, logging, url_for, redirect, Response,  send_from_directory
 import psycopg2
 from markupsafe import escape
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, SelectField, DecimalField, DateField, IntegerField, EmailField, TimeField, FileField,  SubmitField, FieldList, FormField, DateTimeField
@@ -89,6 +89,11 @@ def authenticate_twilio_request():
         return False
     return True
 
+
+@app.route('/audio/<path:filename>')
+def serve_audio(filename):
+    # Serve the audio file from the 'static' directory
+    return send_from_directory('static/audio', filename)
 
 def criar_tabela():
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
