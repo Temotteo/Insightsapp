@@ -68,8 +68,8 @@ TWILIO_PHONE_NUMBER = '+19495652625'
 
 # URLs of audio files for each question
 QUESTION_AUDIO_URLS = [
-    "https://insightsap.com/audio/audioteste.mp3",
-    "https://insightsap.com/audio/audioteste.mp3"
+    "https://insightsap.com/audio/conjutivite_p1.mp3"
+    
     
 ]
 
@@ -2200,7 +2200,7 @@ def ivr():
 
     with response.gather(num_digits=1, action='/handle_question', method='POST') as gather:
         # Introduction message
-        response.play("https://insightsap.com/audio/audioteste.mp3")
+        response.play("https://insightsap.com/audio/conjutivite_intro.mp3")
 
         # Asking each survey question
         for audio_url in QUESTION_AUDIO_URLS:
