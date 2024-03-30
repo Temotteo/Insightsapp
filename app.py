@@ -2263,7 +2263,10 @@ def start_ivr_campaign():
     return 'IVR campaign started successfully'
 
 
-
+@app.route('/audio/<path:filename>')
+def serve_audio(filename):
+    # Serve the audio file from the 'static' directory
+    return send_from_directory('static/audio', filename)
 
 
 @app.route('/addfunction', methods=['GET', 'POST'])
