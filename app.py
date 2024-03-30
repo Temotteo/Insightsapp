@@ -1,5 +1,7 @@
 import os
 from twilio.rest import Client
+from twilio.twiml.voice_response import VoiceResponse
+
 from flask import Flask, render_template, request, session, flash, session, logging, url_for, redirect, Response
 import psycopg2
 from markupsafe import escape
@@ -60,19 +62,25 @@ survey_responses = [
 ]
 
 # Replace these values with your actual Twilio credentials
-TWILIO_ACCOUNT_SID = 'your_twilio_account_sid'
-TWILIO_AUTH_TOKEN = 'your_twilio_auth_token'
-TWILIO_PHONE_NUMBER = 'your_twilio_phone_number'
+TWILIO_ACCOUNT_SID = "AC952933e9303a9c0021be3c0ce432caec"
+TWILIO_AUTH_TOKEN = "5e14a5105201307f6d9a77af3fd81853"
+TWILIO_PHONE_NUMBER = '+19495652625'
 
 # URLs of audio files for each question
 QUESTION_AUDIO_URLS = [
-    "http://yourdomain.com/audio/question1.mp3",
-    "http://yourdomain.com/audio/question2.mp3",
-    "http://yourdomain.com/audio/question3.mp3",
-    "http://yourdomain.com/audio/question4.mp3",
-    "http://yourdomain.com/audio/question5.mp3",
-    "http://yourdomain.com/audio/question6.mp3",
+    "https://drive.google.com/file/d/11-GbPfJfCIMTtQo30he_tawXELKH1WdW/view?usp=sharing",
+    "https://drive.google.com/file/d/11-GbPfJfCIMTtQo30he_tawXELKH1WdW/view?usp=sharing",
+    
 ]
+
+def get_phone_numbers_from_database():
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+   
+    cursor = conn.cursor()
+    cursor.execute("SELECT phone_number FROM phone_numbers_table")
+    phone_numbers = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return phone_numbers
 
 # Authentication function
 def authenticate_twilio_request():
@@ -2185,7 +2193,7 @@ def ivr():
 
     with response.gather(num_digits=1, action='/handle_question', method='POST') as gather:
         # Introduction message
-        response.play("http://yourdomain.com/audio/intro_message.mp3")
+        response.play("https://drive.google.com/file/d/11-GbPfJfCIMTtQo30he_tawXELKH1WdW/view?usp=sharing")
 
         # Asking each survey question
         for audio_url in QUESTION_AUDIO_URLS:
@@ -2208,13 +2216,13 @@ def handle_question():
             raise ValueError()
     except ValueError:
         response = VoiceResponse()
-        response.play("http://yourdomain.com/audio/invalid_input_message.mp3")
+        response.play("https://drive.google.com/file/d/11-GbPfJfCIMTtQo30he_tawXELKH1WdW/view?usp=sharing")
         response.redirect('/ivr')
         return str(response)
 
     # Process the response
     current_question_index = int(request.form.get('current_question_index', 0))
-    save_survey_response(phone_number, current_question_index, selected_option)
+    #save_survey_response(phone_number, current_question_index, selected_option)
 
     # Redirect to the next question or end of survey
     if current_question_index < len(QUESTION_AUDIO_URLS) - 1:
@@ -2225,7 +2233,7 @@ def handle_question():
         return str(response)
     else:
         response = VoiceResponse()
-        response.play("http://yourdomain.com/audio/thank_you_message.mp3")
+        response.play("https://drive.google.com/file/d/11-GbPfJfCIMTtQo30he_tawXELKH1WdW/view?usp=sharing")
         return str(response)
 
 # Start IVR campaign route
@@ -2234,12 +2242,13 @@ def start_ivr_campaign():
     if not authenticate_twilio_request():
         return Response("Unauthorized", 401)
 
-    phone_numbers = get_phone_numbers_from_database()
+    #phone_numbers = get_phone_numbers_from_database()
+    phone_numbers = ['+258878030030','+258842915468']
 
     for number in phone_numbers:
         client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
         call = client.calls.create(
-            url='http://yourdomain.com/ivr',  # URL for handling IVR logic
+            url='https://insightsap.com/ivr',  # URL for handling IVR logic
             to=number,
             from_=TWILIO_PHONE_NUMBER
         )
