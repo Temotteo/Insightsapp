@@ -59,6 +59,21 @@ survey_responses = [
     {'question': 'Question 3', 'options': ['Very Likely', 'Likely', 'Neutral', 'Unlikely', 'Very Unlikely'], 'counts': [20, 15, 10, 8, 5]}
 ]
 
+# Replace these values with your actual Twilio credentials
+TWILIO_ACCOUNT_SID = 'your_twilio_account_sid'
+TWILIO_AUTH_TOKEN = 'your_twilio_auth_token'
+TWILIO_PHONE_NUMBER = 'your_twilio_phone_number'
+
+# URLs of audio files for each question
+QUESTION_AUDIO_URLS = [
+    "http://yourdomain.com/audio/question1.mp3",
+    "http://yourdomain.com/audio/question2.mp3",
+    "http://yourdomain.com/audio/question3.mp3",
+    "http://yourdomain.com/audio/question4.mp3",
+    "http://yourdomain.com/audio/question5.mp3",
+    "http://yourdomain.com/audio/question6.mp3",
+]
+
 def criar_tabela():
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cur = conn.cursor()
@@ -2152,6 +2167,83 @@ def addcredencial():
 
 
 
+# IVR route
+@app.route('/ivr', methods=['POST'])
+def ivr():
+    if not authenticate_twilio_request():
+        return Response("Unauthorized", 401)
+
+    response = VoiceResponse()
+
+    with response.gather(num_digits=1, action='/handle_question', method='POST') as gather:
+        # Introduction message
+        response.play("http://yourdomain.com/audio/intro_message.mp3")
+
+        # Asking each survey question
+        for audio_url in QUESTION_AUDIO_URLS:
+            response.play(audio_url)
+
+    return str(response)
+
+# Handle question route
+@app.route('/handle_question', methods=['POST'])
+def handle_question():
+    if not authenticate_twilio_request():
+        return Response("Unauthorized", 401)
+
+    selected_option = request.form['Digits']
+    phone_number = request.form['To']
+
+    try:
+        selected_option = int(selected_option)
+        if selected_option < 1 or selected_option > 5:
+            raise ValueError()
+    except ValueError:
+        response = VoiceResponse()
+        response.play("http://yourdomain.com/audio/invalid_input_message.mp3")
+        response.redirect('/ivr')
+        return str(response)
+
+    # Process the response
+    current_question_index = int(request.form.get('current_question_index', 0))
+    save_survey_response(phone_number, current_question_index, selected_option)
+
+    # Redirect to the next question or end of survey
+    if current_question_index < len(QUESTION_AUDIO_URLS) - 1:
+        next_question_index = current_question_index + 1
+        response = VoiceResponse()
+        response.play(QUESTION_AUDIO_URLS[next_question_index])
+        response.gather(num_digits=1, action='/handle_question', method='POST')
+        return str(response)
+    else:
+        response = VoiceResponse()
+        response.play("http://yourdomain.com/audio/thank_you_message.mp3")
+        return str(response)
+
+# Start IVR campaign route
+@app.route('/start_ivr_campaign', methods=['POST'])
+def start_ivr_campaign():
+    if not authenticate_twilio_request():
+        return Response("Unauthorized", 401)
+
+    phone_numbers = get_phone_numbers_from_database()
+
+    for number in phone_numbers:
+        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        call = client.calls.create(
+            url='http://yourdomain.com/ivr',  # URL for handling IVR logic
+            to=number,
+            from_=TWILIO_PHONE_NUMBER
+        )
+
+    return 'IVR campaign started successfully'
+
+# Authentication function
+def authenticate_twilio_request():
+    if (request.values.get('AccountSid') != TWILIO_ACCOUNT_SID or
+            request.values.get('AuthToken') != TWILIO_AUTH_TOKEN):
+        return False
+    return True
 
 
 
@@ -2235,6 +2327,6 @@ def hello(name):
 
 if __name__ == '__main__':
     app.secret_key='secret123'
-    app.run(debug=True)
-    #http_server = WSGIServer(('', 5000), app)
-    #http_server.serve_forever()
+    #app.run(debug=True)
+    http_server = WSGIServer(('', 5000), app)
+    http_server.serve_forever()
