@@ -2240,7 +2240,7 @@ def handle_question():
         return str(response)
     else:
         response = VoiceResponse()
-        response.play("https://insightsap.com/audio/audioteste.mp3")
+        response.play("audio/audioteste.mp3")
         return str(response)
 
 # Start IVR campaign route
@@ -2266,7 +2266,7 @@ def start_ivr_campaign():
 @app.route('/audio/<path:filename>')
 def serve_audio(filename):
     # Serve the audio file from the 'static' directory
-    return send_from_directory('static/audio', filename)
+    return send_from_directory('audio', filename)
 
 
 @app.route('/addfunction', methods=['GET', 'POST'])
