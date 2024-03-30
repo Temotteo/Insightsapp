@@ -2240,7 +2240,7 @@ def handle_question():
         return str(response)
     else:
         response = VoiceResponse()
-        response.play("audio/audioteste.mp3")
+        response.play("https://insightsap.com/audio/audioteste.mp3")
         return str(response)
 
 # Start IVR campaign route
@@ -2250,7 +2250,7 @@ def start_ivr_campaign():
     #    return Response("Unauthorized", 401)
 
     #phone_numbers = get_phone_numbers_from_database()
-    phone_numbers = ['+258878030030','+258842915468']
+    phone_numbers = ['+258878030030','+258843696831']
 
     for number in phone_numbers:
         client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
