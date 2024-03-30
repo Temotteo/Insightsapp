@@ -68,8 +68,8 @@ TWILIO_PHONE_NUMBER = '+19495652625'
 
 # URLs of audio files for each question
 QUESTION_AUDIO_URLS = [
-    "https://drive.google.com/file/d/11-GbPfJfCIMTtQo30he_tawXELKH1WdW/view?usp=sharing",
-    "https://drive.google.com/file/d/11-GbPfJfCIMTtQo30he_tawXELKH1WdW/view?usp=sharing",
+    "https://insightsap.com/audio/audioteste.mp3",
+    "https://insightsap.com/audio/audioteste.mp3"
     
 ]
 
@@ -2195,7 +2195,7 @@ def ivr():
 
     with response.gather(num_digits=1, action='/handle_question', method='POST') as gather:
         # Introduction message
-        response.play("https://drive.google.com/file/d/11-GbPfJfCIMTtQo30he_tawXELKH1WdW/view?usp=sharing")
+        response.play("https://insightsap.com/audio/audioteste.mp3")
 
         # Asking each survey question
         for audio_url in QUESTION_AUDIO_URLS:
@@ -2218,7 +2218,7 @@ def handle_question():
             raise ValueError()
     except ValueError:
         response = VoiceResponse()
-        response.play("https://drive.google.com/file/d/11-GbPfJfCIMTtQo30he_tawXELKH1WdW/view?usp=sharing")
+        response.play("https://insightsap.com/audio/audioteste.mp3")
         response.redirect('/ivr')
         return str(response)
 
@@ -2235,7 +2235,7 @@ def handle_question():
         return str(response)
     else:
         response = VoiceResponse()
-        response.play("https://drive.google.com/file/d/11-GbPfJfCIMTtQo30he_tawXELKH1WdW/view?usp=sharing")
+        response.play("https://insightsap.com/audio/audioteste.mp3")
         return str(response)
 
 # Start IVR campaign route
