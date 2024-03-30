@@ -70,8 +70,7 @@ TWILIO_PHONE_NUMBER = '+19495652625'
 QUESTION_AUDIO_URLS = [
     "https://insightsap.com/audio/conjutivitep1.mp3",
      "https://insightsap.com/audio/conjutiviteintro.mp3"
-    
-    
+        
 ]
 
 def get_phone_numbers_from_database():
