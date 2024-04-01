@@ -76,6 +76,38 @@ QUESTION_AUDIO_URLS = [
         
 ]
 
+
+# Mock function to save survey responses to the database
+def save_survey_response(phone_number, question_index, selected_option):
+    # Connect to the database
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy'
+    )
+
+    # Create a cursor object
+    cur = conn.cursor()
+
+    # Create survey_responses table if not exists
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS survey_responses (
+            id SERIAL PRIMARY KEY,
+            phone_number VARCHAR(20),
+            question_index INT,
+            selected_option INT
+        )
+    """)
+
+    # Insert survey response into the table
+    cur.execute("""
+        INSERT INTO survey_responses (phone_number, question_index, selected_option)
+        VALUES (%s, %s, %s)
+    """, (phone_number, question_index, selected_option))
+
+    # Commit changes and close connection
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
 def get_phone_numbers_from_database():
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
    
@@ -2232,7 +2264,7 @@ def handle_question():
 
     # Process the response
     current_question_index = int(request.form.get('current_question_index', 0))
-    #save_survey_response(phone_number, current_question_index, selected_option)
+    save_survey_response(phone_number, current_question_index, selected_option)
 
     # Redirect to the next question or end of survey
     if current_question_index < len(QUESTION_AUDIO_URLS) - 1:
