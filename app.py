@@ -79,8 +79,7 @@ QUESTION_AUDIO_URLS = [
 # Mock function to save survey responses to the database
 def save_survey_response(phone_number, question_index, selected_option):
     # Connect to the database
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy'
-    )
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
     # Create a cursor object
     cur = conn.cursor()
@@ -94,6 +93,10 @@ def save_survey_response(phone_number, question_index, selected_option):
             selected_option INT
         )
     """)
+    print("Dentro")
+    print(phone_number)
+    print(question_index)
+    print(selected_option)
 
     # Insert survey response into the table
     cur.execute("""
@@ -2261,6 +2264,11 @@ def handle_question():
         response.play("https://insightsap.com/audio/conjutiviteintro.mp3")
         response.redirect('/ivr')
         return str(response)
+
+    print("Antes")
+    print(phone_number)
+    print(current_question_index)
+    print(selected_option)
 
     # Save the survey response to the database
     save_survey_response(phone_number, current_question_index, selected_option)
