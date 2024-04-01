@@ -2248,8 +2248,8 @@ def ivr():
 # Handle question route
 @app.route('/handle_question', methods=['POST'])
 def handle_question():
-    if not authenticate_twilio_request():
-        return Response("Unauthorized", 401)
+    #if not authenticate_twilio_request():
+    #    return Response("Unauthorized", 401)
 
     selected_option = request.form['Digits']
     phone_number = request.form['To']
