@@ -2246,11 +2246,12 @@ def ivr():
 # Handle question route
 @app.route('/handle_question', methods=['POST'])
 def handle_question():
-    #if not authenticate_twilio_request():
-    #    return Response("Unauthorized", 401)
+    if not authenticate_twilio_request():
+        return Response("Unauthorized", 401)
 
     selected_option = request.form['Digits']
     phone_number = request.form['To']
+    current_question_index = int(request.form.get('current_question_index', 0))
 
     try:
         selected_option = int(selected_option)
@@ -2258,20 +2259,19 @@ def handle_question():
             raise ValueError()
     except ValueError:
         response = VoiceResponse()
-        response.play("https://insightsap.com/audio/audioteste.mp3")
+        response.play("https://insightsap.com/audio/conjutiviteintro.mp3")
         response.redirect('/ivr')
         return str(response)
 
-    # Process the response
-    current_question_index = int(request.form.get('current_question_index', 0))
+    # Save the survey response to the database
     save_survey_response(phone_number, current_question_index, selected_option)
 
-    # Redirect to the next question or end of survey
-    if current_question_index < len(QUESTION_AUDIO_URLS) - 1:
-        next_question_index = current_question_index + 1
+    # Continue with the next question or end the survey
+    next_question_index = current_question_index + 1
+    if next_question_index < len(QUESTION_AUDIO_URLS):
         response = VoiceResponse()
         response.play(QUESTION_AUDIO_URLS[next_question_index])
-        response.gather(num_digits=1, action='/handle_question', method='POST')
+        response.gather(num_digits=1, action='/handle_question', method='POST', current_question_index=next_question_index)
         return str(response)
     else:
         response = VoiceResponse()
