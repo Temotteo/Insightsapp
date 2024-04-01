@@ -69,7 +69,11 @@ TWILIO_PHONE_NUMBER = '+19495652625'
 # URLs of audio files for each question
 QUESTION_AUDIO_URLS = [
     "https://insightsap.com/audio/conjutivitep1.mp3",
-     "https://insightsap.com/audio/conjutiviteintro.mp3"
+    "https://insightsap.com/audio/conjutivitep2.mp3",
+    "https://insightsap.com/audio/conjutivitep3.mp3",
+    "https://insightsap.com/audio/conjutivitep4.mp3",
+    "https://insightsap.com/audio/conjutivitep5.mp3"
+     
         
 ]
 
@@ -2240,7 +2244,7 @@ def handle_question():
         return str(response)
     else:
         response = VoiceResponse()
-        response.play("https://insightsap.com/audio/audioteste.mp3")
+        response.play("https://insightsap.com/audio/conjutiviteconc.mp3")
         return str(response)
 
 # Start IVR campaign route
