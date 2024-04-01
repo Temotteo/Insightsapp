@@ -71,7 +71,7 @@ QUESTION_AUDIO_URLS = [
     "https://insightsap.com/audio/conjutivitep1.mp3",
     "https://insightsap.com/audio/conjutivitep2.mp3",
     "https://insightsap.com/audio/conjutivitep3.mp3",
-    "https://insightsap.com/audio/conjutivitep4.mp3"
+    "https://insightsap.com/audio/conjutiviteconc.mp3"
      
         
 ]
@@ -2253,7 +2253,7 @@ def start_ivr_campaign():
     #    return Response("Unauthorized", 401)
 
     #phone_numbers = get_phone_numbers_from_database()
-    phone_numbers = ['+258872804892']
+    phone_numbers = ['+258847985430']
 
     for number in phone_numbers:
         client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
