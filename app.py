@@ -166,8 +166,14 @@ def obter_respostas():
 
 # Display Ref
 def display_ref(cursor,ref):
+    
+    
     # Display ref
     cursor.execute(f"SELECT ref FROM display_ref where id='{ref}'")
+    print("teste:")
+    print(f"SELECT ref FROM display_ref where id='{ref}'")
+    #print(cursor.fetchone()[0])
+    #conn.close()
     return cursor.fetchone()[0]
 
 
@@ -1112,6 +1118,15 @@ class TicketForm(Form):
     ticket = TextAreaField('Ticket:',[validators.Length(min=5),validators.DataRequired()])
     criador = StringField('Criado por:', [validators.Length(min=3, max=10)])
 
+class CampForm(Form):
+    
+    #ticket = TextAreaField('Ticket:',[validators.Length(min=5),validators.DataRequired()])
+    projecto = StringField('Projecto:', [validators.Length(min=3, max=200)])
+
+class PerguntaForm(Form):
+    #ticket = TextAreaField('Ticket:',[validators.Length(min=5),validators.DataRequired()])
+    pergunta = StringField('Pergunta:', [validators.Length(min=3, max=200)])
+
 class AprocidaForm(Form):
     nome = StringField('Nome:',[validators.Length(min=9, max=90),validators.DataRequired()])
     apelido = StringField('Apelido:',[validators.Length(min=9, max=90),validators.DataRequired()])
@@ -1803,9 +1818,23 @@ def campanha_n(id):
         # Get a list of columns for the specified table and column name prefix
         columns_list = list_columns(cursor, table_name_to_list, column_prefix_to_list)
         
+        couples = []
+
+        print(columns_list)
         # Campanha
-        table_name_to_list = display_ref(cursor,table_name_to_list)
-        
+        # table_name_to_list = display_ref(cursor,table_name_to_list)
+        for i in range(len(columns_list)):
+            item = columns_list[i]
+            var = display_ref(cursor,id + "_" + item)
+            if var is not None:
+                print(id + "_" + item)
+                print(var)
+                couples.append((item,var))
+                print(couples)
+            else:
+                print("Error: display_ref() returned None for", id + "_" + item)
+
+        campanha_ref = display_ref(cursor,table_name_to_list)
     except Exception as e:
         print(f"Error: {e}")
 
@@ -1815,8 +1844,9 @@ def campanha_n(id):
         connection.close()
     
     
+    
 
-    return render_template('campanha_n.html', columns_list = columns_list, campanha=table_name_to_list)
+    return render_template('campanha_n.html', columns_list = couples, campanha=table_name_to_list, campanha_ref=campanha_ref)
 
 
 @app.route('/create_camp')
@@ -1931,14 +1961,15 @@ def perguntas(id):
 
     cursor = conn.cursor()
 
+    pergunta = display_ref(cursor,id)
+
     cursor.execute("SELECT * from "+id)
 
     dados=cursor.fetchall()
 
-
     conn.close()
 
-    return render_template('perguntas.html', dados = dados, pergunta = id)
+    return render_template('perguntas.html', dados = dados, pergunta = pergunta, pergunta_ref = id)
 
 
 @app.route('/survey_dashboard')
@@ -2310,6 +2341,104 @@ def serve_audio(filename):
     # Serve the audio file from the 'static' directory
     return send_from_directory('audio', filename)
 
+
+# Assign Campaign
+@app.route('/assign_camp/<string:id>', methods=['GET', 'POST'])
+@is_logged_in
+def assign_camp(id):
+
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    
+    # Create cursor
+    cursor = conn.cursor()
+
+    # Get article by id
+    result = cursor.execute("SELECT * FROM campanhas WHERE id_campanha = %s", [id])
+
+    campanha = cursor.fetchone()
+    
+    #conn.close()
+    
+    # Get form
+
+    form = CampForm(request.form)
+
+    # Populate tikrts form fields
+    form.projecto.data = campanha[2]
+    
+
+    if request.method == 'POST':
+        projecto = request.form['projecto']
+        
+        #current_dateTime = datetime.now()
+
+        # Create Cursor
+        cursor = conn.cursor()
+        #app.logger.info(title)
+        
+        # Execute
+        cursor.execute("UPDATE campanhas SET projecto=%s WHERE id_campanha=%s",(projecto,id))
+        cursor.execute("INSERT INTO display_ref(id, ref) VALUES (%s,%s)",(campanha[3],projecto))
+        # Commit to DB
+        conn.commit()
+
+        #Close connection
+        conn.close()
+
+        flash('Campanha atualizada', 'success')
+
+        return redirect(url_for('campanhas'))
+
+    return render_template('assign_camp.html', form=form)
+
+# Assign question
+@app.route('/assign_question/<string:id>', methods=['GET', 'POST'])
+@is_logged_in
+def assign_question(id):
+
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    
+    # Create cursor
+    cursor = conn.cursor()
+
+    # Get article by id
+    result = cursor.execute("SELECT * FROM display_ref WHERE id = %s", [id])
+
+    pergunta = cursor.fetchone()
+    
+    #conn.close()
+    
+    # Get form
+
+    form = PerguntaForm(request.form)
+
+    # Populate tikrts form fields
+    form.pergunta.data = pergunta[1]
+    
+
+    if request.method == 'POST':
+        pergunta = request.form['pergunta']
+        
+        #current_dateTime = datetime.now()
+
+        # Create Cursor
+        cursor = conn.cursor()
+        #app.logger.info(title)
+        
+        # Execute
+        cursor.execute("UPDATE display_ref SET ref=%s WHERE id=%s",(pergunta,id))
+        
+        # Commit to DB
+        conn.commit()
+
+        #Close connection
+        conn.close()
+
+        flash('Pergunta atualizada', 'success')
+
+        return redirect(url_for('perguntas', id=id))
+
+    return render_template('assign_question.html', form=form)
 
 @app.route('/addfunction', methods=['GET', 'POST'])
 @is_logged_in

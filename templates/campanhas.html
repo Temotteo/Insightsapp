@@ -4,7 +4,7 @@
 {% block body%}
 <div class="container my-5">
 
-  <h1>Campanhas</h1>
+  <h1>{{campanha}}</h1>
   <hr>
   <table class="table table-striped">
     <tr>
@@ -24,9 +24,9 @@
         <td>{{pendente[3]}}</td>
         <td>{{pendente[2]}}</td>
        
-
+        
         <td><a href="campanha_n/{{pendente[3]}}" class="btn btn-default pull-right">Perguntas</a></td>
-        <td><a href="assign_ticket/{{pendente[0]}}" class="btn btn-default pull-right">Assign</a></td>
+        <td><a href="assign_camp/{{pendente[0]}}" class="btn btn-default pull-right">Assign Camp</a></td>
         <td>
           <form action="{{url_for('del_tiket', id=pendente[0])}}" method="post">
             <input type="hidden" name="_method" value="DELETE">

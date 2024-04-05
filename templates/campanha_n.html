@@ -4,7 +4,7 @@
 {% block body%}
 <div class="container my-5">
 
-  <h1>{{campanha}}</h1>
+  <h1>{{campanha}} - {{campanha_ref}}</h1>
   <hr>
   <table class="table table-striped">
     <tr>
@@ -13,15 +13,17 @@
       <th>Conteudo</th>
       
       <th></th>
+      <th></th>
 
     </tr>
     {% for column in columns_list %}
       <tr>
-        <td>{{ column }}</td>
-        <td>{{ column }}</td>
+        <td>{{ column[0] }}</td>
+        <td>{{ column[1] }}</td>
 
-        <td><a href="/perguntas/{{campanha}}_{{column}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
+        <td><a href="/perguntas/{{campanha}}_{{column[0]}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
         
+        <td><a href="/assign_question/{{campanha}}_{{column[0]}}" class="btn btn-default pull-right">Editar Pergunta</a></td>
         
       </tr>
     {% endfor %}
