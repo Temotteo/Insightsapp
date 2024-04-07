@@ -2512,14 +2512,14 @@ def ver_respostas():
 # Esta deve ser sempre a ultima funcao
 @app.route("/<name>")
 def hello(name):
-    flash('Pagina nao existe', 'danger')
+    flash('Pagina '+name+ ' nao existe', 'danger')
     return render_template('home.html')
 
 
 
 if __name__ == '__main__':
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()
     
