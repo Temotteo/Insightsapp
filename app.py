@@ -2268,8 +2268,6 @@ def ivr():
     response = VoiceResponse()
 
     with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf') as gather:
-        # Introduction message
-        response.play("https://insightsap.com/audio/conjutiviteintro.mp3", loop=1)
         
         # Asking each survey question
         for index, audio_url in enumerate(QUESTION_AUDIO_URLS):
