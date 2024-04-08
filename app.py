@@ -2264,11 +2264,10 @@ def ivr_test():
 
 # IVR route
 
-# IVR route
 @app.route('/ivr', methods=['POST'])
 def ivr():
-    #if not authenticate_twilio_request():
-    #    return Response("Unauthorized", 401)
+    if not authenticate_twilio_request():
+        return Response("Unauthorized", 401)
 
     response = VoiceResponse()
 
@@ -2278,19 +2277,22 @@ def ivr():
     # Asking each survey question
     for index, audio_url in enumerate(QUESTION_AUDIO_URLS[1:-1], start=1):  # Skip the first and last elements
         with response.gather(num_digits=1, action=f'/handle_question?current_question_index={index}', method='POST', input='dtmf') as gather:
-            gather.play(audio_url)
+            gather.play(audio_url, loop=1 if index == 1 else 0)  # Loop the first question
 
     # Play concluding message
     response.play(QUESTION_AUDIO_URLS[-1])
 
-    return str(response)
+    return str(response), 200, {'Content-Type': 'application/xml'}
 
 # Handle question route
 @app.route('/handle_question', methods=['POST'])
 def handle_question():
-    selected_option = request.form['Digits']
-    phone_number = request.form['To']
-    current_question_index = int(request.form.get('current_question_index', 1))
+    if not authenticate_twilio_request():
+        return Response("Unauthorized", 401)
+
+    selected_option = request.form.get('Digits')
+    phone_number = request.form.get('To')
+    current_question_index = int(request.args.get('current_question_index', 0))
 
     try:
         selected_option = int(selected_option)
@@ -2298,32 +2300,25 @@ def handle_question():
             raise ValueError()
     except ValueError:
         # Handle invalid input
-        pass
-
-    # Save the survey response to the database
-    save_survey_response(phone_number, current_question_index, selected_option)
-
-    return '', 204  # No content response
-
-    print('/handle_question')
-    print(phone_number)
-    print(current_question_index)
-    print(selected_option)
+        response = VoiceResponse()
+        response.play("https://insightsap.com/audio/invalid_input_message.mp3")
+        response.redirect('/ivr')
+        return str(response), 200, {'Content-Type': 'application/xml'}
 
     # Save the survey response to the database
     save_survey_response(phone_number, current_question_index, selected_option)
 
     # Continue with the next question or end the survey
     next_question_index = current_question_index + 1
-    if next_question_index < len(QUESTION_AUDIO_URLS):
+    if next_question_index < len(QUESTION_AUDIO_URLS) - 1:  # Exclude concluding message
         response = VoiceResponse()
         response.play(QUESTION_AUDIO_URLS[next_question_index])
-        response.gather(num_digits=1, action='/handle_question', method='POST', current_question_index=next_question_index)
-        return str(response)
+        response.gather(num_digits=1, action=f'/handle_question?current_question_index={next_question_index}', method='POST', input='dtmf')
+        return str(response), 200, {'Content-Type': 'application/xml'}
     else:
         response = VoiceResponse()
-        response.play("https://insightsap.com/audio/conjutiviteconc.mp3")
-        return str(response)
+        response.play(QUESTION_AUDIO_URLS[-1])  # Play concluding message
+        return str(response), 200, {'Content-Type': 'application/xml'}
 
 # Start IVR campaign route
 @app.route('/start_ivr_campaign', methods=['POST'])
