@@ -2262,16 +2262,21 @@ def ivr_test():
 
 @app.route('/ivr', methods=['POST'])
 def ivr():
-    #if not authenticate_twilio_request():
-    #    return Response("Unauthorized", 401)
+    if not authenticate_twilio_request():
+        return Response("Unauthorized", 401)
 
     response = VoiceResponse()
 
-    with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf') as gather:
-        
-        # Asking each survey question
-        for index, audio_url in enumerate(QUESTION_AUDIO_URLS):
-            gather.play(audio_url, loop=1 if index == 0 else 0)
+    # Play introductory message (doesn't require gather)
+    response.play(QUESTION_AUDIO_URLS[0], loop=1)
+
+    # Asking each survey question
+    for index, audio_url in enumerate(QUESTION_AUDIO_URLS[1:-1]):  # Skip the first and last elements
+        with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf') as gather:
+            gather.play(audio_url)
+
+    # Play concluding message (doesn't require gather)
+    response.play(QUESTION_AUDIO_URLS[-1])
 
     return str(response)
 
