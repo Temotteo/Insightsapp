@@ -2322,13 +2322,13 @@ def handle_question():
         return str(response)
 
 # Start IVR campaign route
-@app.route('/start_ivr_campaign', methods=['POST'])
+@app.route('/start_ivr_campaign', method=['POST'])
 def start_ivr_campaign():
     #if not authenticate_twilio_request():
     #    return Response("Unauthorized", 401)
 
     #phone_numbers = get_phone_numbers_from_database()
-    phone_numbers = ['+258847985340']
+    phone_numbers = ['+258848030090']
 
     for number in phone_numbers:
         client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
