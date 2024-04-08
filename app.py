@@ -2322,7 +2322,7 @@ def handle_question():
         return str(response)
 
 # Start IVR campaign route
-@app.route('/start_ivr_campaign', method=['POST'])
+@app.route('/start_ivr_campaign', methods=['POST'])
 def start_ivr_campaign():
     #if not authenticate_twilio_request():
     #    return Response("Unauthorized", 401)
