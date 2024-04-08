@@ -2266,7 +2266,7 @@ def ivr():
 
     response = VoiceResponse()
 
-    with response.gather(num_digits=1, action='/handle_question', method='POST') as gather:
+    with response.gather(num_digits=1, action='/handle_question', method=['POST'], input='dtmf') as gather:
         # Introduction message
         response.play("https://insightsap.com/audio/conjutiviteintro.mp3")
 
@@ -2277,7 +2277,7 @@ def ivr():
     return str(response)
 
 # Handle question route
-@app.route('/handle_question', methods=['POST'])
+@app.route('/handle_question', method=['POST'])
 def handle_question():
     #if not authenticate_twilio_request():
     #    return Response("Unauthorized", 401)
@@ -2285,6 +2285,11 @@ def handle_question():
     selected_option = request.form['Digits']
     phone_number = request.form['To']
     current_question_index = int(request.form.get('current_question_index', 0))
+
+    print("/handle_question")
+    print(phone_number)
+    print(current_question_index)
+    print(selected_option)
 
     try:
         selected_option = int(selected_option)
@@ -2296,7 +2301,7 @@ def handle_question():
         response.redirect('/ivr')
         return str(response)
 
-    print("Antes")
+    print('/handle_question')
     print(phone_number)
     print(current_question_index)
     print(selected_option)
