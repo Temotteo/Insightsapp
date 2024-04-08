@@ -72,6 +72,8 @@ QUESTION_AUDIO_URLS = [
     
     "https://insightsap.com/audio/conjutivitep1.mp3",
 
+    "https://insightsap.com/audio/conjutivitep2.mp3",
+
     "https://insightsap.com/audio/conjutiviteconc.mp3"
      
         
@@ -2303,7 +2305,7 @@ def handle_question():
             raise ValueError()
     except ValueError:
         response = VoiceResponse()
-        response.play("https://insightsap.com/audio/conjutiviteintro.mp3")
+        #response.play("https://insightsap.com/audio/conjutiviteintro.mp3")
         response.redirect('/ivr')
         return str(response)
 
