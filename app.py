@@ -2270,7 +2270,7 @@ def ivr():
     response = VoiceResponse()
 
     # Play introductory message (doesn't require gather)
-    response.play(QUESTION_AUDIO_URLS[0], loop=1)
+    response.play(QUESTION_AUDIO_URLS[0])
 
     # Asking each survey question
     for index, audio_url in enumerate(QUESTION_AUDIO_URLS[1:-1]):  # Skip the first and last elements
