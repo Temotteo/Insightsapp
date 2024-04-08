@@ -2264,8 +2264,8 @@ def ivr_test():
 
 @app.route('/ivr', methods=['POST'])
 def ivr():
-    if not authenticate_twilio_request():
-        return Response("Unauthorized", 401)
+    #if not authenticate_twilio_request():
+    #    return Response("Unauthorized", 401)
 
     response = VoiceResponse()
 
