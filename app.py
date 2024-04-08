@@ -2290,7 +2290,7 @@ def ivr():
 def handle_question():
     selected_option = request.form['Digits']
     phone_number = request.form['To']
-    current_question_index = int(request.form.get('current_question_index', 0))
+    current_question_index = int(request.form.get('current_question_index', 1))
 
     try:
         selected_option = int(selected_option)
