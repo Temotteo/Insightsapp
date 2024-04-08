@@ -2328,7 +2328,7 @@ def start_ivr_campaign():
     #    return Response("Unauthorized", 401)
 
     #phone_numbers = get_phone_numbers_from_database()
-    phone_numbers = ['+258848030090']
+    phone_numbers = ['+258856017354']
 
     for number in phone_numbers:
         client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
