@@ -2275,7 +2275,7 @@ def ivr():
     response.play(QUESTION_AUDIO_URLS[0])
 
     # Asking each survey question
-    for index, audio_url in enumerate(QUESTION_AUDIO_URLS[1:-1]):  # Skip the first and last elements
+    for index, audio_url in enumerate(QUESTION_AUDIO_URLS[1:-1], start=1):  # Skip the first and last elements
         with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf') as gather:
             gather.play(audio_url)
 
