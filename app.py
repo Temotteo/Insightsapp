@@ -2259,20 +2259,21 @@ def ivr_test():
     return render_template('ivr_test.html')
 
 # IVR route
+
 @app.route('/ivr', methods=['POST'])
 def ivr():
-    #if not authenticate_twilio_request():
-    #    return Response("Unauthorized", 401)
+    if not authenticate_twilio_request():
+        return Response("Unauthorized", 401)
 
     response = VoiceResponse()
 
-    with response.gather(num_digits=1, action='/handle_question', method=['POST'], input='dtmf') as gather:
+    with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf') as gather:
         # Introduction message
         response.play("https://insightsap.com/audio/conjutiviteintro.mp3")
 
         # Asking each survey question
-        for audio_url in QUESTION_AUDIO_URLS:
-            response.play(audio_url)
+        for index, audio_url in enumerate(QUESTION_AUDIO_URLS):
+            gather.play(audio_url, loop=1 if index == 0 else 0)
 
     return str(response)
 
