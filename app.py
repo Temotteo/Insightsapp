@@ -2267,6 +2267,7 @@ def ivr_test():
 @app.route('/ivr', methods=['POST'])
 def ivr():
     response = VoiceResponse()
+    response.play(QUESTION_AUDIO_URLS[0])
 
     current_question_index = request.args.get('current_question_index', default=1, type=int)
     with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=current_question_index), method='POST', input='dtmf') as gather:
