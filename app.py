@@ -2273,10 +2273,10 @@ def ivr():
     # Play introductory message
     #response.play(QUESTION_AUDIO_URLS[0])
 
-    current_question_index = str(1)
+    current_question_index = 1
 
     # Ask the first survey question (without loop)
-    with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf', current_question_index=1) as gather:
+    with response.gather(num_digits=1, action=f'/handle_question?current_question_index={current_question_index}', method='POST', input='dtmf') as gather:
         gather.play(QUESTION_AUDIO_URLS[1])
         
 
@@ -2309,7 +2309,7 @@ def handle_question():
 
         next_question_index = str(next_question_index)
 
-        with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf', current_question_index=next_question_index) as gather:
+        with response.gather(num_digits=1, action=f'/handle_question?current_question_index={next_question_index}', method='POST', input='dtmf') as gather:
             gather.play(QUESTION_AUDIO_URLS[next_question_index])
 
     else:  # Concluding message
