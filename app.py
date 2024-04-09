@@ -2267,18 +2267,11 @@ def ivr_test():
 # IVR route
 @app.route('/ivr', methods=['POST'])
 def ivr():
-
     response = VoiceResponse()
 
-    # Play introductory message
-    #response.play(QUESTION_AUDIO_URLS[0])
-
-    current_question_index = 1
-
-    # Ask the first survey question (without loop)
-    with response.gather(num_digits=1, action=f'/handle_question?current_question_index={current_question_index}', method='POST', input='dtmf') as gather:
-        gather.play(QUESTION_AUDIO_URLS[1])
-        
+    current_question_index = request.args.get('current_question_index', default=1, type=int)
+    with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=current_question_index), method='POST', input='dtmf') as gather:
+        gather.play(QUESTION_AUDIO_URLS[current_question_index])
 
     return str(response), 200, {'Content-Type': 'application/xml'}
 
@@ -2287,7 +2280,7 @@ def ivr():
 def handle_question():
     selected_option = request.form.get('Digits')
     phone_number = request.form.get('To')
-    current_question_index = int(request.form.get('current_question_index'))
+    current_question_index = int(request.args.get('current_question_index'))
 
     response = VoiceResponse()
 
@@ -2297,25 +2290,21 @@ def handle_question():
             if selected_option < 1 or selected_option > 5:
                 raise ValueError()
         except ValueError:
-            # Handle invalid input by repeating the first question
-            # response.play(QUESTION_AUDIO_URLS[1])
-            return str(response), 200, {'Content-Type': 'application/xml'}
+            # Handle invalid input by redirecting back to /ivr with current_question_index
+            return redirect(url_for('ivr', current_question_index=current_question_index))
 
         # Save the survey response to the database
-        save_survey_response(phone_number, current_question_index , selected_option)
+        save_survey_response(phone_number, current_question_index, selected_option)
 
         # Continue with the next question
         next_question_index = current_question_index + 1
-
-        next_question_index = str(next_question_index)
-
-        with response.gather(num_digits=1, action=f'/handle_question?current_question_index={next_question_index}', method='POST', input='dtmf') as gather:
+        with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=next_question_index), method='POST', input='dtmf') as gather:
             gather.play(QUESTION_AUDIO_URLS[next_question_index])
 
     else:  # Concluding message
         response.play(QUESTION_AUDIO_URLS[-1])
 
-    return str(response), 200, {'Content-Type': 'application/xml'}    
+    return str(response), 200, {'Content-Type': 'application/xml'}
 
 # Start IVR campaign route
 @app.route('/start_ivr_campaign', methods=['POST'])
