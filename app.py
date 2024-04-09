@@ -2274,7 +2274,7 @@ def ivr():
     #response.play(QUESTION_AUDIO_URLS[0])
 
     # Ask the first survey question (without loop)
-    with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf', current_question_index='1') as gather:
+    with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf', current_question_index=1) as gather:
         gather.play(QUESTION_AUDIO_URLS[1])
         
 
@@ -2285,7 +2285,7 @@ def ivr():
 def handle_question():
     selected_option = request.form.get('Digits')
     phone_number = request.form.get('To')
-    current_question_index = int(request.form.get('current_question_index'))
+    current_question_index = int(str(request.form.get('current_question_index')))
 
     response = VoiceResponse()
 
@@ -2304,7 +2304,7 @@ def handle_question():
 
         # Continue with the next question
         next_question_index = current_question_index + 1        
-        with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf', current_question_index=str(next_question_index)) as gather:
+        with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf', current_question_index=next_question_index) as gather:
             gather.play(QUESTION_AUDIO_URLS[next_question_index])
 
     else:  # Concluding message
