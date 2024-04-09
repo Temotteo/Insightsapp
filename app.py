@@ -2296,15 +2296,14 @@ def handle_question():
                 raise ValueError()
         except ValueError:
             # Handle invalid input by repeating the first question
-            response.play(QUESTION_AUDIO_URLS[1])
+            # response.play(QUESTION_AUDIO_URLS[1])
             return str(response), 200, {'Content-Type': 'application/xml'}
 
         # Save the survey response to the database
         save_survey_response(phone_number, current_question_index , selected_option)
 
         # Continue with the next question
-        next_question_index = current_question_index + 1
-        response.play(QUESTION_AUDIO_URLS[next_question_index])
+        next_question_index = current_question_index + 1        
         with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf', current_question_index=next_question_index) as gather:
             gather.play(QUESTION_AUDIO_URLS[next_question_index])
 
