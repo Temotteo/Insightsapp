@@ -2264,40 +2264,53 @@ def ivr_test():
 
 # IVR route
 
+# IVR route
 @app.route('/ivr', methods=['POST'])
 def ivr():
-    #if not authenticate_twilio_request():
-    #@    return Response("Unauthorized", 401)
 
     response = VoiceResponse()
 
     # Play introductory message
     response.play(QUESTION_AUDIO_URLS[0])
 
-    # Asking each survey question
-    for index, audio_url in enumerate(QUESTION_AUDIO_URLS[1:-1]):  # Skip the first and last elements
-        with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf', current_question_index=index) as gather:
-            gather.play(audio_url, loop=1 if index == 0 else 0)
-
-    # Play concluding message (doesn't require gather)
-    response.play(QUESTION_AUDIO_URLS[-1])
+    # Ask the first survey question (without loop)
+    with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf', current_question_index=1) as gather:
+        gather.play(QUESTION_AUDIO_URLS[1])
 
     return str(response), 200, {'Content-Type': 'application/xml'}
 
 # Handle question route
 @app.route('/handle_question', methods=['POST'])
 def handle_question():
-    #if not authenticate_twilio_request():
-    #    return Response("Unauthorized", 401)
-
     selected_option = request.form.get('Digits')
     phone_number = request.form.get('To')
-    current_question_index = int(request.args.get('current_question_index'))
+    current_question_index = int(request.form.get('current_question_index'))
 
-    # Save the survey response to the database
-    save_survey_response(phone_number, current_question_index, selected_option)
+    response = VoiceResponse()
 
-    return 200, {'Content-Type': 'application/xml'}        
+    if current_question_index < len(QUESTION_AUDIO_URLS) - 1:  # Not the concluding message
+        try:
+            selected_option = int(selected_option)
+            if selected_option < 1 or selected_option > 5:
+                raise ValueError()
+        except ValueError:
+            # Handle invalid input by repeating the first question
+            response.play(QUESTION_AUDIO_URLS[1])
+            return str(response), 200, {'Content-Type': 'application/xml'}
+
+        # Save the survey response to the database
+        save_survey_response(phone_number, current_question_index , selected_option)
+
+        # Continue with the next question
+        next_question_index = current_question_index + 1
+        response.play(QUESTION_AUDIO_URLS[next_question_index])
+        with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf', current_question_index=next_question_index) as gather:
+            gather.play(QUESTION_AUDIO_URLS[next_question_index])
+
+    else:  # Concluding message
+        response.play(QUESTION_AUDIO_URLS[-1])
+
+    return str(response), 200, {'Content-Type': 'application/xml'}    
 
 # Start IVR campaign route
 @app.route('/start_ivr_campaign', methods=['POST'])
