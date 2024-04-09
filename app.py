@@ -2297,7 +2297,7 @@ def handle_question():
     # Save the survey response to the database
     save_survey_response(phone_number, current_question_index, selected_option)
 
-    return 200        
+    return 200, {'Content-Type': 'application/xml'}        
 
 # Start IVR campaign route
 @app.route('/start_ivr_campaign', methods=['POST'])
