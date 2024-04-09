@@ -2285,7 +2285,7 @@ def ivr():
 def handle_question():
     selected_option = request.form.get('Digits')
     phone_number = request.form.get('To')
-    current_question_index = request.form.get('current_question_index')
+    current_question_index = int(request.form.get('current_question_index'))
 
     response = VoiceResponse()
 
