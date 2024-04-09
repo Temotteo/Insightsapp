@@ -2271,12 +2271,12 @@ def ivr():
     response = VoiceResponse()
 
     # Play introductory message
-    response.play(QUESTION_AUDIO_URLS[0])
+    #response.play(QUESTION_AUDIO_URLS[0])
 
     # Ask the first survey question (without loop)
     with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf') as gather:
         gather.play(QUESTION_AUDIO_URLS[1])
-        gather.input('current_question_index', value='1')
+        
 
     return str(response), 200, {'Content-Type': 'application/xml'}
 
@@ -2285,7 +2285,7 @@ def ivr():
 def handle_question():
     selected_option = request.form.get('Digits')
     phone_number = request.form.get('To')
-    current_question_index = request.form.get('current_question_index')
+    current_question_index = request.form.get('current_question_index',1)
 
     response = VoiceResponse()
 
