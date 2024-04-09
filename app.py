@@ -2275,11 +2275,11 @@ def ivr():
     response.play(QUESTION_AUDIO_URLS[0])
 
     # Asking each survey question
-    for index, audio_url in enumerate(QUESTION_AUDIO_URLS[1:-1], start=1):  # Skip the first and last elements
-        with response.gather(num_digits=1, action=f'/handle_question?current_question_index={index}', method='POST', input='dtmf') as gather:
-            gather.play(audio_url, loop=1 if index == 1 else 0)  # Loop the first question
+    for index, audio_url in enumerate(QUESTION_AUDIO_URLS[1:-1]):  # Skip the first and last elements
+        with response.gather(num_digits=1, action='/handle_question', method='POST', input='dtmf', current_question_index=index) as gather:
+            gather.play(audio_url, loop=1 if index == 0 else 0)
 
-    # Play concluding message
+    # Play concluding message (doesn't require gather)
     response.play(QUESTION_AUDIO_URLS[-1])
 
     return str(response), 200, {'Content-Type': 'application/xml'}
@@ -2292,33 +2292,12 @@ def handle_question():
 
     selected_option = request.form.get('Digits')
     phone_number = request.form.get('To')
-    current_question_index = int(request.args.get('current_question_index', 0))
-
-    try:
-        selected_option = int(selected_option)
-        if selected_option < 1 or selected_option > 5:
-            raise ValueError()
-    except ValueError:
-        # Handle invalid input
-        response = VoiceResponse()
-        response.play("https://insightsap.com/audio/invalid_input_message.mp3")
-        response.redirect('/ivr')
-        return str(response), 200, {'Content-Type': 'application/xml'}
+    current_question_index = int(request.args.get('current_question_index'))
 
     # Save the survey response to the database
     save_survey_response(phone_number, current_question_index, selected_option)
 
-    # Continue with the next question or end the survey
-    next_question_index = current_question_index + 1
-    if next_question_index < len(QUESTION_AUDIO_URLS) - 1:  # Exclude concluding message
-        response = VoiceResponse()
-        response.play(QUESTION_AUDIO_URLS[next_question_index])
-        response.gather(num_digits=1, action=f'/handle_question?current_question_index={next_question_index}', method='POST', input='dtmf')
-        return str(response), 200, {'Content-Type': 'application/xml'}
-    else:
-        response = VoiceResponse()
-        response.play(QUESTION_AUDIO_URLS[-1])  # Play concluding message
-        return str(response), 200, {'Content-Type': 'application/xml'}
+    return 200        
 
 # Start IVR campaign route
 @app.route('/start_ivr_campaign', methods=['POST'])
