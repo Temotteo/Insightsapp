@@ -2262,7 +2262,6 @@ def addcredencial():
 def ivr_test():
     return render_template('ivr_test.html')
 
-# IVR route
 
 # IVR route
 @app.route('/ivr', methods=['POST'])
