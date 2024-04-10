@@ -61,22 +61,6 @@ survey_responses = [
     {'question': 'Question 3', 'options': ['Very Likely', 'Likely', 'Neutral', 'Unlikely', 'Very Unlikely'], 'counts': [20, 15, 10, 8, 5]}
 ]
 
-# Verificar se a tabela clientes existe, se não, criar
-cur.execute('''CREATE TABLE IF NOT EXISTS clientes (
-                id SERIAL PRIMARY KEY,
-                nome VARCHAR(255) NOT NULL,
-                tipo VARCHAR(10) NOT NULL,
-                quantidade_carros INTEGER NOT NULL,
-                contacto VARCHAR(20) NOT NULL,
-                email VARCHAR(255) NOT NULL,
-                pais VARCHAR(100) NOT NULL,
-                provincia VARCHAR(100) NOT NULL,
-                bairro VARCHAR(100) NOT NULL,
-                colaborador VARCHAR(50) NOT NULL,
-                data_cadastro DATE NOT NULL DEFAULT CURRENT_DATE,
-                hora_cadastro TIME NOT NULL DEFAULT CURRENT_TIME
-            )''')
-conn.commit()
 
 
 
