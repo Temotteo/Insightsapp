@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IVR Campaign Status</title>
+</head>
+<body>
+    <h1>IVR Campaign Status</h1>
+    <div id="status-container">
+        <!-- Status of calls will be displayed here -->
+    </div>
+
+    <script>
+        // Function to fetch the status of IVR calls
+        function fetchCallStatus() {
+            fetch('/get_call_status')
+            .then(response => response.json())
+            .then(data => {
+                // Clear existing content
+                document.getElementById('status-container').innerHTML = '';
+
+                // Iterate over call statuses and display them
+                data.forEach(call => {
+                    const callStatus = document.createElement('p');
+                    callStatus.textContent = `Call SID: ${call.sid}, Status: ${call.status}`;
+                    document.getElementById('status-container').appendChild(callStatus);
+                });
+            })
+            .catch(error => console.error('Error fetching call status:', error));
+        }
+
+        // Fetch call status when the page loads
+        fetchCallStatus();
+
+        // Refresh call status every 10 seconds
+        setInterval(fetchCallStatus, 10000); // Adjust interval as needed
+    </script>
+</body>
+</html>

@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IVR Test</title>
+    <title>IVR Campaign Form</title>
 </head>
 <body>
-    <h1>IVR Test</h1>
-    <form action="/start_ivr_campaign" method="POST">
-        <button type="submit">Start IVR Campaign (English)</button>
+    <h1>IVR Campaign Form</h1>
+    <p>Enter phone numbers separated by commas:</p>
+    <form method="POST" action="/start_ivr_campaign">
+        <textarea name="phone_numbers" rows="4" cols="50" placeholder="Enter phone numbers"></textarea>
+        <br>
+        <button type="submit">Start IVR Campaign</button>
     </form>
 </body>
 </html>

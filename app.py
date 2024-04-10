@@ -2,7 +2,7 @@ import os
 from twilio.rest import Client
 from twilio.twiml.voice_response import VoiceResponse
 
-from flask import Flask, render_template, request, session, flash, session, logging, url_for, redirect, Response,  send_from_directory
+from flask import Flask, render_template, request, session, flash, session, logging, url_for, redirect, Response,  send_from_directory, jsonify
 import psycopg2
 from markupsafe import escape
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, SelectField, DecimalField, DateField, IntegerField, EmailField, TimeField, FileField,  SubmitField, FieldList, FormField, DateTimeField
@@ -2306,14 +2306,30 @@ def handle_question():
 
     return str(response), 200, {'Content-Type': 'application/xml'}
 
+
+# Route to fetch call status
+@app.route('/get_call_status', methods=['GET'])
+def get_call_status():
+    # Initialize a list to store call statuses
+    call_statuses = []
+
+    # Fetch call status using Twilio REST API
+    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    for call in client.calls.list(status='in-progress'):
+        # Append call status to the list
+        call_statuses.append({
+            'sid': call.sid,
+            'status': call.status
+        })
+
+    # Return call statuses as JSON response
+    return jsonify(call_statuses)
+
 # Start IVR campaign route
 @app.route('/start_ivr_campaign', methods=['POST'])
 def start_ivr_campaign():
-    #if not authenticate_twilio_request():
-    #    return Response("Unauthorized", 401)
-
-    #phone_numbers = get_phone_numbers_from_database()
-    phone_numbers = ['+258856017354']
+    # Extract phone numbers from the HTML form
+    phone_numbers = request.form.getlist('phone_numbers')
 
     for number in phone_numbers:
         client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
@@ -2323,7 +2339,7 @@ def start_ivr_campaign():
             from_=TWILIO_PHONE_NUMBER
         )
 
-    return 'IVR campaign started successfully'
+    return render_template('campaign_status.html')
 
 
 @app.route('/audio/<path:filename>')
