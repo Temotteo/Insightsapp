@@ -1792,7 +1792,7 @@ def addoption(id):
         # Execute query with parameterized value
         cursor.execute(query, (form.opcao.data,))
 
-       
+        pergunta = display_ref(cursor,id)
 
         # Commit to DB
         conn.commit()
@@ -1802,7 +1802,7 @@ def addoption(id):
 
         flash('Opcao adicionada com Successo', 'success')
 
-        return redirect(url_for('perguntas', id=id))
+        return redirect(url_for('perguntas', id=id, pergunta=pergunta))
 
     return render_template('addoption.html', form=form)
 
