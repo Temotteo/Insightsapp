@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Clientes - Sistema de Rastreamento de Veículos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f8ff; /* Cor aqua suave */
+            color: #333;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            margin: 50px auto;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="tel"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        .logo {
+            display: block;
+            margin: 0 auto 30px;
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Logotipo -->
+    <img class="logo" src="cardinal tracking copia.jpg" alt="Cardinal Tracking">
+
+    
+    <div class="container">
+        <h1>Cadastro de Novos Clientes</h1>
+        <form action="/submit_srv" method="post">
+            <label for="nome">Nome do Cliente:</label>
+            <input type="text" id="nome" name="nome" required>
+
+            <label for="tipo">Tipo:</label>
+            <select id="tipo" name="tipo" required>
+                <option value="empresa">Empresa</option>
+                <option value="singular">Singular</option>
+            </select>
+
+            <label for="quantidade_carros">Quantidade de Carros:</label>
+            <input type="number" id="quantidade_carros" name="quantidade_carros" required>
+
+            <label for="contacto">Contacto:</label>
+            <input type="tel" id="contacto" name="contacto" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="pais">País:</label>
+            <input type="text" id="pais" name="pais" required>
+
+            <label for="provincia">Província:</label>
+            <input type="text" id="provincia" name="provincia" required>
+
+            <label for="bairro">Bairro:</label>
+            <input type="text" id="bairro" name="bairro" required>
+
+            <label for="Colaborador">Colaborador:</label>
+            <select id="Colaborador" name="Colaborador" required>
+                <option value="Inácio Tomás manhisse">Inácio Tomás manhisse</option>
+                <option value="Ostiario Miguel Simbine">Ostiario Miguel Simbine</option>
+                <option value="Inácio João Armando Xavier">Inácio João Armando Xavier</option>
+            </select>
+
+            <input type="submit" value="Cadastrar">
+        </form>
+    </div>
+</body>
+</html>

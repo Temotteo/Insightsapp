@@ -61,6 +61,25 @@ survey_responses = [
     {'question': 'Question 3', 'options': ['Very Likely', 'Likely', 'Neutral', 'Unlikely', 'Very Unlikely'], 'counts': [20, 15, 10, 8, 5]}
 ]
 
+# Verificar se a tabela clientes existe, se não, criar
+cur.execute('''CREATE TABLE IF NOT EXISTS clientes (
+                id SERIAL PRIMARY KEY,
+                nome VARCHAR(255) NOT NULL,
+                tipo VARCHAR(10) NOT NULL,
+                quantidade_carros INTEGER NOT NULL,
+                contacto VARCHAR(20) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                pais VARCHAR(100) NOT NULL,
+                provincia VARCHAR(100) NOT NULL,
+                bairro VARCHAR(100) NOT NULL,
+                colaborador VARCHAR(50) NOT NULL,
+                data_cadastro DATE NOT NULL DEFAULT CURRENT_DATE,
+                hora_cadastro TIME NOT NULL DEFAULT CURRENT_TIME
+            )''')
+conn.commit()
+
+
+
 # Replace these values with your actual Twilio credentials
 TWILIO_ACCOUNT_SID = "AC952933e9303a9c0021be3c0ce432caec"
 TWILIO_AUTH_TOKEN = "5e14a5105201307f6d9a77af3fd81853"
@@ -74,10 +93,7 @@ QUESTION_AUDIO_URLS = [
 
     "https://insightsap.com/audio/conjutivitep2.mp3",
 
-    "https://insightsap.com/audio/conjutiviteconc.mp3"
-     
-        
-]
+    "https://insightsap.com/audio/conjutiviteconc.mp3"]
 
 
 # Mock function to save survey responses to the database
@@ -2498,6 +2514,59 @@ def submit():
 def ver_respostas():
     respostas = obter_respostas()
     return render_template('ver_respostas.html', respostas=respostas)
+
+# Rota para exibir o formulário
+@app.route('/cadastro_clientes')
+def cadastro_clientes():
+    return render_template('cadastro_clientes.html')
+
+# Rota para enviar os dados do formulário SRV
+@app.route('/submit_srv', methods=['POST'])
+def submit_srv():
+    if request.method == 'POST':
+
+        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        cur = conn.cursor()
+
+        # Verificar se a tabela clientes existe, se não, criar
+        cur.execute('''CREATE TABLE IF NOT EXISTS clientes (
+                id SERIAL PRIMARY KEY,
+                nome VARCHAR(255) NOT NULL,
+                tipo VARCHAR(10) NOT NULL,
+                quantidade_carros INTEGER NOT NULL,
+                contacto VARCHAR(20) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                pais VARCHAR(100) NOT NULL,
+                provincia VARCHAR(100) NOT NULL,
+                bairro VARCHAR(100) NOT NULL,
+                colaborador VARCHAR(50) NOT NULL,
+                data_cadastro DATE NOT NULL DEFAULT CURRENT_DATE,
+                hora_cadastro TIME NOT NULL DEFAULT CURRENT_TIME
+            )''')
+        conn.commit()
+
+        nome = request.form['nome']
+        tipo = request.form['tipo']
+        quantidade_carros = request.form['quantidade_carros']
+        contacto = request.form['contacto']
+        email = request.form['email']
+        pais = request.form['pais']
+        provincia = request.form['provincia']
+        bairro = request.form['bairro']
+        Colaborador = request.form['Colaborador']
+
+        # Capturar data e hora atual
+        data_atual = datetime.now().date()
+        hora_atual = datetime.now().time()
+
+        
+
+        # Inserir dados no banco de dados
+        cur.execute("INSERT INTO clientes (nome, tipo, quantidade_carros, contacto, email, pais, provincia, bairro, Colaborador, data_cadastro, hora_cadastro) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (nome, tipo, quantidade_carros, contacto, email, pais, provincia, bairro, Colaborador,  data_atual, hora_atual))
+        conn.commit()
+
+        return 'Dados enviados com sucesso!'
+
 
 # Esta deve ser sempre a ultima funcao
 @app.route("/<name>")
