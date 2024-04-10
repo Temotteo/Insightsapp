@@ -2329,6 +2329,7 @@ def get_call_status():
     # Return call statuses as JSON response
     return jsonify(call_statuses)
 
+
 # Start IVR campaign route
 @app.route('/start_ivr_campaign', methods=['POST'])
 def start_ivr_campaign():
