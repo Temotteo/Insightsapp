@@ -2307,15 +2307,17 @@ def handle_question():
     return str(response), 200, {'Content-Type': 'application/xml'}
 
 
-# Route to fetch call status
 @app.route('/get_call_status', methods=['GET'])
 def get_call_status():
     # Initialize a list to store call statuses
     call_statuses = []
 
-    # Fetch call status using Twilio REST API
+    # Calculate the time one day ago
+    one_day_ago = datetime.now() - timedelta(days=1)
+
+    # Fetch call status using Twilio REST API within the last day
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    for call in client.calls.list(status='in-progress'):
+    for call in client.calls.list(start_time_after=one_day_ago):
         # Append call status to the list including phone number
         call_status = {
             'sid': call.sid,
