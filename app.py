@@ -2316,11 +2316,13 @@ def get_call_status():
     # Fetch call status using Twilio REST API
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
     for call in client.calls.list(status='in-progress'):
-        # Append call status to the list
-        call_statuses.append({
+        # Append call status to the list including phone number
+        call_status = {
             'sid': call.sid,
-            'status': call.status
-        })
+            'status': call.status,
+            'phone_number': call.to
+        }
+        call_statuses.append(call_status)
 
     # Return call statuses as JSON response
     return jsonify(call_statuses)

@@ -3,38 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IVR Campaign Status</title>
+    <title>Call Status</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
-    <h1>IVR Campaign Status</h1>
-    <div id="status-container">
-        <!-- Status of calls will be displayed here -->
-    </div>
+    <h1>Call Status</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Call SID</th>
+                <th>Status</th>
+                <th>Phone Number</th>
+            </tr>
+        </thead>
+        <tbody id="callStatusTable">
+            <!-- Call status rows will be dynamically added here -->
+        </tbody>
+    </table>
 
     <script>
-        // Function to fetch the status of IVR calls
+        // Function to fetch call statuses and update the table
         function fetchCallStatus() {
             fetch('/get_call_status')
-            .then(response => response.json())
-            .then(data => {
-                // Clear existing content
-                document.getElementById('status-container').innerHTML = '';
-
-                // Iterate over call statuses and display them
-                data.forEach(call => {
-                    const callStatus = document.createElement('p');
-                    callStatus.textContent = `Call SID: ${call.sid}, Status: ${call.status}`;
-                    document.getElementById('status-container').appendChild(callStatus);
+                .then(response => response.json())
+                .then(callStatuses => {
+                    const callStatusTable = document.getElementById('callStatusTable');
+                    callStatusTable.innerHTML = ''; // Clear existing rows
+                    callStatuses.forEach(callStatus => {
+                        const row = `<tr>
+                            <td>${callStatus.sid}</td>
+                            <td>${callStatus.status}</td>
+                            <td>${callStatus.phone_number}</td>
+                        </tr>`;
+                        callStatusTable.innerHTML += row; // Add row to the table
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching call status:', error);
                 });
-            })
-            .catch(error => console.error('Error fetching call status:', error));
         }
 
-        // Fetch call status when the page loads
-        fetchCallStatus();
-
-        // Refresh call status every 10 seconds
-        setInterval(fetchCallStatus, 10000); // Adjust interval as needed
+        // Fetch call statuses when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchCallStatus();
+            // Refresh call statuses every 5 seconds
+            setInterval(fetchCallStatus, 5000);
+        });
     </script>
 </body>
 </html>
