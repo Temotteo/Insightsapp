@@ -2307,32 +2307,41 @@ def handle_question():
     return str(response), 200, {'Content-Type': 'application/xml'}
 
 
-@app.route('/get_call_status', methods=['GET'])
-def get_call_status():
+# Get call status for calls made in the last day
+def get_call_statuses():
     # Initialize a list to store call statuses
     call_statuses = []
 
-    # Calculate the time one day ago
-    one_day_ago = datetime.now() - timedelta(days=1)
+    # Calculate the time 1 day ago
+    last_day = datetime.now() - timedelta(days=1)
 
-    # Fetch call status using Twilio REST API within the last day
+    # Fetch call status using Twilio REST API
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    for call in client.calls.list(start_time_after=one_day_ago):
+    for call in client.calls.list(start_time_after=last_day):
         # Calculate call duration in minutes
-        duration_minutes = call.duration / 60 if call.duration else 0
-        
-        # Append call status to the list including phone number and duration
+        start_time = datetime.strptime(call.start_time, '%a, %d %b %Y %H:%M:%S %z')
+        end_time = datetime.strptime(call.end_time, '%a, %d %b %Y %H:%M:%S %z')
+        duration_minutes = (end_time - start_time).total_seconds() / 60
+
+        # Append call status to the list
         call_status = {
             'sid': call.sid,
             'status': call.status,
             'phone_number': call.to,
-            'duration_minutes': duration_minutes
+            'duration_minutes': round(duration_minutes, 2)
         }
         call_statuses.append(call_status)
 
+    return call_statuses
+
+# Route to get call status
+@app.route('/get_call_status', methods=['GET'])
+def get_call_status():
+    # Get call statuses
+    call_statuses = get_call_statuses()
+
     # Return call statuses as JSON response
     return jsonify(call_statuses)
-
 
 # Start IVR campaign route
 @app.route('/start_ivr_campaign', methods=['POST'])
