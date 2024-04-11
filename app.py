@@ -2318,16 +2318,17 @@ def get_call_status():
     # Fetch call status using Twilio REST API within the last day
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
     for call in client.calls.list(start_time_after=one_day_ago):
-        # Append call status to the list including phone number
+        # Calculate call duration in minutes
+        duration_minutes = call.duration / 60 if call.duration else 0
+        
+        # Append call status to the list including phone number and duration
         call_status = {
             'sid': call.sid,
             'status': call.status,
-            'phone_number': call.to
+            'phone_number': call.to,
+            'duration_minutes': duration_minutes
         }
         call_statuses.append(call_status)
-
-    # Return call statuses as JSON response
-    return jsonify(call_statuses)
 
 
 # Start IVR campaign route
