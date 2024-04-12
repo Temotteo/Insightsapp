@@ -14,7 +14,19 @@
           <ul class="nav navbar-nav">
             {% if session.logged_in %}
             
-            <li><a href="/testes">Testes-SMS</a></li>
+            
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> Testes <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li class="dropdown-header">SMS</li>
+                <li><a href="/testes">SMS</a></li>
+                <li role="separator" class="divider"></li>
+                <li class="dropdown-header">IVR</li>
+                <li><a href="/ivr_test">IVR</a></li>
+                
+                
+              </ul>
+            </li>
 
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> RH <span class="caret"></span></a>
