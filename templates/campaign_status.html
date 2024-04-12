@@ -1,54 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Call Status</title>
-</head>
-<body>
-    <h1>Call Status</h1>
-    <table>
+{% extends 'layout.html' %}
+
+{% block body %}
+    <h2>Call Status</h2>
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th>Call SID</th>
                 <th>Status</th>
                 <th>Phone Number</th>
+                
                 <th>Duration (minutes)</th>
             </tr>
         </thead>
-        <tbody id="callStatusTable">
-            <!-- Call status rows will be dynamically added here -->
+        <tbody id="call-status-table">
+            <!-- Table rows will be dynamically populated here -->
         </tbody>
     </table>
-
     <script>
-        // Function to fetch call status from the server and update the table
-        function updateCallStatusTable() {
+        // JavaScript to fetch call statuses and populate the table dynamically
+        function fetchCallStatuses() {
             fetch('/get_call_status')
                 .then(response => response.json())
-                .then(data => {
-                    const callStatusTable = document.getElementById('callStatusTable');
-                    callStatusTable.innerHTML = ''; // Clear existing table rows
-
-                    data.forEach(call => {
+                .then(callStatuses => {
+                    const tableBody = document.getElementById('call-status-table');
+                    tableBody.innerHTML = '';
+                    callStatuses.forEach(call => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${call.sid}</td>
                             <td>${call.status}</td>
                             <td>${call.phone_number}</td>
+                            
                             <td>${call.duration_minutes}</td>
                         `;
-                        callStatusTable.appendChild(row);
+                        tableBody.appendChild(row);
                     });
-                })
-                .catch(error => console.error('Error fetching call status:', error));
+                });
         }
 
-        // Update call status table every 3 seconds
-        setInterval(updateCallStatusTable, 3000);
-        
-        // Initial update when the page loads
-        updateCallStatusTable();
+        // Fetch call statuses every 3 seconds
+        setInterval(fetchCallStatuses, 3000);
+
+        // Initial fetch
+        fetchCallStatuses();
     </script>
-</body>
-</html>
+
+{% endblock %}

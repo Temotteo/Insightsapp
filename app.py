@@ -2307,38 +2307,47 @@ def handle_question():
     return str(response), 200, {'Content-Type': 'application/xml'}
 
 
-# Get call status for calls made in the last day
-def get_call_statuses():
+def get_call_duration(start_time_str, end_time_str):
+    if start_time_str and end_time_str:
+        start_time = datetime.strptime(start_time_str, '%a, %d %b %Y %H:%M:%S %z')
+        end_time = datetime.strptime(end_time_str, '%a, %d %b %Y %H:%M:%S %z')
+        return (end_time - start_time).total_seconds() / 60
+    else:
+        return 0  # Call was not answered
+
+
+@app.route('/campaign_status', methods=['GET','POST'])
+def campaign_status():
+    return render_template('campaign_status.html')
+
+@app.route('/get_call_status', methods=['GET'])
+def get_call_status():
     # Initialize a list to store call statuses
     call_statuses = []
 
-    # Calculate the time 1 day ago
-    last_day = datetime.now() - timedelta(days=1)
-
     # Fetch call status using Twilio REST API
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    for call in client.calls.list(start_time_after=last_day):
+    for call in client.calls.list( start_time=datetime.now() - timedelta(days=1)):
         # Calculate call duration in minutes
-        start_time = datetime.strptime(call.start_time, '%a, %d %b %Y %H:%M:%S %z')
-        end_time = datetime.strptime(call.end_time, '%a, %d %b %Y %H:%M:%S %z')
-        duration_minutes = (end_time - start_time).total_seconds() / 60
+        duration_minutes = 0
+        if call.start_time and call.end_time:
+            start_time = call.start_time
+            end_time = call.end_time
+            duration_minutes = (end_time - start_time).total_seconds() / 60
+            if call.status == 'busy' or call.status == 'no-answer':
+                duration_minutes = 0
+        
 
         # Append call status to the list
         call_status = {
             'sid': call.sid,
             'status': call.status,
             'phone_number': call.to,
+            'start_time': call.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'end_time': call.end_time.strftime('%Y-%m-%d %H:%M:%S'),
             'duration_minutes': round(duration_minutes, 2)
         }
         call_statuses.append(call_status)
-
-    return call_statuses
-
-# Route to get call status
-@app.route('/get_call_status', methods=['GET'])
-def get_call_status():
-    # Get call statuses
-    call_statuses = get_call_statuses()
 
     # Return call statuses as JSON response
     return jsonify(call_statuses)
@@ -2537,6 +2546,7 @@ def ver_respostas():
 @app.route('/cadastro_clientes')
 def cadastro_clientes():
     return render_template('cadastro_clientes.html')
+
 
 # Rota para enviar os dados do formulário SRV
 @app.route('/submit_srv', methods=['POST'])
