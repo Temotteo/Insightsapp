@@ -2330,7 +2330,7 @@ def get_call_status():
 
     # Fetch call status using Twilio REST API
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    for call in client.calls.list( start_time=datetime.now() - timedelta(days=1)):
+    for call in client.calls.list( start_time=datetime.now() - timedelta(days=2)):
         # Calculate call duration in minutes
         duration_minutes = 0
         if call.start_time and call.end_time:
