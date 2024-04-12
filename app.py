@@ -2259,6 +2259,7 @@ def addcredencial():
 
 
 @app.route('/ivr_test')
+@is_logged_in
 def ivr_test():
     return render_template('ivr_test.html')
 
@@ -2317,10 +2318,12 @@ def get_call_duration(start_time_str, end_time_str):
 
 
 @app.route('/campaign_status', methods=['GET','POST'])
+@is_logged_in
 def campaign_status():
     return render_template('campaign_status.html')
 
 @app.route('/get_call_status', methods=['GET'])
+@is_logged_in
 def get_call_status():
     # Initialize a list to store call statuses
     call_statuses = []
