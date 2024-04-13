@@ -2613,6 +2613,11 @@ def submit_srv():
 
         # Inserir dados no banco de dados
         cur.execute("INSERT INTO clientes (nome, tipo, quantidade_carros, contacto, email, pais, provincia, bairro, Colaborador, data_cadastro, hora_cadastro) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (nome, tipo, quantidade_carros, contacto, email, pais, provincia, bairro, Colaborador,  data_atual, hora_atual))
+        
+        # Execute query
+        cur.execute("INSERT INTO cliente_vendas(nome, email, contato, city, srv ) VALUES (%s,%s,%s,%s,%s)",(nome,email,contacto,bairro,'true'))
+        
+        
         conn.commit()
 
         return 'Dados enviados com sucesso!'
