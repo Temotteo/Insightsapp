@@ -2055,6 +2055,25 @@ def clientecad():
     return render_template('cad-cliente.html', dados = dados)
 
 
+@app.route('/cliente_srv', methods=['GET'])
+@is_logged_in
+def cliente_srv():
+
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+
+    cursor = conn.cursor()
+
+    # Execute query
+    cursor.execute('SELECT * FROM cliente_vendas WHERE srv = true ORDER BY nome;')
+        
+    dados=cursor.fetchall()
+
+    # Close connection
+    conn.close()
+
+    return render_template('cad-cliente_srv.html', dados = dados)
+
+
 @app.route('/cliente_ong', methods=['GET'])
 @is_logged_in
 def cliente_ong():
