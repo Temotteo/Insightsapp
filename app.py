@@ -2159,6 +2159,12 @@ def add_call(id):
         conn.close()
 
         flash(f'{client[0]}', 'success')
+
+        if client[10]=='True':
+            return redirect(url_for('cliente_srv'))
+        if client[8]=='True':
+            return redirect(url_for('cliente_ong'))
+        
         return redirect(url_for('clientecad'))
 
     if request.method == 'GET':
