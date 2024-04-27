@@ -2566,6 +2566,42 @@ def submit():
     conn.close()
     return 'Respostas enviadas com sucesso!'
 
+
+@app.route('/contacts_by_collaborator', methods=['GET', 'POST'])
+def contacts_by_collaborator():
+    if request.method == 'POST':
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+
+        print(start_date)
+        print(end_date)
+
+        # Connect to the database
+        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        cur = conn.cursor()
+        
+        # Query the database
+        cur.execute("""
+            SELECT colaborador, COUNT(DISTINCT contacto) AS num_unique_contacts
+            FROM public.clientes
+            WHERE data_cadastro BETWEEN %s AND %s
+            GROUP BY colaborador
+        """, (start_date, end_date))
+        rows = cur.fetchall()
+        cur.close()
+        
+        # Process the data
+        data = [{'colaborador': row[0], 'num_unique_contacts': row[1]} for row in rows]
+        
+        print(data)
+
+        # Render the template with the data
+        return render_template('metas_srv.html', data=data, start_date = start_date, end_date=end_date)
+
+    # If it's a GET request, simply render the form page
+    return render_template('form.html')
+
+
 @app.route('/respostas')
 #@is_logged_in
 def ver_respostas():
