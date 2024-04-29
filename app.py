@@ -2590,6 +2590,12 @@ def contacts_by_collaborator():
             GROUP BY colaborador
         """, (start_date, end_date))
         rows = cur.fetchall()
+
+        cur.execute("""    
+            SELECT nome, contacto, email, colaborador, data_cadastro
+	        FROM public.clientes WHERE data_cadastro BETWEEN %s AND %s
+        """, (start_date, end_date))
+        rows2 = cur.fetchall()
         cur.close()
         
         # Process the data
@@ -2598,7 +2604,7 @@ def contacts_by_collaborator():
         print(data)
 
         # Render the template with the data
-        return render_template('metas_srv.html', data=data, start_date = start_date, end_date=end_date)
+        return render_template('metas_srv.html', data=data, start_date = start_date, end_date=end_date, rows2=rows2)
 
     # If it's a GET request, simply render the form page
     return render_template('form.html')

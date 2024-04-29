@@ -52,4 +52,24 @@
         });
     </script>
 
+    <hr>
+
+    <table class="table table-striped">
+      <tr>
+        <th>Nome</th>
+        <th>Contacto</th>
+        <th>Email</th>
+        <th>Vendedor</th>      
+        <th>Data</th>              
+      </tr>
+      {% for cliente in rows2 %}
+        <tr>
+          <td>{{cliente[0]}}</td> 
+          <td>{{cliente[1]}}</td> 
+          <td>{{cliente[2]}}</td>
+          <td>{{cliente[3]}}</td>          
+          <td>{{cliente[4]}}</td>          
+        </tr>
+      {% endfor %}
+    </table>
 {% endblock %}
