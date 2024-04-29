@@ -42,6 +42,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
+import plotly.graph_objs as go
+import numpy as np
 
 app = Flask(__name__)
 
@@ -2667,6 +2669,67 @@ def submit_srv():
         return 'Dados enviados com sucesso!'
 
 
+# Gerar dados fictícios
+num_registros = 1000
+genero = np.random.choice(['Masculino', 'Feminino'], num_registros)
+provincia = np.random.choice(['Maputo', 'Gaza', 'Inhambane', 'Sofala', 'Manica', 'Tete', 'Zambezia', 'Nampula', 'Niassa', 'Cabo Delgado'], num_registros)
+completado = np.random.choice([True, False], num_registros)
+
+# Calcular taxas de conclusão por género
+completado_por_genero = {'Masculino': {'Completado': 0, 'Não Completado': 0}, 'Feminino': {'Completado': 0, 'Não Completado': 0}}
+for g, c in zip(genero, completado):
+    if c:
+        completado_por_genero[g]['Completado'] += 1
+    else:
+        completado_por_genero[g]['Não Completado'] += 1
+
+# Calcular taxas de conclusão por província
+completado_por_provincia = {}
+for p in set(provincia):
+    completado_por_provincia[p] = {'Completado': sum((p == provincia) & completado), 'Não Completado': sum((p == provincia) & ~completado)}
+
+# Calcular taxa de conclusão geral da campanha
+taxa_conclusao_geral = sum(completado) / num_registros
+
+# Calcular porcentagem de conclusão por província
+porcentagens_por_provincia = {p: completado_por_provincia[p]['Completado'] / (completado_por_provincia[p]['Completado'] + completado_por_provincia[p]['Não Completado']) * 100 for p in completado_por_provincia}
+
+# Gerar gráficos Plotly
+figura_genero = go.Figure(data=[
+    go.Bar(name='Completado', x=list(completado_por_genero.keys()), y=[v['Completado'] for v in completado_por_genero.values()]),
+    go.Bar(name='Não Completado', x=list(completado_por_genero.keys()), y=[v['Não Completado'] for v in completado_por_genero.values()])
+])
+grafico_genero = figura_genero.to_html(full_html=False)
+
+figura_provincia = go.Figure(data=[
+    go.Bar(name='Completado', x=list(completado_por_provincia.keys()), y=[v['Completado'] for v in completado_por_provincia.values()]),
+    go.Bar(name='Não Completado', x=list(completado_por_provincia.keys()), y=[v['Não Completado'] for v in completado_por_provincia.values()])
+])
+grafico_provincia = figura_provincia.to_html(full_html=False)
+
+# Gerar gráfico para a taxa de conclusão geral
+figura_geral = go.Figure(data=go.Indicator(
+    mode="gauge+number",
+    value=taxa_conclusao_geral,
+    title={'text': "Taxa de Conclusão Geral"},
+    gauge={'axis': {'range': [0, 1]}, 'threshold': {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 0.5}}))
+grafico_geral = figura_geral.to_html(full_html=False)
+
+# Gerar gráfico de barras para a porcentagem de conclusão por província
+figura_porcentagem_provincia = go.Figure(data=go.Bar(
+    x=list(porcentagens_por_provincia.keys()),
+    y=list(porcentagens_por_provincia.values()),
+    text=list(porcentagens_por_provincia.values()),
+    textposition='auto',
+    marker_color='blue'
+))
+grafico_porcentagem_provincia = figura_porcentagem_provincia.to_html(full_html=False)
+
+# Modificar a rota para usar '/dashboard_demo'
+@app.route('/dashboard_demo')
+def dashboard_demo():
+    return render_template('dashboard_demo.html', grafico_genero=grafico_genero, grafico_provincia=grafico_provincia, grafico_geral=grafico_geral, grafico_porcentagem_provincia=grafico_porcentagem_provincia)
+
 # Esta deve ser sempre a ultima funcao
 @app.route("/<name>")
 def hello(name):
@@ -2677,7 +2740,7 @@ def hello(name):
 
 if __name__ == '__main__':
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()
     

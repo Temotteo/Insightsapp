@@ -1,0 +1,43 @@
+<!-- templates/dashboard_demo.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Demonstração do Painel de Controle de Campanha IVR</title>
+    <!-- Incluir Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Demonstração do Painel de Controle de Campanha IVR</h1>
+
+    <!-- Gráfico de Conclusão por Género -->
+    <!-- <h2>Taxas de Conclusão por Género</h2> -->
+    <div id="grafico-genero"></div>
+
+    <!-- Gráfico de Conclusão por Província -->
+    <!-- <h2>Taxas de Conclusão por Província</h2> -->
+    <div id="grafico-provincia"></div>
+
+    <!-- Taxa de Conclusão Geral -->
+    <!-- <h2>Taxa de Conclusão Geral da Campanha</h2> -->
+    <div id="grafico-geral"></div>
+
+    <!-- Porcentagem de Conclusão por Província -->
+    <!-- <h2>Porcentagem de Conclusão por Província</h2> -->
+    <div id="grafico-porcentagem-provincia"></div>
+
+    <script>
+        // Código JavaScript para renderizar os gráficos usando o Plotly.js
+        var dadosGenero = {{ grafico_genero|safe }};
+        Plotly.newPlot('grafico-genero', dadosGenero);
+
+        var dadosProvincia = {{ grafico_provincia|safe }};
+        Plotly.newPlot('grafico-provincia', dadosProvincia);
+
+        var dadosGeral = {{ grafico_geral|safe }};
+        Plotly.newPlot('grafico-geral', dadosGeral);
+
+        var dadosPorcentagemProvincia = {{ grafico_porcentagem_provincia|safe }};
+        Plotly.newPlot('grafico-porcentagem-provincia', dadosPorcentagemProvincia);
+    </script>
+</body>
+</html>
