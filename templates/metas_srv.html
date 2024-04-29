@@ -2,7 +2,7 @@
 
 
 {% block body%}
-    <h3>De {{ start_date }} a {{ end_date }}</h3>
+    
 
     <form action="/contacts_by_collaborator" method="POST">
         <div>
@@ -13,7 +13,8 @@
             <button type="submit">Apply Filter</button>
         </div>
     </form>
-    
+    <hr>
+    <h3>De {{ start_date }} a {{ end_date }}</h3>
     <canvas id="uniqueContactsChart" width="800" height="400"></canvas>
 
     <script>
