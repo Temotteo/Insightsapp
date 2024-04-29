@@ -785,7 +785,7 @@ def tasks():
     
     cursor = connection.cursor()
     
-    query = "SELECT "+'"'+ "id"+'"'+" ,title, due_date, accepted_time, completed_time, responsible, completed, accepted FROM tasks where due_date = Current_date OR completed = false OR completed_time = Current_date;"
+    query = "SELECT "+'"'+ "id"+'"'+" ,title, due_date, accepted_time, completed_time, responsible, completed, accepted FROM tasks where due_date = Current_date OR completed = false OR completed_time = Current_date GROUP BY responsible;"
     
     print(query)
     cursor.execute(query)
