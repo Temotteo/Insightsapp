@@ -785,13 +785,13 @@ def tasks():
     
     cursor = connection.cursor()
     
-    query = "SELECT "+'"'+ "id"+'"'+" ,title, due_date, accepted_time, completed_time, responsible, completed, accepted FROM tasks where due_date = Current_date OR completed = false OR completed_time = Current_date GROUP BY responsible;"
+    query = "SELECT "+'"'+ "id"+'"'+" ,title, due_date, accepted_time, completed_time, responsible, completed, accepted FROM tasks where due_date = Current_date OR completed = false OR completed_time = Current_date ORDER BY responsible;"
     
-    print(query)
+   
     cursor.execute(query)
     tasks = cursor.fetchall() 
 
-    print(tasks)
+   
 
     
     return render_template('tasks.html', tasks=tasks)
