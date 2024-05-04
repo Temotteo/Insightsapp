@@ -2679,6 +2679,7 @@ def submit_srv():
 num_registros = 1000
 genero = np.random.choice(['Masculino', 'Feminino'], num_registros)
 provincia = np.random.choice(['Maputo', 'Gaza', 'Inhambane', 'Sofala', 'Manica', 'Tete', 'Zambezia', 'Nampula', 'Niassa', 'Cabo Delgado'], num_registros)
+idade = np.random.randint(18, 80, num_registros)  # Gera idades entre 18 e 79 anos
 completado = np.random.choice([True, False], num_registros)
 
 # Calcular taxas de conclusão por género
@@ -2699,6 +2700,16 @@ taxa_conclusao_geral = sum(completado) / num_registros
 
 # Calcular porcentagem de conclusão por província
 porcentagens_por_provincia = {p: completado_por_provincia[p]['Completado'] / (completado_por_provincia[p]['Completado'] + completado_por_provincia[p]['Não Completado']) * 100 for p in completado_por_provincia}
+
+# Agrupar idades em faixas etárias
+bins = [18, 30, 40, 50, 60, 70, 80]
+idades_por_faixa = np.histogram(idade, bins=bins)[0]
+
+# Calcular taxas de conclusão por faixa etária
+completado_por_faixa = {}
+for i in range(len(bins)-1):
+    faixa_etaria = f'{bins[i]}-{bins[i+1]}'
+    completado_por_faixa[faixa_etaria] = {'Completado': sum((idade >= bins[i]) & (idade < bins[i+1]) & completado), 'Não Completado': sum((idade >= bins[i]) & (idade < bins[i+1]) & ~completado)}
 
 # Gerar gráficos Plotly
 figura_genero = go.Figure(data=[
@@ -2721,20 +2732,23 @@ figura_geral = go.Figure(data=go.Indicator(
     gauge={'axis': {'range': [0, 1]}, 'threshold': {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 0.5}}))
 grafico_geral = figura_geral.to_html(full_html=False)
 
-# Gerar gráfico de barras para a porcentagem de conclusão por província
-figura_porcentagem_provincia = go.Figure(data=go.Bar(
-    x=list(porcentagens_por_provincia.keys()),
-    y=list(porcentagens_por_provincia.values()),
-    text=list(porcentagens_por_provincia.values()),
+# Calcular taxas de conclusão por faixa etária
+taxas_conclusao_faixa = {faixa: round(completado_por_faixa[faixa]['Completado'] / (completado_por_faixa[faixa]['Completado'] + completado_por_faixa[faixa]['Não Completado']) * 100, 2) for faixa in completado_por_faixa}
+
+# Gerar gráfico de barras para a porcentagem de conclusão por faixa etária
+figura_faixa_etaria = go.Figure(data=go.Bar(
+    x=list(taxas_conclusao_faixa.keys()),
+    y=list(taxas_conclusao_faixa.values()),
+    text=list(taxas_conclusao_faixa.values()),
     textposition='auto',
-    marker_color='blue'
+    marker_color='green'
 ))
-grafico_porcentagem_provincia = figura_porcentagem_provincia.to_html(full_html=False)
+grafico_faixa_etaria = figura_faixa_etaria.to_html(full_html=False)
 
 # Modificar a rota para usar '/dashboard_demo'
 @app.route('/dashboard_demo')
 def dashboard_demo():
-    return render_template('dashboard_demo.html', grafico_genero=grafico_genero, grafico_provincia=grafico_provincia, grafico_geral=grafico_geral, grafico_porcentagem_provincia=grafico_porcentagem_provincia)
+    return render_template('dashboard_demo.html', grafico_genero=grafico_genero, grafico_provincia=grafico_provincia, grafico_geral=grafico_geral, grafico_faixa_etaria=grafico_faixa_etaria)
 
 # Esta deve ser sempre a ultima funcao
 @app.route("/<name>")
