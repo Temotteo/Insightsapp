@@ -39,7 +39,7 @@
     <ul>
         {% for task in tasks %}
         {% if session.username == "Temoteo" or session.username == task[5] or session.username == "Marta" %}
-        <li {% if task[2] < now().date() %} style="color: red;" {% endif %}>
+        <li {% if task[2] < today %} style="color: red;" {% endif %}>
             <strong>{{ task[1] }}</strong> | Prazo: {{ task[2] }} | {% if task[6] %}  Completed at: {{ task[4] }}{% endif %}
             {% if not task[7] and not task[6] %}
                 <a href="/accept_task/{{ task[0] }}">Iniciar</a>

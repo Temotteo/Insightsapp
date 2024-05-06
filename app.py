@@ -791,10 +791,10 @@ def tasks():
     cursor.execute(query)
     tasks = cursor.fetchall() 
 
-   
-
+    # Get today's date
+    today = datetime.now().date()
     
-    return render_template('tasks.html', tasks=tasks)
+    return render_template('tasks.html', tasks=tasks, today=today)
 
 @app.route('/add_task', methods=['POST'])
 @is_logged_in
