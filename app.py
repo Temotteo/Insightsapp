@@ -122,7 +122,7 @@ def save_survey_response(phone_number, question_index, selected_option, campaign
     cur.execute("""
         INSERT INTO %s (%s)
         VALUES (%s)
-    """, (campaign,pergunta,opcao))
+    """, (str(campaign),str(pergunta),str(opcao)))
 
     # Commit changes and close connection
     conn.commit()
