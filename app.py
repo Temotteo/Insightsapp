@@ -97,18 +97,32 @@ def save_survey_response(phone_number, question_index, selected_option, campaign
             phone_number VARCHAR(20),
             question_index INT,
             selected_option INT,
-            campaign VARCHAR(40))
+            campaign VARCHAR(40),
+            data timestamp without time zone   )
     """)
-    print("Dentro")
-    print(phone_number)
-    print(question_index)
-    print(selected_option)
-
+    
     # Insert survey response into the table
     cur.execute("""
         INSERT INTO survey_responses (phone_number, question_index, selected_option, campaign)
         VALUES (%s, %s, %s, %s)
-    """, (phone_number, question_index, selected_option, campaign))
+    """, (phone_number, question_index, selected_option, campaign ))
+
+    print(campaign+"_"+"pergunta_"+question_index)    
+
+    pergunta = "pergunta_"+question_index
+
+    ref = campaign+"_"+"pergunta_"+question_index
+
+    # Display ref
+    cur.execute(f"SELECT opcao FROM {ref} where id='{selected_option}'")
+    
+    opcao = cur.fetchone()[0]
+
+    # Insert survey response into the main table
+    cur.execute("""
+        INSERT INTO %s (%s)
+        VALUES (%s)
+    """, (campaign,pergunta,opcao))
 
     # Commit changes and close connection
     conn.commit()
@@ -258,7 +272,9 @@ def create_table(cursor, new_table_name):
         CREATE TABLE {} (
             id_campanha SERIAL PRIMARY KEY,
             orgid VARCHAR(50),
-            t_name VARCHAR(50) DEFAULT %s
+            t_name VARCHAR(50) DEFAULT %s,
+            contact VARCHAR(50),
+            data_hora TIMESTAMP DEFAULT NOW()                
         )
     """).format(sql.Identifier(new_table_name))
     
@@ -2392,7 +2408,7 @@ def get_call_status():
 def start_ivr_campaign():
     # Extract phone numbers from the HTML form
     phone_numbers = request.form.getlist('phone_numbers')
-    campaign = request.form.getlist('campaign')
+    campaign = request.form.get('campaign')
     
     url='https://insightsap.com/ivr/'+campaign
 
@@ -2768,7 +2784,7 @@ def hello(name):
 
 if __name__ == '__main__':
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()
     
