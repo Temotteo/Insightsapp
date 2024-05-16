@@ -107,11 +107,11 @@ def save_survey_response(phone_number, question_index, selected_option, campaign
         VALUES (%s, %s, %s, %s)
     """, (phone_number, question_index, selected_option, campaign ))
 
-    print(campaign+"_"+"pergunta_"+question_index)    
+    #print(campaign+"_"+"pergunta_"+question_index)    
 
-    pergunta = "pergunta_"+question_index
+    pergunta = "pergunta_"+str(question_index)
 
-    ref = campaign+"_"+"pergunta_"+question_index
+    ref = campaign+"_"+"pergunta_"+str(question_index)
 
     # Display ref
     cur.execute(f"SELECT opcao FROM {ref} where id='{selected_option}'")
