@@ -119,7 +119,7 @@ def save_survey_response(phone_number, question_index, selected_option, campaign
     opcao = cur.fetchone()[0]
 
     # Insert survey response into the main table
-    cur.execute(f"INSERT INTO {campaign} ({pergunta}) VALUES ({opcao})")
+    cur.execute(f"INSERT INTO {campaign} ({pergunta}) VALUES ('{opcao}')")
 
     # Commit changes and close connection
     conn.commit()
