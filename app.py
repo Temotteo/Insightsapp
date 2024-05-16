@@ -121,6 +121,13 @@ def save_survey_response(phone_number, question_index, selected_option, campaign
     # Insert survey response into the main table
     cur.execute(f"INSERT INTO {campaign} ({pergunta}) VALUES ('{opcao}')")
 
+    # Update count_
+    cur.execute(f"UPDATE {ref} SET count_=count_+1 where id='{selected_option}'")
+    
+   
+
+
+
     # Commit changes and close connection
     conn.commit()
     cur.close()
