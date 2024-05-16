@@ -4,8 +4,9 @@
     <h1>IVR Campaign Form</h1>
     <p>Enter phone numbers separated by commas:</p>
     <form method="POST" action="/start_ivr_campaign">
-        <textarea name="phone_numbers" rows="4" cols="50" placeholder="Enter phone numbers"></textarea>
+        <textarea name="phone_numbers" rows="4" cols="50" placeholder="Enter phone numbers: +258"></textarea>
         <br>
+        <textarea name="campaign" rows="4" cols="10" placeholder="Enter Campaign"></textarea>
         <button type="submit">Start IVR Campaign</button>
     </form>
 {% endblock %}

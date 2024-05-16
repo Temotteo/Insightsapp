@@ -83,7 +83,7 @@ QUESTION_AUDIO_URLS = [
 
 
 # Mock function to save survey responses to the database
-def save_survey_response(phone_number, question_index, selected_option):
+def save_survey_response(phone_number, question_index, selected_option, campaign):
     # Connect to the database
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
@@ -96,8 +96,8 @@ def save_survey_response(phone_number, question_index, selected_option):
             id SERIAL PRIMARY KEY,
             phone_number VARCHAR(20),
             question_index INT,
-            selected_option INT
-        )
+            selected_option INT,
+            campaign VARCHAR(40))
     """)
     print("Dentro")
     print(phone_number)
@@ -106,9 +106,9 @@ def save_survey_response(phone_number, question_index, selected_option):
 
     # Insert survey response into the table
     cur.execute("""
-        INSERT INTO survey_responses (phone_number, question_index, selected_option)
-        VALUES (%s, %s, %s)
-    """, (phone_number, question_index, selected_option))
+        INSERT INTO survey_responses (phone_number, question_index, selected_option, campaign)
+        VALUES (%s, %s, %s, %s)
+    """, (phone_number, question_index, selected_option, campaign))
 
     # Commit changes and close connection
     conn.commit()
@@ -2294,16 +2294,17 @@ def ivr_test():
 
 
 # IVR route
-@app.route('/ivr', methods=['POST'])
-def ivr():
+@app.route('/ivr/<string:campaign>', methods=['POST'])
+def ivr(campaign):
     response = VoiceResponse()
     response.play(QUESTION_AUDIO_URLS[0])
 
     current_question_index = request.args.get('current_question_index', default=1, type=int)
-    with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=current_question_index), method='POST', input='dtmf') as gather:
+    with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
         gather.play(QUESTION_AUDIO_URLS[current_question_index])
 
     return str(response), 200, {'Content-Type': 'application/xml'}
+
 
 # Handle question route
 @app.route('/handle_question', methods=['POST'])
@@ -2311,6 +2312,7 @@ def handle_question():
     selected_option = request.form.get('Digits')
     phone_number = request.form.get('To')
     current_question_index = int(request.args.get('current_question_index'))
+    campaign=request.args.get('campaign')
 
     response = VoiceResponse()
 
@@ -2324,11 +2326,11 @@ def handle_question():
             return redirect(url_for('ivr', current_question_index=current_question_index))
 
         # Save the survey response to the database
-        save_survey_response(phone_number, current_question_index, selected_option)
+        save_survey_response(phone_number, current_question_index, selected_option, campaign)
 
         # Continue with the next question
         next_question_index = current_question_index + 1
-        with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=next_question_index), method='POST', input='dtmf') as gather:
+        with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=next_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
             gather.play(QUESTION_AUDIO_URLS[next_question_index])
 
     else:  # Concluding message
@@ -2350,6 +2352,7 @@ def get_call_duration(start_time_str, end_time_str):
 @is_logged_in
 def campaign_status():
     return render_template('campaign_status.html')
+
 
 @app.route('/get_call_status', methods=['GET'])
 @is_logged_in
@@ -2389,11 +2392,14 @@ def get_call_status():
 def start_ivr_campaign():
     # Extract phone numbers from the HTML form
     phone_numbers = request.form.getlist('phone_numbers')
+    campaign = request.form.getlist('campaign')
+    
+    url='https://insightsap.com/ivr/'+campaign
 
     for number in phone_numbers:
         client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
         call = client.calls.create(
-            url='https://insightsap.com/ivr',  # URL for handling IVR logic
+            url=url,  # URL for handling IVR logic
             to=number,
             from_=TWILIO_PHONE_NUMBER
         )
@@ -2456,6 +2462,7 @@ def assign_camp(id):
 
     return render_template('assign_camp.html', form=form)
 
+
 # Assign question
 @app.route('/assign_question/<string:id>', methods=['GET', 'POST'])
 @is_logged_in
@@ -2505,6 +2512,7 @@ def assign_question(id):
 
     return render_template('assign_question.html', form=form)
 
+
 @app.route('/addfunction', methods=['GET', 'POST'])
 @is_logged_in
 def addfunction():
@@ -2533,6 +2541,7 @@ def addfunction():
         return redirect(url_for('funcao'))
 
     return render_template('addfunction.html', form = form)
+
 
 @app.route('/candidaturas')
 def formulario():
