@@ -150,9 +150,6 @@ def authenticate_twilio_request():
         return False
     return True
 
-
-
-
 def criar_tabela():
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cur = conn.cursor()
