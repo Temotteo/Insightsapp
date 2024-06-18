@@ -1,0 +1,18 @@
+{% extends 'layout4.html'%}
+
+
+{% block body%}
+  <div class="container">
+    <h2 class="mt-5">Relatório</h2>
+    <h4 class=" px-1">O seu relatorio foi concluido com sucesso</h4>
+    <p>clique no link abaixa para baixar o pdf do relatorio</p>
+    <div class="mt-3">
+      <a href="{{ url_for('gerar_pdf', id= relatorio_id ) }}" title="Detalhes"><button class="btn btn-danger">
+          <i class="fas fa-file-pdf"> </i> baixar pdf </button>   
+     </a>
+     <hr>
+    </div>
+  
+  </div>
+  
+  {% endblock %}

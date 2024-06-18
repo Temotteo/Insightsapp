@@ -13,6 +13,7 @@ from decimal import Decimal
 from wtforms.validators import InputRequired
 from psycopg2 import sql
 from flask_wtf import FlaskForm
+import matplotlib.pyplot as plt
 
 from io import BytesIO
 import base64
@@ -338,7 +339,7 @@ def extract_text_and_numbers_from_pdf(attachment_data):
     try:
         # Create a PDF file reader object
         # Use pdfminer to extract text from the PDF
-        extracted_text = extract_text(io.BytesIO(attachment_data))
+        extracted_text = io.BytesIO(attachment_data)
 
         # Use regex to find all text and numbers
         extracted_content = ' '.join(re.findall(r'\b\w+\b', extracted_text))
@@ -2641,6 +2642,32 @@ def contacts_by_collaborator():
 def ver_respostas():
     respostas = obter_respostas()
     return render_template('ver_respostas.html', respostas=respostas)
+
+@app.route('/Relatorio_obra')
+#@is_logged_in
+def Relatorio_obra():
+    return render_template('formulario_de_obra.html')
+
+@app.route('/submit/tasks', methods=['POST'])
+def submit():
+    relatorio = request.form['relatorio']
+    cliente = request.form['cliente']
+    status = request.form['status']
+    hora_chegada = request.form['tempo']
+    hora_saida = request.form['hora']
+    data_atual = datetime.now().date()
+
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
+    cur = conn.cursor()  
+    cur.execute("INSERT INTO relatorios(cliente, relatorio, status, hora_entrada, hora_saida,data ) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id",(cliente,relatorio,status,hora_chegada,hora_saida,data_atual,))
+
+    relatorio_id = cur.fetchone()[0] 
+    conn.commit()
+    cur.close()
+    conn.close()
+    sucesso = "o seu relatorio foi concluido com sucesso"
+    return render_template('relatorio_de_obra_pdf.html' ,relatorio_id = relatorio_id)
+
 
 # Rota para exibir o formulário
 @app.route('/cadastro_clientes')

@@ -1,0 +1,45 @@
+{% extends 'layout4.html'%}
+
+
+{% block body%}
+<div class="container">
+      <h2>Formulário de Relatório de Obra </h2>
+<br>
+
+<form id="reportForm" action="/submit" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="cliente" class="form-label">Cliente</label>
+         <select class="form-control" id="cliente"  name ="cliente" >
+          <option>Cliente_1</option>
+          <option>Cliente_2</option>
+          <option>Cliente_3</option>
+        </select>
+      </div>
+    <div class="form-group">
+        <label for="relatorio">Relatorio:</label>
+        <textarea type="text" class="form-control" id="relatorio" row="5" name="relatorio"  required ></textarea>
+    <div class="form-group">
+        <label for="status" class="form-label">Fase da obra</label>
+         <select class="form-control" id="status"  name ="status" >
+          <option>Orcamento</option>
+          <option>Cabelagem</option>
+          <option>Instalacao de dispositivos</option>
+          <option>Teste</option>
+          <option>Entrega</option>
+          <option>Manuntancao</option>
+        </select>
+      </div>
+    <div class="form-group">
+        <label for="tempo">hora de entrada:</label>
+        <input type="time" class="form-control" id="tempo" name="tempo">
+    </div>
+    <div class="form-group">
+        <label for="hora">hora de saida</label>
+        <input type="time" id="hora" name="hora"  class="form-control">
+    </div>
+    <button type="submit" class="btn btn-primary">Salvar dados</button>
+</form>
+ <br>
+   
+</div>
+{% endblock %}
