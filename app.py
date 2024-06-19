@@ -2,11 +2,11 @@ import os
 from twilio.rest import Client
 from twilio.twiml.voice_response import VoiceResponse
 
-from flask import Flask, render_template, request, session, flash, session, logging, url_for, redirect, Response,  send_from_directory, jsonify
+from flask import Flask, render_template, request, session, flash, session, logging, url_for, redirect, Response,  send_from_directory, jsonify, send_file
 import psycopg2
 from markupsafe import escape
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, SelectField, DecimalField, DateField, IntegerField, EmailField, TimeField, FileField,  SubmitField, FieldList, FormField, DateTimeField
-from gevent.pywsgi import WSGIServer
+#from gevent.pywsgi import WSGIServer
 from functools import wraps
 from datetime import datetime, time, timedelta, date
 from decimal import Decimal
@@ -27,11 +27,13 @@ from babel.numbers import format_currency
 
 from flask import make_response
 from io import BytesIO
+from reportlab.lib.units import inch
+from reportlab.lib.enums import TA_RIGHT, TA_CENTER, TA_JUSTIFY, TA_LEFT
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer,Image,  PageBreak
 
 import json
 import re
@@ -2643,31 +2645,6 @@ def ver_respostas():
     respostas = obter_respostas()
     return render_template('ver_respostas.html', respostas=respostas)
 
-@app.route('/Relatorio_obra')
-#@is_logged_in
-def Relatorio_obra():
-    return render_template('formulario_de_obra.html')
-
-@app.route('/submit/tasks', methods=['POST'])
-def submit():
-    relatorio = request.form['relatorio']
-    cliente = request.form['cliente']
-    status = request.form['status']
-    hora_chegada = request.form['tempo']
-    hora_saida = request.form['hora']
-    data_atual = datetime.now().date()
-
-    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
-    cur = conn.cursor()  
-    cur.execute("INSERT INTO relatorios(cliente, relatorio, status, hora_entrada, hora_saida,data ) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id",(cliente,relatorio,status,hora_chegada,hora_saida,data_atual,))
-
-    relatorio_id = cur.fetchone()[0] 
-    conn.commit()
-    cur.close()
-    conn.close()
-    sucesso = "o seu relatorio foi concluido com sucesso"
-    return render_template('relatorio_de_obra_pdf.html' ,relatorio_id = relatorio_id)
-
 
 # Rota para exibir o formulário
 @app.route('/cadastro_clientes')
@@ -2810,10 +2787,159 @@ def hello(name):
     return render_template('home.html')
 
 
+@app.route('/Relatorio_obra')
+@is_logged_in
+def Relatorio_obra():
+    return render_template('formulario_de_obra.html')
+
+@app.route('/Gerir_clientes')
+@is_logged_in
+def Gerir_clientes():
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
+    cur = conn.cursor()  
+    cur.execute("SELECT * FROM cliente ")
+    clientes = cur.fetchall() 
+    conn.commit()
+    cur.close()
+    conn.close()
+    return render_template('Gestao_clientes.html', clientes=clientes)
+
+
+@app.route('/pdf_obra')
+@is_logged_in
+def pdf_obra():
+    user = True
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
+    cur = conn.cursor()  
+    cur.execute("SELECT * FROM relatorios ")
+    relatoriopdf = cur.fetchall() 
+    cur.close()
+    conn.close()
+    return render_template('relatorio_de_obra_pdf.html', user=user, relatorios=relatoriopdf)
+
+@app.route('/submit_rel', methods=['POST'])
+def submit_rel():
+    relatorio = request.form['relatorio']
+    cliente = request.form['cliente']
+    status = request.form['status']
+    hora_chegada = request.form['tempo']
+    hora_saida = request.form['hora']
+    data_atual = datetime.now().date()
+
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
+    cur = conn.cursor()  
+    cur.execute("INSERT INTO relatorios( relatorio, status, hora_entrada, hora_saida,data, cliente_id ) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id",(relatorio,status,hora_chegada,hora_saida,data_atual,cliente,))
+
+    relatorio_id = cur.fetchone()[0] 
+    conn.commit()
+    cur.close()
+    conn.close()
+    sucesso = "o seu relatorio foi concluido com sucesso"
+    return render_template('relatorio_de_obra_pdf.html' ,relatorio_id = relatorio_id)
+
+@app.route('/novo_cliente', methods=['POST'])
+def novo_cliente():
+    cliente = request.form['cliente']
+
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
+    cur = conn.cursor()  
+    cur.execute("INSERT INTO cliente( nome ) VALUES (%s) ",(cliente,))
+    conn.commit()
+    cur.close()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM cliente ")
+    clientes = cur.fetchall() 
+    cur.close()
+    conn.close()
+    sucesso = "Cliente inserido com sucesso"
+    return render_template('Gestao_clientes.html', clientes=clientes ,sucesso = sucesso)
+
+@app.route('/edit_cliente/<int:id>', methods=['GET','POST'])
+def edit_cliente(id):
+    cliente = request.form['cliente']
+
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
+    cur = conn.cursor()  
+    cur.execute("UPDATE cliente SET nome = %s WHERE id = %s",(cliente,id,))
+    conn.commit()
+    cur.close()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM cliente ")
+    clientes = cur.fetchall() 
+    cur.close()
+    conn.close()
+    sucesso = "Cliente Atualizado com sucesso"
+    return render_template('Gestao_clientes.html', clientes=clientes,sucesso = sucesso)
+
+@app.route('/delete_cliente/<int:id>', methods=['GET','POST'])
+def delete_cliente(id):
+
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
+    cur = conn.cursor()  
+    cur.execute("DELETE FROM cliente WHERE id = %s",(id,))
+    conn.commit()
+    cur.close()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM cliente ")
+    clientes = cur.fetchall() 
+    cur.close()
+    conn.close()
+    sucesso = "Cliente Removido com sucesso"
+    return render_template('Gestao_clientes.html', clientes=clientes,sucesso = sucesso)
+
+
+@app.route('/ralatori/pdf/<int:id>')
+def gerar_pdf(id):
+    # Obtendo relatórios do banco de dados para o usuário
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
+    cur = conn.cursor()  
+    cur.execute("SELECT * FROM relatorios where id = %s ",(id,))
+    relatoriopdf = cur.fetchone() 
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    # Criando o PDF
+    filename = f'relatorios__{relatoriopdf[1]}.pdf'
+    
+    doc = SimpleDocTemplate(filename, pagesize=letter)
+    
+    style_right = ParagraphStyle(name='right', alignment=TA_RIGHT)
+    style_center = ParagraphStyle(name='center', alignment=TA_CENTER , fontSize=12)
+    style_center2 = ParagraphStyle(name='center2', alignment=TA_CENTER , fontSize=14, underline=True,)
+    styles = getSampleStyleSheet()
+
+    elementos = []
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+     # Caminho para a imagem dentro da pasta 'static'
+    img_path = os.path.join(dir_path, 'static', 'cardinal.png')
+    icon = Image(img_path,  width=2*inch, height=1*inch) 
+    icon.wrapOn(doc, 4, 2) # Ajuste a largura e a altura conforme necessário
+    elementos.append(Spacer(1, 4))
+    elementos.append(icon)
+    elementos.append(Spacer(1, 12)) 
+    texto_direita = Paragraph(f"Ficha Técnica nr: {relatoriopdf[0]}<br/>Cliente: <b>{relatoriopdf[1]}</b><br/>Data: {relatoriopdf[6]}<br/><br/>Hora de entrada: {relatoriopdf[4]}<br/>Hora de saida: {relatoriopdf[5]}", style_right)
+    elementos.append(texto_direita)
+    elementos.append(Spacer(1, 24))
+    texto_central = Paragraph(f'Fase da Obra: <u>{relatoriopdf[3]}</u>', style_right)
+    elementos.append(texto_central)
+    elementos.append(Spacer(1, 24))
+    texto = Paragraph(f"<b>RESUMO:</b> {relatoriopdf[2]}<br/>", style_center)
+    elementos.append(texto)
+    elementos.append(Spacer(1, 12))
+    elementos.append(PageBreak()) 
+    # Adicionando imagens ao PDF
+   
+    doc.build(elementos)
+
+    return send_file(filename, as_attachment=True)
+
 if __name__ == '__main__':
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()
     
 
