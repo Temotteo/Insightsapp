@@ -2859,7 +2859,7 @@ def novo_cliente():
     cur.close()
     conn.close()
     sucesso = "Cliente inserido com sucesso"
-    return render_template('Gestao_clientes.html', clientes=clientes ,sucesso = sucesso)
+    return render_template('gestao_clientes.html', clientes=clientes ,sucesso = sucesso)
 
 @app.route('/edit_cliente/<int:id>', methods=['GET','POST'])
 def edit_cliente(id):
@@ -2876,7 +2876,7 @@ def edit_cliente(id):
     cur.close()
     conn.close()
     sucesso = "Cliente Atualizado com sucesso"
-    return render_template('Gestao_clientes.html', clientes=clientes,sucesso = sucesso)
+    return render_template('gestao_clientes.html', clientes=clientes,sucesso = sucesso)
 
 @app.route('/delete_cliente/<int:id>', methods=['GET','POST'])
 def delete_cliente(id):
@@ -2892,7 +2892,7 @@ def delete_cliente(id):
     cur.close()
     conn.close()
     sucesso = "Cliente Removido com sucesso"
-    return render_template('Gestao_clientes.html', clientes=clientes,sucesso = sucesso)
+    return render_template('gestao_clientes.html', clientes=clientes,sucesso = sucesso)
 
 
 @app.route('/ralatori/pdf/<int:id>')
