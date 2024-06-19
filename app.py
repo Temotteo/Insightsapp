@@ -2790,7 +2790,14 @@ def hello(name):
 @app.route('/Relatorio_obra')
 @is_logged_in
 def Relatorio_obra():
-    return render_template('formulario_de_obra.html')
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
+    cur = conn.cursor()  
+    cur.execute("SELECT * FROM cliente ")
+    clientes = cur.fetchall() 
+    conn.commit()
+    cur.close()
+    conn.close()
+    return render_template('formulario_de_obra.html', clientes=clientes)
 
 @app.route('/Gerir_clientes')
 @is_logged_in
@@ -2938,8 +2945,8 @@ def gerar_pdf(id):
 
 if __name__ == '__main__':
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()
     
 
