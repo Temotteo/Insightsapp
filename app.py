@@ -2836,18 +2836,16 @@ def submit_rel():
     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
     cur = conn.cursor()  
     cur.execute("INSERT INTO relatorios( relatorio, status, hora_entrada, hora_saida,data, cliente_id ) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id",(relatorio,status,hora_chegada,hora_saida,data_atual,cliente,))
-
     relatorio_id = cur.fetchone()[0] 
     conn.commit()
     cur.close()
     conn.close()
-    sucesso = "o seu relatorio foi concluido com sucesso"
+    sucesso = "O seu relatorio foi concluido com sucesso"
     return render_template('relatorio_de_obra_pdf.html' ,relatorio_id = relatorio_id)
 
 @app.route('/novo_cliente', methods=['POST'])
 def novo_cliente():
     cliente = request.form['cliente']
-
     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
     cur = conn.cursor()  
     cur.execute("INSERT INTO cliente( nome ) VALUES (%s) ",(cliente,))
