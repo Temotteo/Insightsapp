@@ -6,7 +6,7 @@ from flask import Flask, render_template, request, session, flash, session, logg
 import psycopg2
 from markupsafe import escape
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, SelectField, DecimalField, DateField, IntegerField, EmailField, TimeField, FileField,  SubmitField, FieldList, FormField, DateTimeField
-#from gevent.pywsgi import WSGIServer
+from gevent.pywsgi import WSGIServer
 from functools import wraps
 from datetime import datetime, time, timedelta, date
 from decimal import Decimal
@@ -2938,8 +2938,8 @@ def gerar_pdf(id):
 
 if __name__ == '__main__':
     app.secret_key='secret123'
-    app.run(debug=True)
-    #http_server = WSGIServer(('', 5000), app)
-    #http_server.serve_forever()
+    #app.run(debug=True)
+    http_server = WSGIServer(('', 5000), app)
+    http_server.serve_forever()
     
 
