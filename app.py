@@ -2809,7 +2809,7 @@ def Gerir_clientes():
     conn.commit()
     cur.close()
     conn.close()
-    return render_template('Gestao_clientes.html', clientes=clientes)
+    return render_template('gestao_clientes.html', clientes=clientes)
 
 
 @app.route('/pdf_obra')
