@@ -2790,6 +2790,7 @@ def hello(name):
 @app.route('/Relatorio_obra')
 @is_logged_in
 def Relatorio_obra():
+  try:  
     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
     cur = conn.cursor()  
     cur.execute("SELECT * FROM cliente ")
@@ -2798,10 +2799,13 @@ def Relatorio_obra():
     cur.close()
     conn.close()
     return render_template('formulario_de_obra.html', clientes=clientes)
+  except psycopg2.Error as e:
+        return render_template('formulario_de_obra.html')
 
 @app.route('/Gerir_clientes')
 @is_logged_in
 def Gerir_clientes():
+   try:  
     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
     cur = conn.cursor()  
     cur.execute("SELECT * FROM cliente ")
@@ -2810,12 +2814,15 @@ def Gerir_clientes():
     cur.close()
     conn.close()
     return render_template('gestao_clientes.html', clientes=clientes)
-
+   except psycopg2.Error as e:
+        error_msg = f"Erro ao fazer a transação: {e}"
+        return render_template('erro.html', error=error_msg)
 
 @app.route('/pdf_obra')
 @is_logged_in
 def pdf_obra():
-    user = True
+   user = True
+   try: 
     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
     cur = conn.cursor()  
     cur.execute("SELECT * FROM relatorios ")
@@ -2823,46 +2830,61 @@ def pdf_obra():
     cur.close()
     conn.close()
     return render_template('relatorio_de_obra_pdf.html', user=user, relatorios=relatoriopdf)
+   except psycopg2.Error as e:
+        error_msg = f"Erro ao fazer a transação: {e}"
+        return render_template('erro.html', error=error_msg)
 
 @app.route('/submit_rel', methods=['POST'])
 def submit_rel():
     relatorio = request.form['relatorio']
     cliente = request.form['cliente']
     status = request.form['status']
+    dificuldade = request.form['status']
     hora_chegada = request.form['tempo']
     hora_saida = request.form['hora']
     data_atual = datetime.now().date()
 
-    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
-    cur = conn.cursor()  
-    cur.execute("INSERT INTO relatorios( relatorio, status, hora_entrada, hora_saida,data, cliente_id ) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id",(relatorio,status,hora_chegada,hora_saida,data_atual,cliente,))
-    relatorio_id = cur.fetchone()[0] 
-    conn.commit()
-    cur.close()
-    conn.close()
-    sucesso = "O seu relatorio foi concluido com sucesso"
-    return render_template('relatorio_de_obra_pdf.html' ,relatorio_id = relatorio_id)
+    try:
+     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
+     cur = conn.cursor()  
+     cur.execute("INSERT INTO relatorios( relatorio, status, hora_entrada, hora_saida,data, cliente_id ) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id",(relatorio,status,hora_chegada,hora_saida,data_atual,cliente,))
+     relatorio_id = cur.fetchone()[0] 
+     conn.commit()
+     cur.close()
+     cur = conn.cursor()  
+     cur.execute("INSERT INTO dificuldades( rel_id, dificuldade, status ) VALUES (%s,%s,%s)",(relatorio_id,'Pedente',dificuldade,))
+     conn.commit()
+     conn.close()
+     sucesso = "O seu relatorio foi concluido com sucesso"
+     return render_template('relatorio_de_obra_pdf.html' ,relatorio_id = relatorio_id)
+    except psycopg2.Error as e:
+        error_msg = f"Erro ao fazer a transação: {e}"
+        return render_template('erro.html', error=error_msg)
 
 @app.route('/novo_cliente', methods=['POST'])
 def novo_cliente():
     cliente = request.form['cliente']
-    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
-    cur = conn.cursor()  
-    cur.execute("INSERT INTO cliente( nome ) VALUES (%s) ",(cliente,))
-    conn.commit()
-    cur.close()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM cliente ")
-    clientes = cur.fetchall() 
-    cur.close()
-    conn.close()
-    sucesso = "Cliente inserido com sucesso"
-    return render_template('gestao_clientes.html', clientes=clientes ,sucesso = sucesso)
+    try:
+     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
+     cur = conn.cursor()  
+     cur.execute("INSERT INTO cliente( nome ) VALUES (%s) ",(cliente,))
+     conn.commit()
+     cur.close()
+     cur = conn.cursor()
+     cur.execute("SELECT * FROM cliente ")
+     clientes = cur.fetchall() 
+     cur.close()
+     conn.close()
+     sucesso = "Cliente inserido com sucesso"
+     return render_template('gestao_clientes.html', clientes=clientes ,sucesso = sucesso)
+    except psycopg2.Error as e:
+        error_msg = f"Erro ao fazer a transação: {e}"
+        return render_template('erro.html', error=error_msg)
 
 @app.route('/edit_cliente/<int:id>', methods=['GET','POST'])
 def edit_cliente(id):
-    cliente = request.form['cliente']
-
+   cliente = request.form['cliente']
+   try:
     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
     cur = conn.cursor()  
     cur.execute("UPDATE cliente SET nome = %s WHERE id = %s",(cliente,id,))
@@ -2875,10 +2897,13 @@ def edit_cliente(id):
     conn.close()
     sucesso = "Cliente Atualizado com sucesso"
     return render_template('gestao_clientes.html', clientes=clientes,sucesso = sucesso)
+   except psycopg2.Error as e:
+        error_msg = f"Erro ao fazer a transação: {e}"
+        return render_template('erro.html', error=error_msg) 
 
 @app.route('/delete_cliente/<int:id>', methods=['GET','POST'])
 def delete_cliente(id):
-
+   try:
     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
     cur = conn.cursor()  
     cur.execute("DELETE FROM cliente WHERE id = %s",(id,))
@@ -2891,6 +2916,9 @@ def delete_cliente(id):
     conn.close()
     sucesso = "Cliente Removido com sucesso"
     return render_template('gestao_clientes.html', clientes=clientes,sucesso = sucesso)
+   except psycopg2.Error as e:
+        error_msg = f"Erro ao fazer a transação: {e}"
+        return render_template('erro.html', error=error_msg) 
 
 
 @app.route('/ralatori/pdf/<int:id>')
@@ -2900,7 +2928,11 @@ def gerar_pdf(id):
     cur = conn.cursor()  
     cur.execute("SELECT * FROM relatorios where id = %s ",(id,))
     relatoriopdf = cur.fetchone() 
-    conn.commit()
+    cur.close()
+    cur.close()
+    cur = conn.cursor()
+    cur.execute("SELECT nome FROM cliente where id = %s ",(relatoriopdf[1],))
+    cliente = cur.fetchone()[0] 
     cur.close()
     conn.close()
     
@@ -2925,7 +2957,7 @@ def gerar_pdf(id):
     elementos.append(Spacer(1, 4))
     elementos.append(icon)
     elementos.append(Spacer(1, 12)) 
-    texto_direita = Paragraph(f"Ficha Técnica nr: {relatoriopdf[0]}<br/>Cliente: <b>{relatoriopdf[1]}</b><br/>Data: {relatoriopdf[6]}<br/><br/>Hora de entrada: {relatoriopdf[4]}<br/>Hora de saida: {relatoriopdf[5]}", style_right)
+    texto_direita = Paragraph(f"Ficha Técnica nr: {relatoriopdf[0]}<br/>Cliente: <b>{cliente}</b><br/>Data: {relatoriopdf[6]}<br/><br/>Hora de entrada: {relatoriopdf[4]}<br/>Hora de saida: {relatoriopdf[5]}", style_right)
     elementos.append(texto_direita)
     elementos.append(Spacer(1, 24))
     texto_central = Paragraph(f'Fase da Obra: <u>{relatoriopdf[3]}</u>', style_right)
@@ -2943,8 +2975,8 @@ def gerar_pdf(id):
 
 if __name__ == '__main__':
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()
     
 
