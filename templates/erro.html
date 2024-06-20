@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Erro ao Executar Transação</title>
+{% extends 'layout.html'%}
+
+
+{% block body%}
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -22,12 +20,12 @@
             color: #c00;
         }
     </style>
-</head>
-<body>
+
+
     <div class="error-container">
         <h1>Erro ao executar a transação</h1>
         <p>{{ error }}</p>
         <p>Por favor, tente novamente mais tarde ou entre em contacto com a equipe de suporte.</p>
     </div>
-</body>
-</html>
+
+{% endblock %}
