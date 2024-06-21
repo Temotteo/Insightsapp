@@ -2818,6 +2818,41 @@ def Gerir_clientes():
         error_msg = f"Erro ao fazer a transação: {e}"
         return render_template('erro.html', error=error_msg)
 
+@app.route('/ver_relatorio/<int:id>')
+@is_logged_in
+def ver_relatorio(id):
+   try: 
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
+    cur = conn.cursor()  
+    cur.execute("""SELECT
+    relatorios.id AS relatorio_id,
+    relatorios.relatorio,
+    relatorios.status AS status_relatorio,
+    relatorios.hora_entrada,
+    relatorios.hora_saida,
+    relatorios.data,
+    cliente.id AS cliente_id,
+    cliente.nome AS cliente_nome,
+    dificuldades.id AS dificuldade_id,
+    dificuldades.dificuldade,
+    dificuldades.status AS status_dificuldade
+    FROM
+    relatorios
+    JOIN
+    cliente ON relatorios.cliente_id = cliente.id
+    JOIN
+    dificuldades ON relatorios.id = dificuldades.rel_id
+    WHERE
+    relatorios.id = %s
+    """,(id,))
+    relatorios = cur.fetchall() 
+    cur.close()
+    conn.close()
+    return render_template('ver_relatorio.html', relatorios=relatorios)
+   except psycopg2.Error as e:
+        error_msg = f"Erro ao fazer a transação: {e}"
+        return render_template('erro.html', error=error_msg) 
+
 @app.route('/pdf_obra')
 @is_logged_in
 def pdf_obra():
@@ -2825,7 +2860,19 @@ def pdf_obra():
    try: 
     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
     cur = conn.cursor()  
-    cur.execute("SELECT * FROM relatorios ")
+    cur.execute("""SELECT 
+    relatorios.id,
+    relatorios.relatorio,
+    relatorios.status,
+    relatorios.hora_entrada,
+    relatorios.hora_saida,
+    relatorios.data,
+    relatorios.cliente_id,
+    cliente.nome AS nome_cliente
+    FROM 
+    relatorios
+    JOIN 
+    cliente ON relatorios.cliente_id = cliente.id; """)
     relatoriopdf = cur.fetchall() 
     cur.close()
     conn.close()
@@ -2839,7 +2886,7 @@ def submit_rel():
     relatorio = request.form['relatorio']
     cliente = request.form['cliente']
     status = request.form['status']
-    dificuldade = request.form['status']
+    dificuldade = request.form['dificuldade']
     hora_chegada = request.form['tempo']
     hora_saida = request.form['hora']
     data_atual = datetime.now().date()
@@ -2852,11 +2899,16 @@ def submit_rel():
      conn.commit()
      cur.close()
      cur = conn.cursor()  
-     cur.execute("INSERT INTO dificuldades( rel_id, dificuldade, status ) VALUES (%s,%s,%s)",(relatorio_id,'Pedente',dificuldade,))
+     cur.execute("INSERT INTO dificuldades( rel_id, dificuldade, status ) VALUES (%s,%s,%s)",(relatorio_id,dificuldade,'Pedente',))
      conn.commit()
+     cur.close()
+     cur = conn.cursor()
+     cur.execute("SELECT * FROM cliente where id = %s ",(relatorio_id,))
+     cliente = cur.fetchone()
+     cur.close()
      conn.close()
      sucesso = "O seu relatorio foi concluido com sucesso"
-     return render_template('relatorio_de_obra_pdf.html' ,relatorio_id = relatorio_id)
+     return render_template('relatorio_de_obra_pdf.html' ,relatorio_id = relatorio_id, cliente=cliente)
     except psycopg2.Error as e:
         error_msg = f"Erro ao fazer a transação: {e}"
         return render_template('erro.html', error=error_msg)
@@ -2924,24 +2976,30 @@ def delete_cliente(id):
 @app.route('/ralatori/pdf/<int:id>')
 def gerar_pdf(id):
     # Obtendo relatórios do banco de dados para o usuário
-    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
-    cur = conn.cursor()  
-    cur.execute("SELECT * FROM relatorios where id = %s ",(id,))
-    relatoriopdf = cur.fetchone() 
-    cur.close()
-    cur.close()
-    cur = conn.cursor()
-    cur.execute("SELECT nome FROM cliente where id = %s ",(relatoriopdf[1],))
-    cliente = cur.fetchone()[0] 
-    cur.close()
-    conn.close()
+    try: 
+     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
+     cur = conn.cursor()  
+     cur.execute("SELECT * FROM relatorios where id = %s ",(id,))
+     relatoriopdf = cur.fetchone() 
+     cur.close()
+     cur.close()
+     cur = conn.cursor()
+     cur.execute("SELECT * FROM cliente where id = %s ",(relatoriopdf[6],))
+     cliente = cur.fetchone()
+     cur.close()
+     conn.close()
+    except psycopg2.Error as e:
+        error_msg = f"Erro ao fazer a transação: {e}"
+        return render_template('erro.html') 
+
     
     # Criando o PDF
-    filename = f'relatorios__{relatoriopdf[1]}.pdf'
+    filename = f'relatorios__{relatoriopdf[0]}.pdf'
     
     doc = SimpleDocTemplate(filename, pagesize=letter)
     
     style_right = ParagraphStyle(name='right', alignment=TA_RIGHT)
+    style_left = ParagraphStyle(name='left', alignment=TA_LEFT)
     style_center = ParagraphStyle(name='center', alignment=TA_CENTER , fontSize=12)
     style_center2 = ParagraphStyle(name='center2', alignment=TA_CENTER , fontSize=14, underline=True,)
     styles = getSampleStyleSheet()
@@ -2957,15 +3015,17 @@ def gerar_pdf(id):
     elementos.append(Spacer(1, 4))
     elementos.append(icon)
     elementos.append(Spacer(1, 12)) 
-    texto_direita = Paragraph(f"Ficha Técnica nr: {relatoriopdf[0]}<br/>Cliente: <b>{cliente}</b><br/>Data: {relatoriopdf[6]}<br/><br/>Hora de entrada: {relatoriopdf[4]}<br/>Hora de saida: {relatoriopdf[5]}", style_right)
+    texto_direita = Paragraph(f"Ficha Técnica nr: {relatoriopdf[0]}<br/>Cliente: <b>{cliente[1]}</b><br/>Data: {relatoriopdf[5]}<br/>", style_right)
     elementos.append(texto_direita)
     elementos.append(Spacer(1, 24))
-    texto_central = Paragraph(f'Fase da Obra: <u>{relatoriopdf[3]}</u>', style_right)
+    texto_central = Paragraph(f'Fase da Obra: <u>{relatoriopdf[2]}</u>', style_right)
     elementos.append(texto_central)
     elementos.append(Spacer(1, 24))
-    texto = Paragraph(f"<b>RESUMO:</b> {relatoriopdf[2]}<br/>", style_center)
+    texto = Paragraph(f"<b>RESUMO:</b> <br/>{relatoriopdf[1]}<br/>", style_left)
     elementos.append(texto)
     elementos.append(Spacer(1, 12))
+    texto_esquerda = Paragraph(f"<br/>Hora de entrada: {relatoriopdf[3]}<br/>Hora de saida: {relatoriopdf[4]}", style_left)
+    elementos.append(texto_esquerda)
     elementos.append(PageBreak()) 
     # Adicionando imagens ao PDF
    

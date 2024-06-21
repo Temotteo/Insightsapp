@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+{% if relatorios  %}
+    <div class="container">
+        {% for relatorio in relatorios %}
+        <h1 class="text-center">Detalhes do Relatório</h1>
+        <div class="card">
+            <div class="card-header">
+                <h2>Relatório ID: {{ relatorio[0] }}</h2>
+            </div>
+            <div class="card-body">
+                <p><strong>Resumo:</strong> {{ relatorio[1] }}</p>
+                <p><strong>Status:</strong> {{ relatorio[2] }}</p>
+                <p><strong>Hora de Entrada:</strong> {{ relatorio[3] }}</p>
+                <p><strong>Hora de Saída:</strong> {{ relatorio[4] }}</p>
+                <p><strong>Data:</strong> {{ relatorio[5] }}</p>
+                <p><strong>Nome do Cliente:</strong> {{ relatorio[7] }}</p>
+                <p><strong>dificuldade:</strong> {{ relatorio[9] }}  <span>({{ relatorio[10] }})</span></p>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="text-center">
+            <a href="{{ url_for('pdf_obra') }}" class="btn btn-primary mt-3">Voltar</a>
+        </div>
+        {% endif %}
+    </div>
+
+    {% endblock %}
