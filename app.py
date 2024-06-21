@@ -813,8 +813,11 @@ def tasks():
 
     # Get today's date
     today = datetime.now().date()
+
     
-    return render_template('tasks.html', tasks=tasks, today=today)
+    index = 0
+    
+    return render_template('tasks.html', tasks=tasks, today=today, index= index)
 
 @app.route('/add_task', methods=['POST'])
 @is_logged_in
@@ -1101,6 +1104,7 @@ def cobrancas():
     dados=cursor.fetchall()
 
     return render_template('cobrancas.html', cobrancas = dados)
+
 
 
 @app.route('/about')
@@ -2096,9 +2100,9 @@ def cliente_srv():
     return render_template('cad-cliente_srv.html', dados = dados)
 
 
-@app.route('/cliente_ong', methods=['GET'])
+@app.route('/clientes_ong', methods=['GET'])
 @is_logged_in
-def cliente_ong():
+def clientes_ong():
 
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
@@ -3032,6 +3036,74 @@ def gerar_pdf(id):
     doc.build(elementos)
 
     return send_file(filename, as_attachment=True)
+
+@app.route('/saltar_org_id/<int:index>', methods=['GET'])
+@is_logged_in
+def saltar_org_id(index):
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT * FROM cliente_vendas WHERE ong = true ORDER BY nome;')
+    dados = cursor.fetchall()
+
+    conn.close()
+    if dados:
+        total = len(dados)
+        index = index % total  # Ensures the index wraps around if out of bounds
+        cliente = dados[index]
+        #print(cliente[0])
+    else:
+        cliente = None
+
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+
+    cursor = conn.cursor()
+
+    # Execute query
+    cursor.execute('SELECT * FROM cliente_vendas WHERE ong =true ORDER BY nome;')
+        
+    dado=cursor.fetchone()
+    colnames = [desc[0] for desc in cursor.description]
+    print("cheguei")
+    print(colnames)
+    # Close connection
+    conn.close()   
+
+    return render_template('tasks.html', cliente=cliente, index=index, total=total)
+
+@app.route('/cliente_ong/<int:index>/<org_id>', methods=['GET'])
+@is_logged_in
+def cliente_ong(index,org_id):
+    print(org_id)
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+
+    cursor = conn.cursor()
+
+    # Execute query
+    cursor.execute('SELECT * FROM cliente_vendas WHERE id_vendas = %s ORDER BY nome;',(org_id,))
+        
+    dados=cursor.fetchall()
+
+    # Close connection
+    conn.close()
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+
+    cursor = conn.cursor()
+
+    # Execute query
+    cursor.execute('SELECT * FROM cliente_vendas WHERE ong =true ORDER BY nome;')
+        
+    cliente=cursor.fetchone()
+    
+    cursor.execute('SELECT * FROM cliente_vendas WHERE ong = true ORDER BY nome;')
+    dado = cursor.fetchall()
+
+    conn.close()
+    if dado:
+        total = len(dado)  
+
+    return render_template('cad-cliente_ong.html', dados = dados, cliente=cliente,index = index, total=total)
+
 
 if __name__ == '__main__':
     app.secret_key='secret123'

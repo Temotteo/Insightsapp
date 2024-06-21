@@ -80,7 +80,7 @@
               <ul class="dropdown-menu">
                 <li class="dropdown-header">Clientes</li>
                 <li><a href="/cliente">Automação</a></li>
-                <li><a href="/cliente_ong">ONGs</a></li>
+                <li><a href="{% if cliente %} {{ url_for('cliente_ong', index=index, org_id = cliente[4])}} {% else %} /clientes_ong {% endif %}">ONGs</a></li>
                 <li><a href="/cliente_srv">SRV</a></li>
                 <li><a href="/contacts_by_collaborator">LeadsSRV</a></li>
                 <li role="separator" class="divider"></li>
@@ -115,7 +115,7 @@
             {% if session.logged_in %}
             
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Login as <strong>{{session.username}}</strong> at Org: <strong>{{session.last_org}}</strong> <span class="caret"></span></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Login as <strong>{{session.username}}</strong> at Org: <strong>{% if cliente %}{{ cliente[0] }}{% else %}{{session.last_org}}{% endif %}</strong> <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li class="dropdown-header">Minhas actividades</li>
                 <li><a href="/tasks">Actividades</a></li>
@@ -125,7 +125,7 @@
                 <li class="disabled"><a href="#">Meus dados</a></li>
                 <li role="separator" class="divider"></li>
                 <li class="dropdown-header">Mudar de Org.</li>
-                <li><a href="/tasks">Saltar</a></li>
+                <li><a href="{% if cliente %}{{ url_for('saltar_org_id', index=(index + 1) % total) }}{%elif index %}{{ url_for('saltar_org_id', index=index) }}{% else %}{{ url_for('saltar_org_id', index=0) }}{% endif %}">Saltar</a></li>
                 <li role="separator" class="divider"></li>
                 <li><a href="/logout">Logout</a></li>
               </ul>
