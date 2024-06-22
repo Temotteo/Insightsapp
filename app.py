@@ -5,12 +5,14 @@ from twilio.twiml.voice_response import VoiceResponse
 from flask import Flask, render_template, request, session, flash, session, logging, url_for, redirect, Response,  send_from_directory, jsonify, send_file
 import psycopg2
 from markupsafe import escape
+from flask_sqlalchemy import SQLAlchemy
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, SelectField, DecimalField, DateField, IntegerField, EmailField, TimeField, FileField,  SubmitField, FieldList, FormField, DateTimeField
 from gevent.pywsgi import WSGIServer
 from functools import wraps
 from datetime import datetime, time, timedelta, date
 from decimal import Decimal
 from wtforms.validators import InputRequired
+from werkzeug.utils import secure_filename
 from psycopg2 import sql
 from flask_wtf import FlaskForm
 import matplotlib.pyplot as plt
@@ -799,6 +801,7 @@ def generate_pdf(invoice_data):
 @is_logged_in
 
 def tasks():
+    
     connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
     create_table_if_not_exists(connection)
@@ -806,6 +809,7 @@ def tasks():
     cursor = connection.cursor()
     
     query = "SELECT "+'"'+ "id"+'"'+" ,title, due_date, accepted_time, completed_time, responsible, completed, accepted FROM tasks where due_date = Current_date OR completed = false OR completed_time = Current_date ORDER BY responsible;"
+    
     
    
     cursor.execute(query)
@@ -815,9 +819,7 @@ def tasks():
     today = datetime.now().date()
 
     
-    index = 0
-    
-    return render_template('tasks.html', tasks=tasks, today=today, index= index)
+    return render_template('tasks.html', tasks=tasks, today=today)
 
 @app.route('/add_task', methods=['POST'])
 @is_logged_in
@@ -2100,9 +2102,9 @@ def cliente_srv():
     return render_template('cad-cliente_srv.html', dados = dados)
 
 
-@app.route('/clientes_ong', methods=['GET'])
+@app.route('/cliente_ong', methods=['GET'])
 @is_logged_in
-def clientes_ong():
+def cliente_ong():
 
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
@@ -2791,6 +2793,7 @@ def hello(name):
     return render_template('home.html')
 
 
+# FUNCAO DE RELATORIO DE OBRAS(AUTOMACAO)
 @app.route('/Relatorio_obra')
 @is_logged_in
 def Relatorio_obra():
@@ -2806,21 +2809,6 @@ def Relatorio_obra():
   except psycopg2.Error as e:
         return render_template('formulario_de_obra.html')
 
-@app.route('/Gerir_clientes')
-@is_logged_in
-def Gerir_clientes():
-   try:  
-    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
-    cur = conn.cursor()  
-    cur.execute("SELECT * FROM cliente ")
-    clientes = cur.fetchall() 
-    conn.commit()
-    cur.close()
-    conn.close()
-    return render_template('gestao_clientes.html', clientes=clientes)
-   except psycopg2.Error as e:
-        error_msg = f"Erro ao fazer a transação: {e}"
-        return render_template('erro.html', error=error_msg)
 
 @app.route('/ver_relatorio/<int:id>')
 @is_logged_in
@@ -2914,6 +2902,23 @@ def submit_rel():
      sucesso = "O seu relatorio foi concluido com sucesso"
      return render_template('relatorio_de_obra_pdf.html' ,relatorio_id = relatorio_id, cliente=cliente)
     except psycopg2.Error as e:
+        error_msg = f"Erro ao fazer a transação: {e}"
+        return render_template('erro.html', error=error_msg)
+    
+# FUNCAO PARA GESTAO DE CLIENTES   
+@app.route('/Gerir_clientes')
+@is_logged_in
+def Gerir_clientes():
+   try:  
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
+    cur = conn.cursor()  
+    cur.execute("SELECT * FROM cliente ")
+    clientes = cur.fetchall() 
+    conn.commit()
+    cur.close()
+    conn.close()
+    return render_template('gestao_clientes.html', clientes=clientes)
+   except psycopg2.Error as e:
         error_msg = f"Erro ao fazer a transação: {e}"
         return render_template('erro.html', error=error_msg)
 
@@ -3037,78 +3042,304 @@ def gerar_pdf(id):
 
     return send_file(filename, as_attachment=True)
 
-@app.route('/saltar_org_id/<int:index>', methods=['GET'])
+# FUNCAO DE BUTAO SALTAR
+@app.route('/saltar_org_id', methods=['GET'])
 @is_logged_in
-def saltar_org_id(index):
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-    cursor = conn.cursor()
-
-    cursor.execute('SELECT * FROM cliente_vendas WHERE ong = true ORDER BY nome;')
-    dados = cursor.fetchall()
-
-    conn.close()
-    if dados:
-        total = len(dados)
-        index = index % total  # Ensures the index wraps around if out of bounds
-        cliente = dados[index]
-        #print(cliente[0])
-    else:
-        cliente = None
-
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-
-    cursor = conn.cursor()
-
-    # Execute query
-    cursor.execute('SELECT * FROM cliente_vendas WHERE ong =true ORDER BY nome;')
-        
-    dado=cursor.fetchone()
-    colnames = [desc[0] for desc in cursor.description]
-    print("cheguei")
-    print(colnames)
-    # Close connection
-    conn.close()   
-
-    return render_template('tasks.html', cliente=cliente, index=index, total=total)
-
-@app.route('/cliente_ong/<int:index>/<org_id>', methods=['GET'])
-@is_logged_in
-def cliente_ong(index,org_id):
-    print(org_id)
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-
-    cursor = conn.cursor()
-
-    # Execute query
-    cursor.execute('SELECT * FROM cliente_vendas WHERE id_vendas = %s ORDER BY nome;',(org_id,))
-        
-    dados=cursor.fetchall()
-
-    # Close connection
-    conn.close()
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-
-    cursor = conn.cursor()
-
-    # Execute query
-    cursor.execute('SELECT * FROM cliente_vendas WHERE ong =true ORDER BY nome;')
-        
-    cliente=cursor.fetchone()
+def saltar_org_id():
     
-    cursor.execute('SELECT * FROM cliente_vendas WHERE ong = true ORDER BY nome;')
-    dado = cursor.fetchall()
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Campanha_Org')
+    cursor = conn.cursor()
 
+    cursor.execute('SELECT * FROM org  ORDER BY nome;')
+    orgs = cursor.fetchall()
+    
     conn.close()
-    if dado:
-        total = len(dado)  
 
-    return render_template('cad-cliente_ong.html', dados = dados, cliente=cliente,index = index, total=total)
+    data = [{'id': org[0], 'nome': org[1], 'Saldo': org[3]} for org in orgs]
+
+    return jsonify(data)
+
+@app.route('/get_org/<org_id>', methods=['GET'])
+def get_org(org_id):
+    return redirect(url_for('org_id',org_id=org_id))
+
+@app.route('/org_id/<org_id>', methods=['GET'])
+@is_logged_in
+def org_id(org_id):
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Campanha_Org')
+
+    cursor = conn.cursor()
+
+    # Execute query
+    cursor.execute('SELECT * FROM org WHERE id = %s ORDER BY nome;',(org_id,))
+        
+    org=cursor.fetchone()
+
+    # Close connection
+    conn.close()
+    print(org)
+   
+
+    return render_template('tasks.html',org=org)
+
+# FUNCAO DE RELATORIO DE CAMERAS
+@app.route('/Relatorio_camera')
+def Relatorio_camera():
+    return render_template('Resumo_rel_camera.html')
+
+
+@app.route('/resumo', methods=['POST'])
+def resumo():
+    cliente = request.form['clientes']
+    resumo = request.form['resumo']
+    id_user = request.form['user']
+
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Relatorio_de_Manuntecao_de_Cameras')
+    cur = conn.cursor()
+    cur.execute("INSERT INTO resumo_rel ( resumo) VALUES (%s) RETURNING id", ( resumo,))
+    conn.commit()
+    idResumo =cur.fetchone()[0]
+    cur.close()
+
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Relatorio_de_Manuntecao_de_Cameras')
+    cur = conn.cursor()
+    cur.execute("INSERT INTO clientes (id_usuario,id_resumo, cliente) VALUES (%s, %s,%s) RETURNING id", (id_user, idResumo, cliente,))
+    conn.commit()
+    cli_id =cur.fetchone()[0]
+    cur.close()
+
+    print(resumo)
+    return render_template('relatorio_camera.html', resumo=resumo, idResumo=idResumo, cli_id=cli_id)
+
+@app.route('/submit_rel_cm', methods=['POST'])
+def submit_rel_cm():
+    descricao = request.form['descricao']
+    estado = request.form['estado']
+    assunto = request.form['assunto']
+    idResumo = request.form['idResumo']
+    resumo = request.form['resumo'] 
+    cli_id = request.form['cliente']  # Supondo que você tenha um campo no formulário para o ID do usuário
+
+    # Inserindo dados na tabela Relatorio
+    id_user=1
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Relatorio_de_Manuntecao_de_Cameras')
+    cur = conn.cursor()
+    cur.execute("INSERT INTO Relatorio (descricao, assunto, estado, id_resumo) VALUES (%s, %s, %s, %s)", (descricao, assunto, estado, idResumo))
+    conn.commit()
+    cur.close()
+
+    # Obtendo o ID do relatório recém-inserido
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM Relatorio ORDER BY id DESC LIMIT 1")
+    id_relatorio = cur.fetchone()[0]
+    cur.close()
+
+    # Inserindo dados na tabela Imagens (se houver)
+    for imagem in request.files.getlist('imagem'):
+        if imagem.filename != '':
+            cur = conn.cursor()
+            imagem_bytes = BytesIO(imagem.read())  # Lê os bytes da imagem
+            cur.execute("INSERT INTO Imagens (id_relatorio, imagem) VALUES (%s, %s)", (id_relatorio, psycopg2.Binary(imagem_bytes.getvalue())))
+            conn.commit()
+            cur.close()
+
+    return render_template('relatorio_camera.html' , resumo=resumo, idResumo=idResumo,cli_id=cli_id)
+
+
+@app.route('/ralatorios/pdf/<int:id_resumo>')
+def gerar_pdf_cameras(id_resumo):
+    # Obtendo relatórios do banco de dados para o usuário
+    
+
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Relatorio_de_Manuntecao_de_Cameras')
+    cur = conn.cursor()
+    cur.execute("SELECT cliente FROM clientes WHERE id_resumo = %s", (id_resumo,))
+    cliente = cur.fetchone()[0]
+    cur.close()
+
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Relatorio_de_Manuntecao_de_Cameras')
+    cur = conn.cursor()
+    cur.execute("SELECT id, descricao, assunto, estado FROM Relatorio WHERE id_resumo = %s", (id_resumo,))
+    relatorios = cur.fetchall()
+    cur.close()
+
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Relatorio_de_Manuntecao_de_Cameras')
+    cur = conn.cursor()
+    cur.execute("SELECT id , resumo , data FROM resumo_rel WHERE id = %s", (id_resumo,))
+    resumo = cur.fetchone()
+    cur.close()
+
+    # Criando os dados da tabela para o PDF
+    dados_tabela = [['Descrição', 'Assunto', 'Estado']]
+    for relatorio in relatorios:
+        dados_tabela.append(relatorio[1:])  # Ignorando o ID para a tabela
+
+    # Criando o PDF
+    filename = f'relatorios_camera_{cliente[0]}.pdf'
+    
+    doc = SimpleDocTemplate(filename, pagesize=letter)
+    style = TableStyle([('BACKGROUND', (0, 0), (-1, 0), colors.white),
+                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+                        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                        ('BOTTOMPADDING', (0, 0), (-1, 0), 16),
+                        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                        ('GRID', (0, 0), (-1, -1), 1, colors.black)])
+    style_right = ParagraphStyle(name='right', alignment=TA_RIGHT)
+    style_center = ParagraphStyle(name='center', alignment=TA_CENTER , fontSize=18)
+    style_left = ParagraphStyle(name='left', alignment=TA_LEFT , fontSize=14, underline=True,)
+    styles = getSampleStyleSheet()
+    tabela = Table(dados_tabela, colWidths=[180, 200, 150])
+    tabela.setStyle(style)
+
+    elementos = []
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+     # Caminho para a imagem dentro da pasta 'static'
+    img_path = os.path.join(dir_path, 'static', 'cardinal.png')
+    icon = Image(img_path,  width=2*inch, height=1*inch) 
+    icon.wrapOn(doc, 4, 2) # Ajuste a largura e a altura conforme necessário
+    elementos.append(icon)
+    elementos.append(Spacer(1, 24)) 
+    texto_direita = Paragraph(f"Ficha Técnica nr: {resumo[0]}<br/>Data: {resumo[2]}<br/>Cliente: <b>{cliente}</b>", style_right)
+    texto_centro = Paragraph("Manutenção Preventiva", style_center)
+    texto_esquerdo = Paragraph("<u><b>Sistema de Videovigilância</b></u>", style_left)
+    elementos.append(texto_direita)
+    elementos.append(Spacer(1, 24))
+    elementos.append(texto_centro)
+    elementos.append(Spacer(1, 24))
+    elementos.append(texto_esquerdo)
+    elementos.append(Spacer(1, 24))
+    elementos.append(tabela)
+    elementos.append(Spacer(1, 12))
+    texto = Paragraph(f"<b>RESUMO:</b> {resumo[1]}<br/>", styles["Normal"])
+    elementos.append(texto)
+    elementos.append(Spacer(1, 12))
+    elementos.append(PageBreak()) 
+    # Adicionando imagens ao PDF
+    for relatorio in relatorios:
+        id_relatorio = relatorio[0]
+        cur = conn.cursor()
+        cur.execute("SELECT imagem, data_criacao FROM Imagens WHERE id_relatorio = %s", (id_relatorio,))
+        imagens_info = cur.fetchall()
+        cur.close()
+        for imagem_info in imagens_info:
+            image_data = BytesIO(imagem_info[0])
+            img = Image(image_data)
+            original_width, original_height = img.wrap(0, 0)
+            scale = min(456 / original_width, 636 / original_height)
+            img.drawHeight =  original_height*scale   # Altura da imagem no PDF
+            img.drawWidth =  original_width*scale  # Largura da imagem no PDF
+            legenda = Paragraph(f"<b>Descrição:</b> {relatorio[1]}<br/><b>Data da Imagem:</b> {imagem_info[1]}", styles["Normal"])
+            elementos.append(legenda)
+            elementos.append(Spacer(1, 12))  # Espaçamento entre a legenda e a próxima imagem
+            elementos.append(img)
+            elementos.append(PageBreak())  # Quebra de página entre as imagens
+
+    doc.build(elementos)
+
+    return send_file(filename, as_attachment=True)
+
+
+UPLOAD_FOLDER = 'static/videos'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+
+@app.route('/videos', methods=['GET','POST'])
+def videos():
+    if request.method == 'POST':
+        nome = request.form['nome']
+        descricao = request.form['descricao']
+        file = request.files['video']
+        data_video = datetime.strptime(request.form['data_video'], '%Y-%m-%d')
+
+        if file:
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            video_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            
+            try:
+             conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
+             cur = conn.cursor()
+             cur.execute('INSERT INTO testemunho( nome, descricao, video, data_video, assunto) VALUES (%s, %s, %s, %s, %s);',(nome, descricao, video_path, data_video,))
+             conn.commit()
+             conn.close()
+             return redirect(url_for('videos'))
+            except psycopg2.Error as e:
+             error_msg = f"Erro ao fazer a transação: {e}"
+             return render_template('erro.html', error=error_msg)
+
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM testemunho;')
+    testemunhos = cur.fetchall()
+    conn.close()        
+    return render_template('Testemunhos.html', testemunhos=testemunhos)
+
+@app.route('/formulario_vidoes')
+def formulario_vidoes():
+    return render_template('formulario_vidoes.html')
+
+@app.route('/atualizar/<int:id>', methods=['GET','POST'])
+def atualizar(id):
+    descricao = request.form['descricao']
+    
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
+    cur = conn.cursor()
+    cur.execute('UPDATE testemunho set descricao where id = %s;',(id,))
+    conn.commit()
+    conn.close()    
+
+    return redirect('/videos')
+
+@app.route('/Link_video/<int:testemunho_id>',methods=['GET'])
+def Link_video(testemunho_id):
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM testemunho where id = %s;',(testemunho_id,))
+    testemunho = cur.fetchone()
+    conn.close() 
+    return redirect(url_for('detalhes', nome=testemunho[1]))
+
+@app.route('/detalhes/<nome>',methods=['POST','GET'])
+def detalhes(nome):
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM testemunho where nome = %s;',(nome,))
+    testemunho = cur.fetchall()
+    conn.close() 
+    if testemunho:
+       return render_template('detalhes_testemunho.html', testemunho=testemunho) 
+    else:
+        conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM testemunho;')
+        testemunhos = cur.fetchall()
+        conn.close()    
+        erro = "algo deu errado!"
+        return render_template('Testemunhos.html', testemunhos=testemunhos, erro=erro)
+      
+
+@app.route('/buscar_testemunho', methods=['POST'])
+def buscar_testemunho(): 
+    nome = request.form['nome']
+    try:
+     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
+     cur = conn.cursor()
+     cur.execute('SELECT * FROM testemunho where nome = %s;',(nome,))
+     testemunho = cur.fetchall()
+     conn.close()
+     return render_template('detalhes_testemunho.html', testemunho=testemunho)
+    except psycopg2.Error as e:
+     error_msg = f"Erro ao fazer a transação: {e}"
+     return render_template('erro.html', error=error_msg) 
 
 
 if __name__ == '__main__':
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()
     
 

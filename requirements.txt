@@ -20,3 +20,5 @@ pdfminer.six
 importlib-metadata
 plotly
 matplotlib
+werkzeug
+flask_sqlalchemy

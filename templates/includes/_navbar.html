@@ -18,8 +18,9 @@
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> Automação <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li class="dropdown-header">relatorios</li>
-                <li><a href="/Relatorio_obra">Criar Relatorio</a></li>
-                <li><a href="/pdf_obra">Baixar pdf</a></li>
+                <li><a href="/Relatorio_obra">Relatorio de Obra</a></li>
+                <li><a href="/Relatorio_camera">Relatorio de Cameras</a></li>
+                <li><a href="/pdf_obra">Gerir_relatorios</a></li>
                 <li><a href="/Gerir_clientes">Gerir Clientes</a></li>
               </ul>
             </li>
@@ -35,7 +36,8 @@
                 <li role="separator" class="divider"></li>
                 <li class="dropdown-header">Dashboard</li>
                 <li><a href="/dashboard_demo">Demo</a></li>
-                
+                <li class="dropdown-header">Video</li>
+                <li><a href="/videos">Videos</a></li>
               </ul>
             </li>
 
@@ -80,7 +82,7 @@
               <ul class="dropdown-menu">
                 <li class="dropdown-header">Clientes</li>
                 <li><a href="/cliente">Automação</a></li>
-                <li><a href="{% if cliente %} {{ url_for('cliente_ong', index=index, org_id = cliente[4])}} {% else %} /clientes_ong {% endif %}">ONGs</a></li>
+                <li><a href=" /cliente_ong">ONGs</a></li>
                 <li><a href="/cliente_srv">SRV</a></li>
                 <li><a href="/contacts_by_collaborator">LeadsSRV</a></li>
                 <li role="separator" class="divider"></li>
@@ -108,14 +110,18 @@
                 
               </ul>
             </li>  
-
+            {% if org %}
+             <li class="nav-item">
+              <a href="#" >Saldo: {{ org[3] }}</a>
+             </li>
+             {% endif %}
             {% endif %}
           </ul>
           <ul class="nav navbar-nav navbar-right">
             {% if session.logged_in %}
             
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Login as <strong>{{session.username}}</strong> at Org: <strong>{% if cliente %}{{ cliente[0] }}{% else %}{{session.last_org}}{% endif %}</strong> <span class="caret"></span></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Login as <strong>{{session.username}}</strong> at Org: <strong>{% if org %}{{ org[1] }}{% else %}{{session.last_org}}{% endif %}</strong> <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li class="dropdown-header">Minhas actividades</li>
                 <li><a href="/tasks">Actividades</a></li>
@@ -125,8 +131,9 @@
                 <li class="disabled"><a href="#">Meus dados</a></li>
                 <li role="separator" class="divider"></li>
                 <li class="dropdown-header">Mudar de Org.</li>
-                <li><a href="{% if cliente %}{{ url_for('saltar_org_id', index=(index + 1) % total) }}{%elif index %}{{ url_for('saltar_org_id', index=index) }}{% else %}{{ url_for('saltar_org_id', index=0) }}{% endif %}">Saltar</a></li>
+                <li ><a href="#"  onclick="carregarDados()">Saltar</a></li>
                 <li role="separator" class="divider"></li>
+                <li><a href="/tasks">my acount</a></li>
                 <li><a href="/logout">Logout</a></li>
               </ul>
             </li>
@@ -141,3 +148,83 @@
         </div><!--/.nav-collapse -->
       </div>
     </nav>
+    
+
+    <script>
+      // Função para carregar os dados do banco de dados e exibir no modal
+      function carregarDados() {
+        
+        $.get('/saltar_org_id', function(data) {
+        // Limpa o conteúdo atual do modal
+        $('#modalTableBody').empty();
+        
+        // Itera sobre os dados recebidos e os adiciona ao modal
+        data.forEach(function(item) {
+          var linha = `<tr>
+                         <td>${item.id}</td>
+                         <td>${item.nome}</td>
+                         <td>${item.Saldo}</td>
+                          <td>
+                           <button class="btn btn-primary btn-xs" onclick="verDetalhes(${item.id})">
+                             <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Ver
+                           </button>
+                         </td>
+                       </tr>`;
+          $('#modalTableBody').append(linha);
+        });
+
+        // Abre o modal após carregar os dados
+        $('#exampleModal').modal('show');
+      });
+      }
+    function verDetalhes(id) {
+     
+      console.log('ID:', id);
+
+    // Redireciona para a URL gerada pelo Flask usando fetch, por exemplo:
+    fetch(`/get_org/${id}`, {
+      method: 'GET'
+    })
+    .then(response => {
+      if (response.redirected) {
+        window.location.href = response.url;  // Redireciona para a URL retornada pelo Flask
+      }
+    })
+    .catch(error => {
+      console.error('Erro ao enviar dados:', error);
+    });
+    }
+      // Ao clicar no botão, chama a função para carregar os dados e exibir no modal
+     
+  </script>
+  
+ <!-- Modal -->
+ <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="exampleModalLabel">Dados Carregados</h4>
+      </div>
+      <div class="modal-body">
+        <!-- Tabela para apresentar os dados -->
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>Saldo</th>
+            </tr>
+          </thead>
+          <tbody id="modalTableBody">
+
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+

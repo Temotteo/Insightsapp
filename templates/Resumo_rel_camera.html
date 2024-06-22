@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <div class="container">
+    <h2>Formulário de Relatório</h2>
+    <form id="reportForm" action="/resumo" method="post" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="country" class="form-label">Cliente</label>
+         <select class="form-control" id="country"  name ="clientes" >
+          <option value="">selecione...</option>
+          <option>Cliente_1</option>
+          <option>Cliente_2</option>
+          <option>Cliente_3</option>
+        </select>
+      </div>
+      <div class="form-group ml-4">
+        <label for="resumo">Resumo:</label>
+        <input type="hidden" class="form-control" id="id" name="user" value="1">
+        <textarea type="text" class="form-control" id="resumo" row="5" name="resumo" required ></textarea>
+    </div>
+      <div id="preview"></div> <!-- Aqui será exibida a pré-visualização das imagens -->
+      <button type="submit" class="btn btn-primary">iniciar relatorio</button>
+  </form>
+  
+  </div>
+  
+
+    </script>
+   {% endblock %}
