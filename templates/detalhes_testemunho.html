@@ -1,20 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalhes do Testemunho</title>
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-dark text-light">
+{% extends 'layout.html' %}
+
+{% block body %}
 <div class="">
  
 {% if testemunho %}
  
  
     <video width="100%" height="450" controls>
-        <source src="/{{ testemunho[3] }}" type="video/mp4">
+        <source src="{{ testemunho[3] }}" type="video/mp4">
         Seu navegador não suporta a reprodução de vídeos.
     </video>
 
@@ -32,5 +25,4 @@
 {% endif %}
  
 </div>
-</body>
-</html>
+{% endblock %}
