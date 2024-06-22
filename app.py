@@ -3307,7 +3307,7 @@ def detalhes(nome):
     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
     cur = conn.cursor()
     cur.execute('SELECT * FROM testemunho where nome = %s;',(nome,))
-    testemunho = cur.fetchall()
+    testemunho = cur.fetchone()
     conn.close() 
     if testemunho:
        return render_template('detalhes_testemunho.html', testemunho=testemunho) 
@@ -3328,8 +3328,9 @@ def buscar_testemunho():
      conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
      cur = conn.cursor()
      cur.execute('SELECT * FROM testemunho where nome = %s;',(nome,))
-     testemunho = cur.fetchall()
+     testemunho = cur.fetchone()
      conn.close()
+     print(testemunho)
      return render_template('detalhes_testemunho.html', testemunho=testemunho)
     except psycopg2.Error as e:
      error_msg = f"Erro ao fazer a transação: {e}"
@@ -3338,8 +3339,8 @@ def buscar_testemunho():
 
 if __name__ == '__main__':
     app.secret_key='secret123'
-    app.run(debug=True)
-    #http_server = WSGIServer(('', 5000), app)
-    #http_server.serve_forever()
+    #app.run(debug=True)
+    http_server = WSGIServer(('', 5000), app)
+    http_server.serve_forever()
     
 
