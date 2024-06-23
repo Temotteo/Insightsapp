@@ -3277,9 +3277,9 @@ def videos():
     conn.close()        
     return render_template('Testemunhos.html', testemunhos=testemunhos)
 
-@app.route('/formulario_vidoes')
-def formulario_vidoes():
-    return render_template('formulario_vidoes.html')
+@app.route('/formulario_videos')
+def formulario_videos():
+    return render_template('formulario_videos.html')
 
 @app.route('/atualizar/<int:id>', methods=['GET','POST'])
 def atualizar(id):
