@@ -1,0 +1,209 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<style>
+         .centered-paragraph2 {
+            display: flex;
+            justify-content: center; /* Centraliza horizontalmente */
+            text-align: left; /* Centraliza o texto */
+        }
+        .border-style-1 {
+            border: 2px solid #007bff;;
+        }
+        td, th{
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+            width: 2rem;
+        }
+        thead{
+            color: aliceblue;
+        }
+    </style>
+
+<div class="container mt-5 p-2" style="font-family: 'Times New Roman', Times, serif;">
+    <div class="row">
+        <div class="col-md-11"></div>
+        <div class="col-md-1">
+            <a href="{{ url_for('reniciar', usuario_id=1)}}" class="icon-link icon-link-hover" role="button">Reniciar</a>
+        </div>
+    </div>
+    <div class="border-style-1 p-2 mt-2">
+        <img src="/static/cod_OV/Logo-Insigths-2.png" height="50" width="auto">
+        <p class="text-center">RELATÓRIO DE ORIENTAÇÃO VOCACIONAL</p>
+    </div>
+    <div class="border-style-1 p-2" style="background-color: rgb(236, 234, 234);">
+        <p>Dados Pessoais</p>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group mb-3">
+                    <span class="input-group-addon" style="background-color: rgba(245, 191, 16, 1);">Aluno</span>
+                    <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" value="{% if usuario %}{{ usuario[1] }}{% endif %}">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group mb-3">
+                    <span class="input-group-addon" style="background-color: rgba(245, 191, 16, 1);">Escola</span>
+                    <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" value="indefinido">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group mb-3">
+                    <span class="input-group-addon" style="background-color: rgba(245, 191, 16, 1);">Idade</span>
+                    <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" value="{% if usuario %}{{ usuario[4] }} anos{% endif %} ">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group mb-3">
+                    <span class="input-group-addon" style="background-color: rgba(245, 191, 16, 1);">Classe</span>
+                    <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" value="{% if usuario %}{{ usuario[6] }}{% endif %}">
+           </div>
+        </div>
+    </div>
+    <hr class="border-style-1" style="border-color: #007bff;">
+        <div  style="background-color: rgb(236, 234, 234); padding: 20px 20px 20px 20px;">
+         <h6>2. RESULTADO DOS TESTES DE APTIDÃO COGNITIVA</h6> 																	  
+         <p> 2.1. Resumo gráfico</p>																	
+        <div class="row bg-white ">
+        <div class="col-md-1 p-5"></div>
+         <div class="col-md-4 pt-5 mx-4">     
+          <table class=" mt-3 " border="1">
+            <thead>
+                <tr >
+                    <th scope="col" ></th>
+                    <th scope="col" colspan="2" style="background-color: rgb(204, 45, 17);">Inferior</th>
+                    <th scope="col" colspan="2" style="background-color: rgba(245, 191, 16, 1);">Medio inferior</th>
+                    <th scope="col" colspan="2" style="background-color: rgb(11, 110, 11);">Medio</th>
+                    <th scope="col" colspan="2" style="background-color: rgb(15, 248, 159); ">Medio superior</th>
+                    <th scope="col" colspan="2" class="bg-primary">superior</th>
+                </tr>
+                <tr style="color: rgb(15, 15, 15);">
+                    <th></th>
+                    <th>1</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                    <th>5</th>
+                    <th>6</th>
+                    <th>7</th>
+                    <th>8</th>
+                    <th>9</th>
+                    <th>10</th>
+                </tr>
+            </thead>
+            {% if resultados %}
+            <tbody id="respostasTableBody" > 
+                <tr>
+                    <th>Teste_Logico</th>
+                    {% for i in range(1,11) %}
+                    <th>{% if total_respostas[0] == i  %} X {% endif %}</th>
+                  {% endfor %}
+                </tr> 
+                <tr>
+                    <th>Teste_numerico</th>
+                    {% for i in range(1,11) %}
+                    <th>{% if total_respostas[1] == i  %} X {% endif %}</th>
+                  {% endfor %}
+                </tr> 
+                <tr>
+                    <th>Teste_verbal</th>
+                    {% for i in range(1,11) %}
+                      <th>{% if total_respostas[2] == i %} X {% endif %}</th>
+                    {% endfor %}
+                </tr> 
+            </tbody>
+            {% endif %}
+        </table>
+    </div>
+    <div class="col-md-1 p-5"></div>
+    <div class="col-md-5 p-5 ml-5">
+        <div class="px-3 py-1" style="background-color: rgb(236, 234, 234);">
+            <p> <strong>Teste de Raciocínio Lógico</strong>
+                Mede a capacidade para raciocinar em termos abstractos
+            </p>  
+              <p><strong>Teste de Raciocínio Verbal</strong>
+                Mede a capacidade para compreender e avaliar a lógica de várias afirmações
+            </p>  
+             <p><strong>Teste de Raciocínio Numérico</strong>
+                Avalia a capacidade de análise e de tomada de decisão com base em dados numéricos"			
+            </p>
+        </div>
+    </div>
+    </div>
+    <div >
+       <h6>2.2. Descrição</h6>
+       <div class="bg-white px-1">																	
+       <p>Mesmo perante situações novas, é capaz de efectuar análises precisas. É ágil nas análises que efectua.
+         Revela maior facilidade em tratar assuntos que exijam uma leitura e análise de informação de diversas
+          fontes para retirar conclusões. É ágil nas interpretações que efectua, revelando precisão nas 
+          conclusões que retira e nas decisões que toma. Lê com rapidez e interpreta as informações em tempo útil.
+           Revela autonomia na análise de informações complexas, podendo ser de diferentes fontes.
+            A sua capacidade analítica ultrapassa a média. É capaz de efectuar análises matemáticas sejam 
+            acima do seu domínio imediato. Evidencia alguma assertividade nas análises que efectua. 
+            Revela facilidade para trabalhar com números.</p></div>																	        
+    </div>
+    </div>
+    <hr class="border-style-1" style="border-color: #007bff;">
+        <div class="p-2 mt-2" style="background-color: rgb(236, 234, 234); padding: 20px 20px 20px 20px;">
+        <h6 class="mt-5 mb-4">3. ORIENTAÇÃO VOCACIONAL</h6>															
+         <p>3.1. Gráfico	</p>														
+            
+            <div class="m-5 p-5 bg-light" style=" padding: 10px 100px 60px 100px;">
+                <canvas id="grafico"></canvas>
+            </div>
+           <p> 3.2. Recomendação</p> 
+            <div class="bg-white ">
+                <p>Apresenta potencial para continuar a estudar disciplinas relacionadas com a natureza,
+                 meio ambiente, animais e clima.  Demonstra possuir potencial para dedicar-se à área 
+                 das ciências sociais e humanitárias. </p>
+            </div>
+        </div>
+
+        <div class=" bg-light" style="background: rgb(236, 234, 234); padding: 20px 20px 20px 20px;">
+        	<h6>4. CONFIDENCIALIDADE</h6>
+        <div class="bg-white ">																	
+	       <p>Este relatório foi especificamente elaborado em contexto de Orientação Vocacional, pelo que, a informação recolhida será apenas utilizada para esta finalidade; A leitura, análise e interpretação dos resultados deste relatório deverá ser assegurada por um pessoal devidamente qualificado;
+           O(a) aluno(a) compromete-se a adoptar medidas de segurança que garantam a inviolabilidade da informação. É expressamente proibida a reprodução total ou parcial deste documento ou a sua utilização para outros fins.
+        </p>
+        </div>
+        </div>
+
+    </div>
+
+    <!-- Adicione o link para o Bootstrap JavaScript -->
+    <script>
+        var ctx = document.getElementById('grafico').getContext('2d');
+        var grafico = new Chart(ctx, {
+            type: 'bar',
+            drawTime: 'afterDatasetsDraw',
+            id: 'hline',
+            mode: 'vertical',
+            scaleID: 'x',
+            value: '{{ total_respostas | tojson }}', // Total de respostas para cada usuário
+            backgroundColor: 'rgba(255,99,132,0.2)',
+            borderColor: 'rgba(75,192,192,1)',
+            borderWidth: 2,
+                    
+            data: {
+                labels: {{ tipo | tojson }},
+                datasets: [{
+                    label: 'Número de Respostas',
+                    data: {{ total_respostas | tojson }},
+                    backgroundColor: 'rgba(245, 191, 16,1)'
+                    
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 10
+                    }
+                }
+               
+            }
+        });
+    </script>
+{% endblock %}

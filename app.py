@@ -2648,7 +2648,7 @@ def contacts_by_collaborator():
 @app.route('/respostas')
 #@is_logged_in
 def ver_respostas():
-    respostas = obter_respostas()
+    respostas=obter_respostas()
     return render_template('ver_respostas.html', respostas=respostas)
 
 
@@ -3336,11 +3336,163 @@ def buscar_testemunho():
      error_msg = f"Erro ao fazer a transação: {e}"
      return render_template('erro.html', error=error_msg) 
 
+# FUNCAO PROJECTO OV
+@app.route('/testes_OV')
+def testes_OV():
+      return redirect( url_for('teste_ov',tipo = 'iniciar' )) 
+               
+@app.route('/teste_ov/<tipo>',methods=['POST','GET'])
+def teste_ov(tipo): 
+  if request.method =='POST':
+    print('aqui')
+    resposta = {}
+    try:
+     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Quizdb')
+     cur = conn.cursor()
+     cur.execute("SELECT * FROM quiz WHERE tipo = %s;",(tipo,))
+     questoes = cur.fetchall()
+     print(questoes)
+     
+     for questoes in questoes:
+      print(questoes)
+      resposta = request.form.get(f'quiz{ questoes[0] }')
+      cur.execute("SELECT * FROM respostas WHERE usuario_id=1 and questao_id = %s;",(questoes[0],))
+      resposta_existente = cur.fetchall()
+      if resposta_existente:
+         for resp in resposta_existente:
+          cur.execute("SELECT * FROM quiz WHERE id = %s;",(resp[1],))
+          resposta_quiz = cur.fetchone()
+          cur.execute("DELETE FROM respostas WHERE usuario_id=1 and questao_id = %s;",(resp[1],))
+          conn.commit()
+          if resposta_quiz[3] == resposta:
+           cur.execute('INSERT INTO respostas(usuario_id,questao_id,resposta ,situacao) VALUES(%s,%s,%s,%s);',(1 , resp[1], resposta, 'correcto',))
+          else:  
+           cur.execute('INSERT INTO respostas(usuario_id,questao_id,resposta ,situacao) VALUES(%s,%s,%s,%s);',(1 , resp[1], resposta, 'incorrecto',))
+          conn.commit()
+      else:    
+        if questoes[3] == resposta:
+           print('cheguei')
+           print(questoes[0])
+           cur.execute('INSERT INTO respostas(usuario_id,questao_id,resposta ,situacao) VALUES(%s,%s,%s,%s);',(1 , questoes[0], resposta, 'correcto',))
+        else:
+           print('cheguei')
+           print(questoes[0])
+           cur.execute('INSERT INTO respostas(usuario_id,questao_id,resposta ,situacao) VALUES(%s,%s,%s,%s);',(1 , questoes[0], resposta, 'incorrecto',))
+        
+        conn.commit()
+     conn.close()   
+    except psycopg2.Error as e:
+     error_msg = f"Erro ao fazer a transação: {e}"
+
+  try:
+   conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Quizdb')
+   cur = conn.cursor()
+   if tipo == "iniciar": 
+      cur.execute("SELECT * FROM quiz WHERE tipo='logico';")
+      questoes = cur.fetchall()
+      logico = True
+      return render_template('testes_OV.html', questoes=questoes, logico = logico)
+   elif tipo == "verbal": 
+      cur.execute("SELECT * FROM quiz WHERE tipo='numerico';")
+      questoes = cur.fetchall()
+      numerico = True
+      return render_template('testes_OV.html', questoes=questoes, numerico = numerico)
+   elif tipo == "logico": 
+      cur.execute("SELECT * FROM quiz WHERE tipo='verbal';")
+      questoes = cur.fetchall()
+      verbal = True
+      return render_template('testes_OV.html', questoes=questoes, verbal = verbal)
+   elif tipo == "numerico": 
+      cur.execute("SELECT * FROM quiz WHERE tipo='preferencias';")
+      questoes = cur.fetchall()
+      preferencias = True
+      return render_template('testes_OV.html', questoes=questoes, preferencias = preferencias)
+   else:
+      preferencias = True
+      return redirect( url_for('resultado',usuario_id = 1 )) 
+      
+   conn.close()
+  except psycopg2.Error as e:
+     error_msg = f"Erro ao fazer a transação: {e}"
+     return render_template('erro.html', error=error_msg) 
+    
+     
+# Rota para a página de avaliação
+@app.route('/resultado/<int:usuario_id>')
+def resultado(usuario_id):
+  query = """
+        SELECT u.id AS usuario_id, u.nome AS usuario_nome,
+               r.questao_id, r.resposta,
+               q.questao, q.opcoes,  q.opcao_correcta, q.tipo,
+               r.situacao
+        FROM usuario u
+        JOIN respostas r ON u.id = r.usuario_id
+        JOIN quiz q ON r.questao_id = q.id
+        WHERE u.id =1
+         """
+  try:
+     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Quizdb')
+     cur = conn.cursor()
+     cur.execute(query)
+     resultados = cur.fetchall()
+     cur.execute('select * from usuario where id =1')
+     usuario = cur.fetchone()
+     conn.close()
+  except psycopg2.Error as e:
+     error_msg = f"Erro ao fazer a transação: {e}"
+     return render_template('erro.html', error=error_msg)    
+  percentual_correto_verbal = 0    
+  percentual_correto_numerico = 0
+  percentual_correto_logico = 0
+  for respostas in resultados:
+   if respostas[7] =='verbal': 
+    total_respostas = len(resultados)
+    respostas_corretas = sum(1 for respostas in resultados if respostas[8] == "correcto" and respostas[7] =='verbal')
+    percentual_correto_verbal = respostas_corretas
+    
+   if respostas[7] =='logico': 
+    total_respostas = len(resultados)
+    respostas_corretas = sum(1 for respostas in resultados if respostas[8] == "correcto" and respostas[7]=="logico")
+    percentual_correto_logico = respostas_corretas
+
+   if respostas[7] =='numerico': 
+    total_respostas = len(resultados)
+    respostas_corretas = sum(1 for respostas in resultados if respostas[8] == "correcto" and respostas[7]=="numerico")
+    percentual_correto_numerico = respostas_corretas  
+   
+  tipo = ["logico","numerico", "verbal"] 
+  total_respostas = [ percentual_correto_logico, percentual_correto_numerico,  percentual_correto_verbal] 
+  return render_template('resultado.htm', resultados=resultados,  tipo=tipo, total_respostas=total_respostas, usuario=usuario)
+
+@app.route('/reniciar/<int:usuario_id>')
+def reniciar(usuario_id):
+    try:
+     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Quizdb')
+     cur = conn.cursor()
+     cur.execute("SELECT * FROM respostas WHERE usuario_id=1 ;")
+     resposta_existente = cur.fetchall()
+    
+     for resposta in resposta_existente:
+      cur.execute("DELETE FROM respostas WHERE usuario_id=1;")
+      conn.commit()
+     conn.close() 
+    except psycopg2.Error as e:
+     error_msg = f"Erro ao fazer a transação: {e}"
+     return render_template('erro.html', error=error_msg)   
+
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Quizdb')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM quiz WHERE tipo='logico';")
+    questoes = cur.fetchall()
+    conn.close()
+    logico = True
+    return render_template('testes_OV.html', questoes=questoes, logico = logico)
+
 
 if __name__ == '__main__':
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()
     
 

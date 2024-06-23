@@ -109,6 +109,15 @@
                 
                 
               </ul>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> Orientação Vocal <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li class="dropdown-header">Quiz</li>
+                  <li><a href="/testes_OV">testes</a></li>
+                  <li><a href="{{ url_for('resultado', usuario_id=1 )}}">Resultados</a></li>
+                </ul>
+              </li>
+
             </li>  
             {% if org %}
              <li class="nav-item">
