@@ -3264,19 +3264,22 @@ def videos():
              cur = conn.cursor()
              cur.execute('INSERT INTO testemunho( nome, descricao, video, data_video, assunto) VALUES (%s, %s, %s, %s, %s);',(nome, descricao, video_path, data_video,))
              conn.commit()
-             conn.close()
-             return redirect(url_for('videos'))
+             cur.execute('SELECT * FROM testemunho;')
+             testemunhos = cur.fetchall()
+             conn.close()        
+             return render_template('Testemunhos.html', testemunhos=testemunhos)
             except psycopg2.Error as e:
              error_msg = f"Erro ao fazer a transação: {e}"
              return render_template('erro.html', error=error_msg)
-
+            
     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
     cur = conn.cursor()
     cur.execute('SELECT * FROM testemunho;')
     testemunhos = cur.fetchall()
     conn.close()        
     return render_template('Testemunhos.html', testemunhos=testemunhos)
-
+        
+    
 @app.route('/formulario_videos')
 def formulario_videos():
     return render_template('formulario_videos.html')
