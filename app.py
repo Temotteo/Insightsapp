@@ -3242,7 +3242,7 @@ def gerar_pdf_cameras(id_resumo):
     return send_file(filename, as_attachment=True)
 
 
-UPLOAD_FOLDER = 'static/videos'
+UPLOAD_FOLDER = '/static/videos'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
