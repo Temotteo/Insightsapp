@@ -28,22 +28,22 @@
             <a href="{{ url_for('reniciar', usuario_id=1)}}" class="icon-link icon-link-hover" role="button">Reniciar</a>
         </div>
     </div>
-    <div class="border-style-1 p-2 mt-2">
+    <div class="border-style-1 p-2 mt-2" style="background-color: rgb(236, 234, 234);">
         <img src="/static/cod_OV/Logo-Insigths-2.png" height="50" width="auto">
-        <p class="text-center">RELATÓRIO DE ORIENTAÇÃO VOCACIONAL</p>
+        <h2 class="text-center">RELATÓRIO DE ORIENTAÇÃO VOCACIONAL</h2>
     </div>
     <div class="border-style-1 p-2" style="background-color: rgb(236, 234, 234);">
         <p>Dados Pessoais</p>
         <div class="row">
             <div class="col-md-6">
                 <div class="input-group mb-3">
-                    <span class="input-group-addon" style="background-color: rgba(245, 191, 16, 1);">Aluno</span>
+                    <span class="input-group-text" style="background-color: rgba(245, 191, 16, 1);">Aluno</span>
                     <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" value="{% if usuario %}{{ usuario[1] }}{% endif %}">
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="input-group mb-3">
-                    <span class="input-group-addon" style="background-color: rgba(245, 191, 16, 1);">Escola</span>
+                    <span class="input-group-text" style="background-color: rgba(245, 191, 16, 1);">Escola</span>
                     <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" value="indefinido">
                 </div>
             </div>
@@ -51,31 +51,31 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="input-group mb-3">
-                    <span class="input-group-addon" style="background-color: rgba(245, 191, 16, 1);">Idade</span>
+                    <span class="input-group-text" style="background-color: rgba(245, 191, 16, 1);">Idade</span>
                     <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" value="{% if usuario %}{{ usuario[4] }} anos{% endif %} ">
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="input-group mb-3">
-                    <span class="input-group-addon" style="background-color: rgba(245, 191, 16, 1);">Classe</span>
+                    <span class="input-group-text" style="background-color: rgba(245, 191, 16, 1);">Classe</span>
                     <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" value="{% if usuario %}{{ usuario[6] }}{% endif %}">
            </div>
         </div>
     </div>
     <hr class="border-style-1" style="border-color: #007bff;">
-        <div  style="background-color: rgb(236, 234, 234); padding: 20px 20px 20px 20px;">
+        <div class="p-2">
          <h6>2. RESULTADO DOS TESTES DE APTIDÃO COGNITIVA</h6> 																	  
          <p> 2.1. Resumo gráfico</p>																	
-        <div class="row bg-white ">
+        <div class="row bg-default ">
         <div class="col-md-1 p-5"></div>
          <div class="col-md-4 pt-5 mx-4">     
           <table class=" mt-3 " border="1">
             <thead>
                 <tr >
                     <th scope="col" ></th>
-                    <th scope="col" colspan="2" style="background-color: rgb(204, 45, 17);">Inferior</th>
-                    <th scope="col" colspan="2" style="background-color: rgba(245, 191, 16, 1);">Medio inferior</th>
-                    <th scope="col" colspan="2" style="background-color: rgb(11, 110, 11);">Medio</th>
+                    <th scope="col" colspan="2" class="bg-danger">Inferior</th>
+                    <th scope="col" colspan="2" class="bg-warning">Medio inferior</th>
+                    <th scope="col" colspan="2" class="bg-success">Medio</th>
                     <th scope="col" colspan="2" style="background-color: rgb(15, 248, 159); ">Medio superior</th>
                     <th scope="col" colspan="2" class="bg-primary">superior</th>
                 </tr>
@@ -119,7 +119,7 @@
     </div>
     <div class="col-md-1 p-5"></div>
     <div class="col-md-5 p-5 ml-5">
-        <div class="px-3 py-1" style="background-color: rgb(236, 234, 234);">
+        <div class="px-3 py-1" >
             <p> <strong>Teste de Raciocínio Lógico</strong>
                 Mede a capacidade para raciocinar em termos abstractos
             </p>  
@@ -134,7 +134,7 @@
     </div>
     <div >
        <h6>2.2. Descrição</h6>
-       <div class="bg-white px-1">																	
+       <div class="px-1">																	
        <p>Mesmo perante situações novas, é capaz de efectuar análises precisas. É ágil nas análises que efectua.
          Revela maior facilidade em tratar assuntos que exijam uma leitura e análise de informação de diversas
           fontes para retirar conclusões. É ágil nas interpretações que efectua, revelando precisão nas 
@@ -146,7 +146,7 @@
     </div>
     </div>
     <hr class="border-style-1" style="border-color: #007bff;">
-        <div class="p-2 mt-2" style="background-color: rgb(236, 234, 234); padding: 20px 20px 20px 20px;">
+        <div class="p-2 mt-2" >
         <h6 class="mt-5 mb-4">3. ORIENTAÇÃO VOCACIONAL</h6>															
          <p>3.1. Gráfico	</p>														
             
@@ -154,20 +154,18 @@
                 <canvas id="grafico"></canvas>
             </div>
            <p> 3.2. Recomendação</p> 
-            <div class="bg-white ">
+            <div class="">
                 <p>Apresenta potencial para continuar a estudar disciplinas relacionadas com a natureza,
                  meio ambiente, animais e clima.  Demonstra possuir potencial para dedicar-se à área 
                  das ciências sociais e humanitárias. </p>
             </div>
         </div>
 
-        <div class=" bg-light" style="background: rgb(236, 234, 234); padding: 20px 20px 20px 20px;">
-        	<h6>4. CONFIDENCIALIDADE</h6>
-        <div class="bg-white ">																	
+        <div class="p-2" >
+        	<h6>4. CONFIDENCIALIDADE</h6>																	
 	       <p>Este relatório foi especificamente elaborado em contexto de Orientação Vocacional, pelo que, a informação recolhida será apenas utilizada para esta finalidade; A leitura, análise e interpretação dos resultados deste relatório deverá ser assegurada por um pessoal devidamente qualificado;
            O(a) aluno(a) compromete-se a adoptar medidas de segurança que garantam a inviolabilidade da informação. É expressamente proibida a reprodução total ou parcial deste documento ou a sua utilização para outros fins.
         </p>
-        </div>
         </div>
 
     </div>

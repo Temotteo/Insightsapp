@@ -3242,7 +3242,7 @@ def gerar_pdf_cameras(id_resumo):
     return send_file(filename, as_attachment=True)
 
 
-UPLOAD_FOLDER = '/static/videos'
+UPLOAD_FOLDER = 'static/videos'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -3252,6 +3252,7 @@ def videos():
         nome = request.form['nome']
         descricao = request.form['descricao']
         file = request.files['video']
+        categoria = request.form['categoria']
         data_video = datetime.strptime(request.form['data_video'], '%Y-%m-%d')
 
         if file:
@@ -3262,7 +3263,7 @@ def videos():
             try:
              conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
              cur = conn.cursor()
-             cur.execute('INSERT INTO testemunho( nome, descricao, video, data_video, assunto) VALUES (%s, %s, %s, %s, %s);',(nome, descricao, video_path, data_video,))
+             cur.execute('INSERT INTO testemunho( nome, descricao, video, data_video, assunto) VALUES (%s, %s, %s, %s, %s);',(nome, descricao, video_path, data_video,categoria,))
              conn.commit()
              cur.execute('SELECT * FROM testemunho;')
              testemunhos = cur.fetchall()
@@ -3342,7 +3343,7 @@ def buscar_testemunho():
 # FUNCAO PROJECTO OV
 @app.route('/testes_OV')
 def testes_OV():
-      return redirect( url_for('teste_ov',tipo = 'iniciar' )) 
+      return redirect( url_for('teste_ov',tipo = 'verbal' )) 
                
 @app.route('/teste_ov/<tipo>',methods=['POST','GET'])
 def teste_ov(tipo): 
@@ -3391,22 +3392,22 @@ def teste_ov(tipo):
    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Quizdb')
    cur = conn.cursor()
    if tipo == "iniciar": 
-      cur.execute("SELECT * FROM quiz WHERE tipo='logico';")
+      cur.execute("SELECT * FROM quiz WHERE tipo='logico' ORDER BY id;")
       questoes = cur.fetchall()
       logico = True
       return render_template('testes_OV.html', questoes=questoes, logico = logico)
    elif tipo == "verbal": 
-      cur.execute("SELECT * FROM quiz WHERE tipo='numerico';")
+      cur.execute("SELECT * FROM quiz WHERE tipo='numerico' ORDER BY id;")
       questoes = cur.fetchall()
       numerico = True
       return render_template('testes_OV.html', questoes=questoes, numerico = numerico)
    elif tipo == "logico": 
-      cur.execute("SELECT * FROM quiz WHERE tipo='verbal';")
+      cur.execute("SELECT * FROM quiz WHERE tipo='verbal' ORDER BY id;")
       questoes = cur.fetchall()
       verbal = True
       return render_template('testes_OV.html', questoes=questoes, verbal = verbal)
    elif tipo == "numerico": 
-      cur.execute("SELECT * FROM quiz WHERE tipo='preferencias';")
+      cur.execute("SELECT * FROM quiz WHERE tipo='preferencias' ORDER BY id;")
       questoes = cur.fetchall()
       preferencias = True
       return render_template('testes_OV.html', questoes=questoes, preferencias = preferencias)

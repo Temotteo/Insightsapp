@@ -1,219 +1,149 @@
-<nav class="navbar navbar-default">
-      
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          
-        </div>
-        <div id="navbar" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            {% if session.logged_in %}
-            
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> Automação <span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li class="dropdown-header">relatorios</li>
-                <li><a href="/Relatorio_obra">Relatorio de Obra</a></li>
-                <li><a href="/Relatorio_camera">Relatorio de Cameras</a></li>
-                <li><a href="/pdf_obra">Gerir_relatorios</a></li>
-                <li><a href="/Gerir_clientes">Gerir Clientes</a></li>
-              </ul>
-            </li>
-
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> Testes <span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li class="dropdown-header">Texto</li>
-                <li><a href="/testes">SMS</a></li>
-                <li role="separator" class="divider"></li>
-                <li class="dropdown-header">Voz</li>
-                <li><a href="/ivr_test">IVR</a></li>
-                <li role="separator" class="divider"></li>
-                <li class="dropdown-header">Dashboard</li>
-                <li><a href="/dashboard_demo">Demo</a></li>
-                <li class="dropdown-header">Video</li>
-                <li><a href="/videos">Videos</a></li>
-              </ul>
-            </li>
-
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> RH <span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li class="dropdown-header">Candidaturas</li>
-                <li><a href="/respostas">Ver Respostas</a></li>
-                <li><a href="/candidaturas">Testar Formulario</a></li>
-                
-                
-              </ul>
-            </li>
-
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Campanhas<span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li class="dropdown-header">SMS</li>
-                <li><a href="/campanhas">Activas</a></li>
-                <li><a href="/campanhas">Criar</a></li>
-                <li role="separator" class="divider"></li>
-                <li class="dropdown-header">Mensagem de voz</li>
-                <li><a href="/campanhas">Activas</a></li>
-                <li><a href="/campanhas">Criar</a></li>
-                <li role="separator" class="divider"></li>
-                <li class="dropdown-header">Survey</li>
-                <li><a href="/cliente">Activas</a></li>
-                <li><a href="/cliente">Criar</a></li>
-                <li role="separator" class="divider"></li>
-                <li class="dropdown-header">Formacao Remota</li>
-                <li><a href="/cliente">Activas</a></li>
-                <li><a href="/cliente">Criar</a></li>
-                <li role="separator" class="divider"></li>
-                <li class="dropdown-header">Historico de chamadas</li>
-                <li><a href="/campaign_status">Ver</a></li>
-                
-              </ul>
-            </li>
-                       
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">CRM<span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li class="dropdown-header">Clientes</li>
-                <li><a href="/cliente">Automação</a></li>
-                <li><a href=" /cliente_ong">ONGs</a></li>
-                <li><a href="/cliente_srv">SRV</a></li>
-                <li><a href="/contacts_by_collaborator">LeadsSRV</a></li>
-                <li role="separator" class="divider"></li>
-                <li><a href="/cadastro">Cadastrar</a></li>
-                <li><a href="/cadastro_clientes">Cadastrar SRV</a></li>
-                <li role="separator" class="divider"></li>
-                <li class="dropdown-header">Propostas</li>
-                <li><a href="/addproposal">Solicitar proposta</a></li>
-                <li><a href="/propostas">Propostas</a></li>
-              </ul>
-            </li>
-            
-
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Contactos<span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li class="dropdown-header">Contactos</li>
-                <li><a href="/cliente">Visualizar</a></li>
-                <li><a href="/add_contact">Criar contacto</a></li>                
-                <li role="separator" class="divider"></li>
-                <li class="dropdown-header">Grupos</li>
-                <li><a href="/cliente">Visualizar</a></li>
-                <li><a href="/cliente">Criar grupo</a></li>
-                
-                
-              </ul>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> Orientação Vocal <span class="caret"></span></a>
-                <ul class="dropdown-menu">
-                  <li class="dropdown-header">Quiz</li>
-                  <li><a href="/testes_OV">testes</a></li>
-                  <li><a href="{{ url_for('resultado', usuario_id=1 )}}">Resultados</a></li>
-                </ul>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container py-0">
+      <div class="collapse navbar-collapse " id="navbarNav">
+          <ul class="navbar-nav mr-auto">
+              {% if session.logged_in %}
+              <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Automação <span class="caret-down"></span></a>
+                  <ul class="dropdown-menu" aria-labelledby="navbarDropdown1">
+                      <li class="dropdown-header">Relatórios</li>
+                      <li><a class="dropdown-item" href="/Relatorio_obra">Relatório de Obra</a></li>
+                      <li><a class="dropdown-item" href="/Relatorio_camera">Relatório de Câmeras</a></li>
+                      <li><a class="dropdown-item" href="/pdf_obra">Gerir Relatórios</a></li>
+                      <li><a class="dropdown-item" href="/Gerir_clientes">Gerir Clientes</a></li>
+                  </ul>
               </li>
-
-            </li>  
-            {% if org %}
-             <li class="nav-item">
-              <a href="#" >Saldo: {{ org[3] }}</a>
-             </li>
-             {% endif %}
-            {% endif %}
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            {% if session.logged_in %}
-            
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Login as <strong>{{session.username}}</strong> at Org: <strong>{% if org %}{{ org[1] }}{% else %}{{session.last_org}}{% endif %}</strong> <span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li class="dropdown-header">Minhas actividades</li>
-                <li><a href="/tasks">Actividades</a></li>
-                <li><a href="/db">Meu Dashboard</a></li>
-                <li role="separator" class="divider"></li>
-                <li class="dropdown-header">Dados Pessoais</li>
-                <li class="disabled"><a href="#">Meus dados</a></li>
-                <li role="separator" class="divider"></li>
-                <li class="dropdown-header">Mudar de Org.</li>
-                <li ><a href="#"  onclick="carregarDados()">Saltar</a></li>
-                <li role="separator" class="divider"></li>
-                <li><a href="/tasks">my acount</a></li>
-                <li><a href="/logout">Logout</a></li>
-              </ul>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Testes <span class="caret-down"></span></a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown2">
+                    <li class="dropdown-header">Texto</li>
+                    <li><a class="dropdown-item" href="/testes">SMS</a></li>
+                    <li class="dropdown-divider"></li>
+                    <li class="dropdown-header">Voz</li>
+                    <li><a class="dropdown-item" href="/ivr_test">IVR</a></li>
+                    <li class="dropdown-divider"></li>
+                    <li class="dropdown-header">Dashboard</li>
+                    <li><a class="dropdown-item" href="/dashboard_demo">Demo</a></li>
+                    <li class="dropdown-header">Vídeo</li>
+                    <li><a class="dropdown-item" href="/videos">Vídeos</a></li>
+                </ul>
             </li>
-
-            {% else %}
-            <li><a href="/login">Login</a></li>
-            <li><a href="/addcrentes">Cadastro Divina Esperança</a></li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown3" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">RH <span class="caret-down"></span></a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown3">
+                    <li class="dropdown-header">Candidaturas</li>
+                    <li><a class="dropdown-item" href="/respostas">Ver Respostas</a></li>
+                    <li><a class="dropdown-item" href="/candidaturas">Testar Formulário</a></li>
+                </ul>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown4" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Campanhas <span class="caret-down"></span></a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown4">
+                    <li class="dropdown-header">SMS</li>
+                    <li><a class="dropdown-item" href="/campanhas">Ativas</a></li>
+                    <li><a class="dropdown-item" href="/campanhas">Criar</a></li>
+                    <li class="dropdown-divider"></li>
+                    <li class="dropdown-header">Mensagem de voz</li>
+                    <li><a class="dropdown-item" href="/campanhas">Ativas</a></li>
+                    <li><a class="dropdown-item" href="/campanhas">Criar</a></li>
+                    <li class="dropdown-divider"></li>
+                    <li class="dropdown-header">Survey</li>
+                    <li><a class="dropdown-item" href="/cliente">Ativas</a></li>
+                    <li><a class="dropdown-item" href="/cliente">Criar</a></li>
+                    <li class="dropdown-divider"></li>
+                    <li class="dropdown-header">Formação Remota</li>
+                    <li><a class="dropdown-item" href="/cliente">Ativas</a></li>
+                    <li><a class="dropdown-item" href="/cliente">Criar</a></li>
+                    <li class="dropdown-divider"></li>
+                    <li class="dropdown-header">Histórico de chamadas</li>
+                    <li><a class="dropdown-item" href="/campaign_status">Ver</a></li>
+                </ul>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown5" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">CRM <span class="caret-down"></span></a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown5">
+                    <li class="dropdown-header">Clientes</li>
+                    <li><a class="dropdown-item" href="/cliente">Automação</a></li>
+                    <li><a class="dropdown-item" href="/cliente_ong">ONGs</a></li>
+                    <li><a class="dropdown-item" href="/cliente_srv">SRV</a></li>
+                    <li><a class="dropdown-item" href="/contacts_by_collaborator">LeadsSRV</a></li>
+                    <li class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="/cadastro">Cadastrar</a></li>
+                    <li><a class="dropdown-item" href="/cadastro_clientes">Cadastrar SRV</a></li>
+                    <li class="dropdown-divider"></li>
+                    <li class="dropdown-header">Propostas</li>
+                    <li><a class="dropdown-item" href="/addproposal">Solicitar Proposta</a></li>
+                    <li><a class="dropdown-item" href="/propostas">Propostas</a></li>
+                </ul>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown6" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Contactos <span class="caret-down"></span></a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown6">
+                    <li class="dropdown-header">Contactos</li>
+                    <li><a class="dropdown-item" href="/cliente">Visualizar</a></li>
+                    <li><a class="dropdown-item" href="/add_contact">Criar Contacto</a></li>
+                    <li class="dropdown-divider"></li>
+                    <li class="dropdown-header">Grupos</li>
+                    <li><a class="dropdown-item" href="/cliente">Visualizar</a></li>
+                    <li><a class="dropdown-item" href="/cliente">Criar Grupo</a></li>
+                </ul>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown7" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Orientação Vocal <span class="caret-down"></span></a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown7">
+                    <li class="dropdown-header">Quiz</li>
+                    <li><a class="dropdown-item" href="/testes_OV">Testes</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('resultado', usuario_id=1 ) }}">Resultados</a></li>
+                </ul>
+            </li>
+            {% if org %}
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Saldo: {{ org[3] }}</a>
+                </li>
             {% endif %}
-            
-          </ul>
-          
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
-    
-
-    <script>
-      // Função para carregar os dados do banco de dados e exibir no modal
-      function carregarDados() {
+            {% endif %}
+        </ul>
+        <ul class="navbar-nav ml-auto">
+            {% if session.logged_in %}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown8" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Login como <strong>{{session.username}}</strong> na Org: <strong>{% if org %}{{ org[1] }}{% else %}{{session.last_org}}{% endif %}</strong> <span class="caret-down"></span>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown8">
+                    <a class="dropdown-item" href="/tasks">Minhas Atividades</a>
+                    <a class="dropdown-item" href="/db">Meu Dashboard</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item disabled" href="#">Meus Dados</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#" onclick="carregarDados()">Mudar de Org.</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="/tasks">Minha Conta</a>
+                    <a class="dropdown-item" href="/logout">Logout</a>
         
-        $.get('/saltar_org_id', function(data) {
-        // Limpa o conteúdo atual do modal
-        $('#modalTableBody').empty();
-        
-        // Itera sobre os dados recebidos e os adiciona ao modal
-        data.forEach(function(item) {
-          var linha = `<tr>
-                         <td>${item.id}</td>
-                         <td>${item.nome}</td>
-                         <td>${item.Saldo}</td>
-                          <td>
-                           <button class="btn btn-primary btn-xs" onclick="verDetalhes(${item.id})">
-                             <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Ver
-                           </button>
-                         </td>
-                       </tr>`;
-          $('#modalTableBody').append(linha);
-        });
+                </div>
+            </li>
+            {% else %}
+            <li class="nav-item">
+                <a class="nav-link" href="/login">Login</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/addcrentes">Cadastro Divina Esperança</a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+</nav>
 
-        // Abre o modal após carregar os dados
-        $('#exampleModal').modal('show');
-      });
-      }
-    function verDetalhes(id) {
-     
-      console.log('ID:', id);
-
-    // Redireciona para a URL gerada pelo Flask usando fetch, por exemplo:
-    fetch(`/get_org/${id}`, {
-      method: 'GET'
-    })
-    .then(response => {
-      if (response.redirected) {
-        window.location.href = response.url;  // Redireciona para a URL retornada pelo Flask
-      }
-    })
-    .catch(error => {
-      console.error('Erro ao enviar dados:', error);
-    });
-    }
-      // Ao clicar no botão, chama a função para carregar os dados e exibir no modal
-     
-  </script>
-  
- <!-- Modal -->
- <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+<!-- Modal -->
+<div class="modal" id="Modal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="exampleModalLabel">Dados Carregados</h4>
+        <h5 class="modal-title" id="ModalLabel">Dados Carregados</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <!-- Tabela para apresentar os dados -->
@@ -226,14 +156,49 @@
             </tr>
           </thead>
           <tbody id="modalTableBody">
-
           </tbody>
         </table>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
       </div>
     </div>
   </div>
 </div>
 
+
+<script>
+  function carregarDados() {
+      $.get('/saltar_org_id', function(data) {
+          $('#modalTableBody').empty();
+          data.forEach(function(item) {
+              var linha = `<tr>
+                              <td>${item.id}</td>
+                              <td>${item.nome}</td>
+                              <td>${item.Saldo}</td>
+                              <td>
+                                  <button class="btn btn-primary btn-sm" onclick="verDetalhes(${item.id})">
+                                      <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Ver
+                                  </button>
+                              </td>
+                          </tr>`;
+              $('#modalTableBody').append(linha);
+          });
+          // Abre o modal após carregar os dados
+          $('#Modal').modal('show');
+      });
+  }
+  function verDetalhes(id) {
+      fetch(`/get_org/${id}`, {
+              method: 'GET'
+          })
+          .then(response => {
+              if (response.redirected) {
+                  window.location.href = response.url;
+              }
+          })
+          .catch(error => {
+              console.error('Erro ao enviar dados:', error);
+          });
+  }
+</script>

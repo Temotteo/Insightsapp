@@ -41,179 +41,171 @@
         apresentadas é a resposta correcta.</h4>
     
         <form action="{{ url_for('teste_ov', tipo='numerico')}}" method="POST" id="ratingForm">
-            {% for questao in questoes %}
-            <input type="hidden" name="questao" id="" value="{{ questao[0] }}">
-            <fieldset class="panel panel-default border-style-default p-2 my-4">
-                <legend class="panel-heading w-auto legend-small">Pergunta {{ loop.index }}</legend>
-                <div class="panel-body">
-                    <label>{{ questao[1] }}</label>
-                    <div class="row">
-                        {% for opcao in questao[2] %}
-                        <div class="col-xs-12 col-sm-2">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="quiz{{ questao[0] }}" id="quiz{{ questao[0] }}-opcao{{ loop.index }}" value="{{ opcao }}">
-                                <label class="form-check-label" for="quiz{{ questao[0] }}-opcao{{ loop.index }}">
-                                    {{ opcao }}
-                                </label>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </fieldset>
-            {% endfor %} 
-    <div class="row">
-     <div class="col-md-10"></div>   
-    <div class="col-md-2"><button type="submit" class="btn-info b-2 mx-2">Seguinte</button></div>
-</div>
-</form>
-{% elif verbal %}
-<div class="d-flex justify-content-center">
-<h1 class="mt-5 text-center">TESTE DE RACIOCÍNIO VERBAL    </h1></div>
-<h4 class="text-center" >A sua tarefa neste teste consiste em ler um texto e, depois, analisar o sentido de cada
-     afirmação que se lhe segue de acordo com as regras seguintes: Escolha a alternativa A
-      se, a partir das informações ou opiniões contidas no texto, a afirmação lhe parecer 
-      VERDADEIRA ou se delas decorrer logicamente. Escolha a alternativa B se, a partir das
-       informações ou opiniões contidas no texto, a afirmação lhe parecer FALSA ou se delas
-        decorrer logicamente o oposto. Escolha a alternativa C se, a partir das informações
-         ou opiniões contidas no texto, a afirmação não lhe parecer verdadeira nem falsa,
-          ou se NÃO PUDER RESPONDER sem informações adicionais.</h4>
-        
-<form action="{{ url_for('teste_ov', tipo='verbal')}}" method="POST" id="ratingForm">
- {% for questao in questoes %}
- {% if loop.index == 1 %}
- <fieldset class="border p-2 my-4 ">
-     <legend class="w-auto legend-small px-5">Texto 1</legend> 
-  <p class="mb-3">Muitas empresas consideram proveitoso empregar estudantes durante o período de Verão, 
-    pois os trabalhadores efectivos optam frequentemente por gozar as suas férias neste período. 
-    Para além disso, algumas empresas sofrem picos de trabalho nesta altura, precisando por isso de recorrer 
-    a pessoal externo. Este trabalho no Verão também atrai os estudantes porque ficam com mais oportunidades 
-    de voltar a essas empresas, depois de terminarem os seus cursos. Interessa portanto que os estudantes
-     aprendam o mais possível acerca da empresa para facilitar a sua eventual futura integração. 
-     Relativamente ao vencimento, é paga uma quantia fixa sem direito a férias ou subsídio de doença.</p>
- </fieldset> 
-
- {% elif loop.index ==5 %}
-  <fieldset class="border p-2 my-4 ">
-      <legend class="w-auto legend-small px-5">Texto 2</legend> 
-   <p class="mb-3">As instituições públicas nacionais adotam uma política antitabagista nas zonas destinadas
-    aos utentes e restantes funcionários. Existem placas informativas e autocolantes nestas áreas para chamar
-     a atenção para esta política. O conteúdo destes avisos não é, no entanto, apresentado de forma muito
-      rígida, já que alguns utentes podem sentir-se incomodados. Se um utente ignorar o aviso,
-       os funcionários estão instruídos para chamarem os Agentes de segurança para o acompanhar para fora do
-        estabelecimento. Na verdade, a maior parte dos utentes já espera estas políticas por parte deste tipo
-  de instituições, à semelhança das agências bancárias, aeroportos, universidades, entre outras. 
-  No fim de contas, este tipo de procedimentos torna as instalações mais saudáveis e reduz o risco de incêndio.</p>
-  </fieldset> 
-
-  {% elif loop.index == 8 %}
-  <fieldset class="border p-2 my-4 ">
-      <legend class="w-auto legend-small px-5">Texto 3</legend> 
-   <p class="mb-3">A mecanização é definida como o processo de utilizar máquinas para realizar tarefas
-     que foram previamente realizadas por pessoas. A automatização, que consiste numa extensão da mecanização,
-      é definida como o processo de realizar operações mecânicas com um envolvimento humano mínimo ou nulo.
-       A automatização é frequentemente utilizada sempre que uma organização enfrenta dificuldades para 
-       produzir um produto com qualidade consistente, bem como quando a tarefa é monótona ou insegura para os
-        funcionários. Os sistemas de automatização podem ser rígidos ou flexíveis. Os sistemas de automatização
-         flexíveis são adaptáveis, permitindo consequentemente a realização de várias funções diferentes. 
-         Nos sistemas de automatização rígidos, cada máquina realiza uma função específica. Em consequência,
-          estes sistemas são menos adaptáveis do que os sistemas de automatização flexíveis.</p>
-        </fieldset>
-        {% endif %}       
-       <fieldset class="panel panel-default border-style-default p-2 my-4">
-                <legend class="panel-heading w-auto legend-small">Pergunta {{ loop.index }}</legend>
-                <div class="panel-body">
-                    <label>{{ questao[1] }}</label>
-                    <div class="row">
-                        {% for opcao in questao[2] %}
-                        <div class="col-xs-12 col-sm-2">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="quiz{{ questao[0] }}" id="quiz{{ questao[0] }}-opcao{{ loop.index }}" value="{{ opcao }}">
-                                <label class="form-check-label" for="quiz{{ questao[0] }}-opcao{{ loop.index }}">
-                                    {{ opcao }}
-                                </label>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </fieldset>
-            {% endfor %} 
-<div class="row">
-    <div class="col-md-10"></div>   
-   <div class="col-md-2"><button type="submit" class="btn-info b-2 mx-2">Seguinte</button></div>
-</div>
-</form>
-{% elif preferencias %}
-<div class="d-flex justify-content-center">
-    <h1 class="mt-5 text-center">TESTE DE PREFERÊNCIAS PROFISSIONAIS </h1></div>
-    <h4 class="text-center">O teste abaixo não tem respostas erradas ou correctas. Para cada número, será dado duas alternativas para escolher apenas uma de acordo com a 
-        sua preferência. Escolhe a alternativa que com que mais se identifica (ou se identificaria). Caso não se identifique com nenhuma das duas 
-        alternativas, faça um esforço para seleccionar aquela que seria mais próxima de si.</h4>
-    
-    <form action="{{ url_for('teste_ov', tipo='preferencias') }}" method="POST" id="ratingForm">
-     {% for questoes in questoes %} 
-     <fieldset class="border-style-default my-4 px-2 py-0 ">
-       <legend class="w-auto legend-small px-5">Alternativa {{loop.index}}</legend> 
-         <div class="form-group">
-            <div class="row centered-paragraph">
-            {% for opcoes in questoes[2] %} 
-            <div class="col-md-5">  
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="quiz{{questoes[0]}}" id="quiz{{questoes[0]}}-opcao{{ loop.index }}" value="{{opcoes}}">
-                <label class="form-check-label" for="quiz{{questoes[0]}}-opcao{{ loop.index }}"> {{opcoes}}</label></div>
-            </div>
-             {% if loop.index == 1 %}
-                <div class="col-md-1">
-                <p class="border-style-default py-2 " style="background-color: transparent;" for="option1">ou</p>
-             </div> 
-             {% endif %}
-            {% endfor %}
-        </div>
-        </div>
-    </fieldset> 
-    {% endfor %} 
-    <div class="row">
-     <div class="col-md-10"></div>   
-    <div class="col-md-2"><button type="submit" class="btn-info b-2 mx-2">Seguinte</button></div>
-</div>
-</form>
-
-{% elif logico %}
-<div class="d-flex justify-content-center">
-    <h1 class="mt-5 text-center">TESTE DE RACIOCÍNIO LÓGICO </h1></div>
-    <h4 class="text-center">Cada problema neste teste consiste numa série de diagramas que seguem
-         uma determinada sequência lógica, que é apresentada no lado esquerdo da página. No lado direito,
-          aparecem cinco alternativas de resposta (A, B, C, D e E). Deve escolher aquela figura que 
-          completa correctamente a sequência apresentada do lado esquerdo.														
-    </h4>
-    
-    <form action="{{ url_for('teste_ov', tipo='logico')}}" method="POST" id="ratingForm">
-        {% for questao in questoes %}
-        <input type="hidden" name="questao" id="" value="{{ questao[0] }}">
-        <fieldset class="panel panel-default border-style-default p-2 my-4" style="background-color: beige;">
-            <legend class="panel-heading w-auto legend-small" >Pergunta {{ loop.index }}</legend>
-            <div class="panel-body" style="background-color: beige;">
-              <label><img src="/static/cod_OV/questao_{{ loop.index }}/q{{ loop.index }}.png" ></label>
-              <div class="row">
-                {% for opcao in questao[2] %}
-                <div class="col-xs-12 col-sm-2">
-                    <div class="form-check">
-                        <input type="radio" name="quiz{{ questao[0] }}" id="quiz{{ questao[0] }}-opcao{{ loop.index }}" value="{{ opcao }}">
-                        <label>{{ opcao }}<img src="/static/cod_OV/questao_{{ questao[0] }}/q{{ questao[0] }}_{{ loop.index }}.png" alt="">
-                        </label>
-                    </div>
-               </div>
+            {% for questoes in questoes %} 
+            <input  type="hidden" name="questao" id="" value="{{questoes[0]}}">
+            <fieldset class="border-style-default p-2 my-4 ">
+              <legend class="w-auto legend-small px-5">Pergunta{{loop.index}}</legend> 
+                   <label>{{questoes[1]}}</label>
+                       <div class="form-row">
+                           {% for opcao in questoes[2] %} 
+                           <div class="form-check mx-3 ml-5">
+                               <input  type="radio" name="quiz{{questoes[0]}}" id="quiz{{questoes[0]}}-opcao{{ loop.index }}" value="{{opcao}}">
+                               <label class=" mx-2" for="quiz{{questoes[0]}}-opcao{{ loop.index }}">
+                                   {{ opcao }}
+                               </label>
+                           </div>
+                           {% endfor %}
+                       </div>
+           </fieldset> 
+           {% endfor %} 
+           <div class="row">
+            <div class="col-md-10"></div>   
+           <div class="col-md-2"><button type="submit" class="btn-info b-2 mx-2">Seguinte</button></div>
+       </div>
+       </form>
+       {% elif verbal %}
+       <div class="d-flex justify-content-center">
+       <h1 class="mt-5">TESTE DE RACIOCÍNIO VERBAL    </h1></div>
+       <h6 class="centered-paragraph" >A sua tarefa neste teste consiste em ler um texto e, depois, analisar o sentido de cada
+            afirmação que se lhe segue de acordo com as regras seguintes: Escolha a alternativa A
+             se, a partir das informações ou opiniões contidas no texto, a afirmação lhe parecer 
+             VERDADEIRA ou se delas decorrer logicamente. Escolha a alternativa B se, a partir das
+              informações ou opiniões contidas no texto, a afirmação lhe parecer FALSA ou se delas
+               decorrer logicamente o oposto. Escolha a alternativa C se, a partir das informações
+                ou opiniões contidas no texto, a afirmação não lhe parecer verdadeira nem falsa,
+                 ou se NÃO PUDER RESPONDER sem informações adicionais.</h6>
+               
+       <form action="{{ url_for('teste_ov', tipo='verbal')}}" method="POST" id="ratingForm">
+        {% for questoes in questoes %}
+        {% if loop.index == 1 %}
+        <fieldset class="border p-2 my-4 ">
+            <legend class="w-auto legend-small px-5">Texto 1</legend> 
+         <p class="mb-3">Muitas empresas consideram proveitoso empregar estudantes durante o período de Verão, 
+           pois os trabalhadores efectivos optam frequentemente por gozar as suas férias neste período. 
+           Para além disso, algumas empresas sofrem picos de trabalho nesta altura, precisando por isso de recorrer 
+           a pessoal externo. Este trabalho no Verão também atrai os estudantes porque ficam com mais oportunidades 
+           de voltar a essas empresas, depois de terminarem os seus cursos. Interessa portanto que os estudantes
+            aprendam o mais possível acerca da empresa para facilitar a sua eventual futura integração. 
+            Relativamente ao vencimento, é paga uma quantia fixa sem direito a férias ou subsídio de doença.</p>
+        </fieldset> 
+       
+        {% elif loop.index ==5 %}
+         <fieldset class="border p-2 my-4 ">
+             <legend class="w-auto legend-small px-5">Texto 2</legend> 
+          <p class="mb-3">As instituições públicas nacionais adotam uma política antitabagista nas zonas destinadas
+           aos utentes e restantes funcionários. Existem placas informativas e autocolantes nestas áreas para chamar
+            a atenção para esta política. O conteúdo destes avisos não é, no entanto, apresentado de forma muito
+             rígida, já que alguns utentes podem sentir-se incomodados. Se um utente ignorar o aviso,
+              os funcionários estão instruídos para chamarem os Agentes de segurança para o acompanhar para fora do
+               estabelecimento. Na verdade, a maior parte dos utentes já espera estas políticas por parte deste tipo
+         de instituições, à semelhança das agências bancárias, aeroportos, universidades, entre outras. 
+         No fim de contas, este tipo de procedimentos torna as instalações mais saudáveis e reduz o risco de incêndio.</p>
+         </fieldset> 
+       
+         {% elif loop.index == 8 %}
+         <fieldset class="border p-2 my-4 ">
+             <legend class="w-auto legend-small px-5">Texto 3</legend> 
+          <p class="mb-3">A mecanização é definida como o processo de utilizar máquinas para realizar tarefas
+            que foram previamente realizadas por pessoas. A automatização, que consiste numa extensão da mecanização,
+             é definida como o processo de realizar operações mecânicas com um envolvimento humano mínimo ou nulo.
+              A automatização é frequentemente utilizada sempre que uma organização enfrenta dificuldades para 
+              produzir um produto com qualidade consistente, bem como quando a tarefa é monótona ou insegura para os
+               funcionários. Os sistemas de automatização podem ser rígidos ou flexíveis. Os sistemas de automatização
+                flexíveis são adaptáveis, permitindo consequentemente a realização de várias funções diferentes. 
+                Nos sistemas de automatização rígidos, cada máquina realiza uma função específica. Em consequência,
+                 estes sistemas são menos adaptáveis do que os sistemas de automatização flexíveis.</p>
+               </fieldset>
+               {% endif %}       
+        <fieldset class="border-style-default p-2 my-4 ">
+          <legend class="w-auto legend-small px-5">Pergunta{{loop.index}}</legend> 
+               <label>{{questoes[1]}}</label>
+               <input  type="hidden" name="questao" id="questao" value="{{questoes[0]}}">
+               <div class="form-row">
+               {% for opcoes in questoes[2] %} 
+               <div class="form-check mx-3 ml-5">
+                   <input  type="radio" name="quiz{{ questoes[0] }}" id="quiz{{questoes[0]}}-opcao{{ loop.index }}" value="{{opcoes}}">
+                   <label class="mx-1" for="quiz{{questoes[0]}}-opcao{{ loop.index }}">
+                       {{opcoes}}
+                   </label>
+               </div> 
                {% endfor %}
-              </div>
-            </div>
-        </fieldset>
-        {% endfor %}
-         <div class="row">
-     <div class="col-md-10"></div>   
-    <div class="col-md-2"><button type="submit" class="btn-info b-2 mx-2">Seguinte</button></div>
-</div>
-</form>
-{% endif %}
-</div>
+       
+           </div>
+       </fieldset> 
+       {% endfor %} 
+       <div class="row">
+           <div class="col-md-10"></div>   
+          <div class="col-md-2"><button type="submit" class="btn-info b-2 mx-2">Seguinte</button></div>
+       </div>
+       </form>
+       {% elif preferencias %}
+       <div class="d-flex justify-content-center">
+           <h1 class="mt-5">TESTE DE PREFERÊNCIAS PROFISSIONAIS </h1></div>
+           <h6 class="centered-paragraph">O teste abaixo não tem respostas erradas ou correctas. Para cada número, será dado duas alternativas para escolher apenas uma de acordo com a 
+               sua preferência. Escolhe a alternativa que com que mais se identifica (ou se identificaria). Caso não se identifique com nenhuma das duas 
+               alternativas, faça um esforço para seleccionar aquela que seria mais próxima de si.</h6>
+           
+           <form action="{{ url_for('teste_ov', tipo='Preferencias') }}" method="POST" id="ratingForm">
+            {% for questoes in questoes %} 
+            <fieldset class="border-style-default my-4 px-2 py-0 ">
+              <legend class="w-auto legend-small px-5">Alternativa {{loop.index}}</legend> 
+                <div class="form-group">
+                   <div class="row centered-paragraph">
+                   {% for opcoes in questoes[2] %} 
+                   <div class="col-md-5">  
+                   <div class="form-check">
+                       <input class="form-check-input" type="radio" name="quiz{{questoes[0]}}" id="quiz{{questoes[0]}}-opcao{{ loop.index }}" value="{{opcoes}}">
+                       <label class="form-check-label" for="quiz{{questoes[0]}}-opcao{{ loop.index }}"> {{opcoes}}</label></div>
+                   </div>
+                    {% if loop.index == 1 %}
+                       <div class="col-md-1">
+                       <p class="border-style-default py-2 " style="background-color: transparent;" for="option1">ou</p>
+                    </div> 
+                    {% endif %}
+                   {% endfor %}
+               </div>
+               </div>
+           </fieldset> 
+           {% endfor %} 
+           <div class="row">
+            <div class="col-md-10"></div>   
+           <div class="col-md-2"><button type="submit" class="btn-info b-2 mx-2">Seguinte</button></div>
+       </div>
+       </form>
+       
+       {% elif logico %}
+       <div class="d-flex justify-content-center">
+           <h1 class="mt-5">TESTE DE RACIOCÍNIO LÓGICO </h1></div>
+           <h6 class="centered-paragraph">Cada problema neste teste consiste numa série de diagramas que seguem
+                uma determinada sequência lógica, que é apresentada no lado esquerdo da página. No lado direito,
+                 aparecem cinco alternativas de resposta (A, B, C, D e E). Deve escolher aquela figura que 
+                 completa correctamente a sequência apresentada do lado esquerdo.														
+           </h6>
+           
+         <form action="{{ url_for('teste_ov', tipo='logico')}}" method="POST" id="ratingForm">
+            {% for questoes in questoes %} 
+            <input  type="hidden" name="questao" id="" value="{{questoes[0]}}">
+            <fieldset class="border-style-default p-2 my-4 ">
+              <legend class="w-auto legend-small px-5">Pergunta{{loop.index}}</legend> 
+                   <label><img src="/static/cod_OV/questao_{{loop.index}}/q{{loop.index}}.png" alt=""></label>
+                       <div class="form-row">
+                           {% for opcao in questoes[2] %}
+                           <div class="form-check mx-3 ml-5">
+                               <input type="radio" name="quiz{{questoes[0]}}" id="quiz{{questoes[0]}}-opcao{{ loop.index }}" value="{{opcao}}">
+                               <label class=" ml-2" for="quiz{{questoes[0]}}-opcao{{ loop.index }}">
+                                   {{opcao}} <strong>) </strong> <img src="/static/cod_OV/questao_{{questoes[0]}}/q{{questoes[0]}}_{{loop.index}}.png" alt="">
+                               </label>
+                       </div>
+                           {% endfor %}
+                       </div>
+           </fieldset> 
+           {% endfor %}
+           <div class="row">
+            <div class="col-md-10"></div>   
+           <div class="col-md-2"><button type="submit" class="btn-info b-2 mx-2">Seguinte</button></div>
+       </div>
+       </form>
+       {% endif %}
+       </div>
+       
 {% endblock %}

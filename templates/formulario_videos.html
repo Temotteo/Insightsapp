@@ -66,13 +66,19 @@ textarea:focus + .label {
             <label class="label" for="mensagem">Descricao:</label>
         </div>
         <div class="form-row">
-            <div class="form-group col-md-12"> 
-                <div class="custom-file">
-                  <input type="file" class="custom-file-label"  id="video" name="video" accept="video/*"  aria-describedby="videoddon01" required>
-                  <label for="video" class="custom-file-label">Upload do Vídeo:</label>
-                </div>
-            </div>
+        <div class="form-group col-md-12"> 
+          <input type="file" class="form-control form-control-lg" id="video" name="video" accept="video/*" aria-label="Large file input example">
         </div>
+        </div>
+        <div class="form-group">
+            <label for="categoria" class="form-label">Categoria</label>
+             <select class="form-control" id="categoria"  name ="categoria" >
+              <option value="">selecione...</option>
+              <option>Testemunho</option>
+              <option>Profecia</option>
+              <option>Louvor</option>
+            </select>
+          </div>
         <div class="form-group">
             <label for="data_video">Data do Vídeo:</label>
             <input type="date" class="form-control" id="data_video" name="data_video" required>
