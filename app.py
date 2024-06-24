@@ -3343,7 +3343,7 @@ def buscar_testemunho():
 # FUNCAO PROJECTO OV
 @app.route('/testes_OV')
 def testes_OV():
-      return redirect( url_for('teste_ov',tipo = 'verbal' )) 
+      return redirect( url_for('teste_ov',tipo = 'iniciar' )) 
                
 @app.route('/teste_ov/<tipo>',methods=['POST','GET'])
 def teste_ov(tipo): 
