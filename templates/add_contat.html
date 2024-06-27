@@ -6,34 +6,79 @@
 <h1>Add Contact</h1>
 <hr>
 {% from "includes/_formhelpers.html" import render_field %}
-<form action="/add_contact" method="post">
-    <div class="form-group">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required><br>
-    </div> 
 
-    <div class="form-group">
-    <label for="location">Location:</label>
-    <input type="text" id="location" name="location"><br>
+    <p>Aqui você pode criar os detalhes da organização como projetos e grupos.</p>
+    <p>Exemplo de como criar projetos e grupos:</p>
+  
+    {% if erro %}
+    <div class="alert alert-danger">{{erro}}</div>
+   {% endif %} 
+   <a class="icon-link icon-link-hover"  href="#">
+    <use xlink:href="#clipboard"></use></svg>
+     @importar dados do excel
+   </a>
+    <form action="/add_contact"  method="post">
+      <div class="form-group">
+        <label for="nome">Nome:</label>
+        <input type="hidden" name="orgId" value="{% if org %}{{ org.id }}{% endif %}">
+        <input type="text" class="form-control" id="nome" name="name" placeholder="Digite o nome" required>
+      </div>
+      <div class="form-group">
+        <label for="nomeGrupo">location:</label>
+        <input type="text" class="form-control" id="local" name="location" placeholder="Digite uma referencia"{% if grp %} value="{{ grp.nome }}" {% endif %} required>
+      </div>
+  
+      <div class="form-group">
+        <label for="gender">gender:</label>
+        <select class="form-control" id="gender"  name ="gender" >
+          <option value="">selecione...</option>
+          <option value="Masculino">Masculino</option>
+          <option value="Femenino">Femenino</option>
+        </select>
+       </div>
+      <div class="row">
+        <div class="col-sm-7">
+          <div class="form-group">
+          <label for="nrdocumento" class="form-label">Contacto</label>
+          <input type="text" class="form-control" id="nrdocumento" name ="phone" placeholder="insere o numero de contacto" required>
+          <div class="invalid-feedback">
+            codigo do documento requerido.
+          </div>
+        </div>
+      </div>
+  
+      <div class="col-sm-5">
+        <div class="form-group">
+        <label for="country" class="form-label">Grupo</label>
+        <select class="form-control" id="country"  name ="grupo" >
+          <option value="">selecione...</option>
+          {% if grupo %}
+          {% for grupo in grupo %}
+              <option value="{{ grupo[0] }}">{{ grupo[1] }}</option>
+          {% endfor %}
+        {% endif %}
+        </select>
+      </div>
+      </div>
     </div>
-    
-    <div class="form-group">
-    <label for="phone">Phone:</label>
-    <input type="text" id="phone" name="phone"><br>
-    </div>
-
-    <div class="form-group">
-    <label for="gender">Gender:</label>
-    <input type="text" id="gender" name="gender"><br>
-    </div>
-    
-    
-    <input type="submit" class="btn btn-success" value="Add Contact">
-</form>
-
+      <div class="d-flex gap-2 justify-content-start ">
+        <button type="submit" class="btn btn-info px-4">Criar</button>
+        {% if org %}  
+        <a href="{{ url_for('detalhes_proj', org_id=org.id) }}" class="btn  btn-danger ml-3 px-4" title="Detalhes">voltar</a>
+        {% endif %}
+      </div>    
+     
+    </form>
+    <hr>
+  </div>
+  </div>
+  
 <hr>
+<div class="container">
 <h2>Contact List</h2>
-
+{% if sucesso %}
+  <div class="alert alert-danger">{{erro}}</div>
+ {% endif %}
 <table class="table table-striped">
     <tr>
         <th>Name</th>
@@ -46,11 +91,11 @@
     <tr>
         <td>{{ contact[1] }}</td>
         <td>{{ contact[2] }}</td>
-        <td>{{ contact[3] }}</td>
+        <td><a href="{{ url_for('detalhes_contact', id=contact[0]) }}">{{ contact[3] }}</a></td>
         <td>{{ contact[4] }}</td>
         <td>{{ contact[5] }}</td>
     </tr>
     {% endfor %}
 </table>
-
+</div>
 {% endblock %}

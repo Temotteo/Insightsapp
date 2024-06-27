@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+    <div class="container">
+        {% if ticket %}
+        <h1>{{ ticket[1] }}</h1>
+        <p><strong>Descrição:</strong> {{ ticket[2] }}</p>
+        <p><strong>Dificuldade:</strong> {{ ticket[3] }}</p>
+        <p><strong>Dificuldade:</strong> {{ ticket[4] }}</p>
+        <p><strong>Status:</strong> {{ ticket[5] }}</p>
+        <p><strong>Data:</strong> {{ ticket[7] }}</p>
+        <p><strong>Funcionário Atribuído:</strong> {{ ticket[8] }}</p>
+        
+        {% if ticket.prazo_conclusao %}
+        <p><strong>Prazo de Conclusão:</strong> {{ ticket[8].strftime('%d/%m/%Y') }}</p>
+        {% endif %}
+        <a href="{{ url_for('atribuir_ticket', ticket_id=ticket[0]) }}" class="text-success">Atribuir Ticket</a><br>
+        <a href="{{ url_for('tickets') }}" class="text-danger mr-4">Voltar</a>
+        {% endif %}
+    </div>
+    
+    {% endblock %}

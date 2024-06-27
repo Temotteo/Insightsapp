@@ -1,0 +1,81 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+    <div class="container">
+        <h1>Lista de Tickets</h1>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Titulo</th>
+                    <th>Descrição</th>
+                    <th>Categoria</th>
+                    <th>Prioridade</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket[0] }}</td>
+                    <td><a href="{{ url_for('ticket', id=ticket[0]) }}">{{ ticket[1] }}</a></td>
+                    <td>{{ ticket[2] }}</td>
+                    <td>{{ ticket[3] }}</td>
+                    <td>{{ ticket[4] }}</td>
+                    <td>{{ ticket[5] }}</td>
+                    <td><a href="{{ url_for('funcionarios', ticket_id=ticket[0]) }}" class="text-secondary"><i class="fa fa-wallet" ></i> Atribuir tickets</a></td>
+                    <td><a href="{{ url_for('concluir_ticket', ticket_id=ticket[0]) }} " onclick="return confirm('Tem certeza que deseja concluir este ticket?')" class="text-secondary" data-toggle="tooltip" data-placement="top" title="concluir ticket"><i class="fa fa-check-circle" ></i></a>
+                        <button type="button" class="text-secondary btn btn-default" data-toggle="modal" data-target="#editarTicket{{ ticket[0] }}" data-toggle="tooltip" data-placement="top" title="Editar ticket">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <!-- Modal para editar ticket -->
+                        <div class="modal" id="editarTicket{{ ticket[0] }}" tabindex="-1" role="dialog" aria-labelledby="editarTicketModalLabel{{ ticket[0] }}" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title" id="editarTicketModalLabel{{ ticket[0] }}">Editar Ticket {{ ticket[0] }}</h4>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar"><span aria-hidden="true">&times;</span></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form method="post" action="{{ url_for('atualizar_ticket', id=ticket[0]) }}">
+                                            <div class="form-group">
+                                                <label for="titulo{{ ticket[0] }}">Título</label>
+                                                <input type="text" class="form-control" id="titulo{{ ticket[0] }}" name="titulo" value="{{ ticket[1] }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="descricao{{ ticket[0] }}">Descrição</label>
+                                                <textarea class="form-control" id="descricao{{ ticket[0] }}" name="descricao">{{ ticket[2] }}</textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="dificuldade{{ ticket[0] }}">Prioridade</label>
+                                                <select class="form-control" id="dificuldade{{ ticket[0] }}" name="dificuldade">
+                                                    <option value="Baixa" {% if ticket[4] == 'Baixa' %} selected {% endif %}>Baixa</option>
+                                                    <option value="Média" {% if ticket[4] == 'Média' %} selected {% endif %}>Média</option>
+                                                    <option value="Alta" {% if ticket[4] == 'Alta' %} selected {% endif %}>Alta</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="status{{ ticket[0] }}">Status</label>
+                                                <select class="form-control" id="status{{ ticket[0] }}" name="status">
+                                                    <option value="Aberto" {% if ticket[5] == 'Aberto' %} selected {% endif %}>Aberto</option>
+                                                    <option value="Em andamento" {% if ticket[5] == 'Em andamento' %} selected {% endif %}>Em andamento</option>
+                                                    <option value="Concluído" {% if ticket[5] == 'Concluído' %} selected {% endif %}>Concluído</option>
+                                                </select>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Atualizar Ticket</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <a href="{{ url_for('deletar_ticket', ticket_id=ticket[0]) }}" class="text-secondary"  onclick="return confirm('Tem certeza que deseja excluir este ticket?')" data-toggle="tooltip" data-placement="top" title="deletar"><i class="fas fa-trash-alt"></i></a>
+                  </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{ url_for('novo_ticket') }}" class="btn btn-primary">Novo Ticket</a>
+    </div>
+
+    {% endblock %}

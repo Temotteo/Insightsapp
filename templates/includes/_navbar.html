@@ -1,10 +1,14 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="container py-0">
-      <div class="collapse navbar-collapse " id="navbarNav">
-          <ul class="navbar-nav mr-auto">
+<link href="/static/css/insghtscss.css" rel="stylesheet">
+<nav class="navbar navbar-expand-lg navbar-light bg-light" aria-label="Eighth navbar example">
+  <div class="container div">
+      <button class="navbar-toggler me-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
               {% if session.logged_in %}
               <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Automação <span class="caret-down"></span></a>
+                  <a class="nav-link dropdown-toggle"  href="#" id="navbarDropdown1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Automação <span class="caret-down"></span></a>
                   <ul class="dropdown-menu" aria-labelledby="navbarDropdown1">
                       <li class="dropdown-header">Relatórios</li>
                       <li><a class="dropdown-item" href="/Relatorio_obra">Relatório de Obra</a></li>
@@ -96,18 +100,20 @@
                     <li><a class="dropdown-item" href="{{ url_for('resultado', usuario_id=1 ) }}">Resultados</a></li>
                 </ul>
             </li>
-            {% if org %}
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Saldo: {{ org[3] }}</a>
-                </li>
-            {% endif %}
+            
+           
             {% endif %}
         </ul>
         <ul class="navbar-nav ml-auto">
             {% if session.logged_in %}
+            <ul class="navbar-nav ml-lg-auto ml-5">
+                <li class="nav-item ">
+                    <a class="nav-link" href="#">Saldo: {{ session.saldo }}</a>
+                </li>
+            </ul>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown8" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Login como <strong>{{session.username}}</strong> na Org: <strong>{% if org %}{{ org[1] }}{% else %}{{session.last_org}}{% endif %}</strong> <span class="caret-down"></span>
+                    Login como <strong>{{session.username}}</strong> na Org: <strong>{% if session.org_id %}{{ session.org_id }}{% else %}{{session.last_org}}{% endif %}</strong> <span class="caret-down"></span>
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown8">
                     <a class="dropdown-item" href="/tasks">Minhas Atividades</a>
@@ -115,8 +121,9 @@
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item disabled" href="#">Meus Dados</a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#" onclick="carregarDados()">Mudar de Org.</a>
+                    <a class="dropdown-item" href="#" onclick="carregarDados('session.org_id')">Mudar de Org.</a>
                     <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="/tickets">tickets</a>
                     <a class="dropdown-item" href="/tasks">Minha Conta</a>
                     <a class="dropdown-item" href="/logout">Logout</a>
         
@@ -132,7 +139,7 @@
             {% endif %}
         </ul>
     </div>
-</div>
+  </div>
 </nav>
 
 <!-- Modal -->
@@ -150,7 +157,7 @@
         <table class="table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>ORG_ID</th>
               <th>Nome</th>
               <th>Saldo</th>
             </tr>
@@ -168,37 +175,38 @@
 
 
 <script>
-  function carregarDados() {
-      $.get('/saltar_org_id', function(data) {
-          $('#modalTableBody').empty();
-          data.forEach(function(item) {
-              var linha = `<tr>
-                              <td>${item.id}</td>
-                              <td>${item.nome}</td>
-                              <td>${item.Saldo}</td>
-                              <td>
-                                  <button class="btn btn-primary btn-sm" onclick="verDetalhes(${item.id})">
-                                      <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Ver
-                                  </button>
-                              </td>
-                          </tr>`;
-              $('#modalTableBody').append(linha);
-          });
-          // Abre o modal após carregar os dados
-          $('#Modal').modal('show');
-      });
-  }
-  function verDetalhes(id) {
-      fetch(`/get_org/${id}`, {
-              method: 'GET'
-          })
-          .then(response => {
-              if (response.redirected) {
-                  window.location.href = response.url;
-              }
-          })
-          .catch(error => {
-              console.error('Erro ao enviar dados:', error);
-          });
-  }
+ function carregarDados() {
+    $.get('/saltar_org_id', function(data) {
+        $('#modalTableBody').empty();
+        data.forEach(function(item) {
+            var linha = `<tr>
+                            <td>${item.id}</td>
+                            <td>${item.nome}</td>
+                            <td>${item.Saldo}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" onclick="verDetalhes('${item.id}')">
+                                    <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Ver
+                                </button>
+                            </td>
+                        </tr>`;
+            $('#modalTableBody').append(linha);
+        });
+        // Abre o modal após carregar os dados
+        $('#Modal').modal('show');
+    });
+}
+function verDetalhes(id) {
+    fetch(`/get_org/${id}`, {
+            method: 'GET'
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao enviar dados:', error);
+        });
+}
 </script>
+<script src="/static/js/bootstrap.bundle.min.js"></script>

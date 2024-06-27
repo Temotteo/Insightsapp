@@ -1,14 +1,15 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-  <div class="container">
+<link href="/static/css/insghtscss.css" rel="stylesheet">
+  <div class="container div">
     {% if user %}
       {% if session.username == "Temoteo"  or session.username == "Marta" or session.username == "Shelton" %}
       <h2 class="mt-5">Relatório</h2>
       <ul>
       {% for relatorio in relatorios %}
          <li>
-            <strong>Relatorio referente a obra de {{ relatorio[7] }}</strong> | Data: {{ relatorio[5] }}   {% if relatorio[0] %}<a href="{{ url_for('gerar_pdf', id= relatorio[0] ) }}"  class="icon-link icon-link-hover " style="margin-left: 20px;" title="Detalhes">
+            <strong class="col-md-6">Relatorio referente a obra de {{ relatorio[7] }}</strong> | Data: {{ relatorio[5] }}   {% if relatorio[0] %}<a href="{{ url_for('gerar_pdf', id= relatorio[0] ) }}"  class="icon-link icon-link-hover " style="margin-left: 20px;" title="Detalhes">
               <i class="fas fa-file-pdf"> </i> baixar pdf  {% endif %} 
          </a>
          <a href="{{ url_for('ver_relatorio', id= relatorio[0] ) }}"  class="icon-link icon-link-hover " style="margin-left: 20px;" title="Detalhes">
