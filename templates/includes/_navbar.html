@@ -1,6 +1,6 @@
 <link href="/static/css/insghtscss.css" rel="stylesheet">
 <nav class="navbar navbar-expand-lg navbar-light bg-light" aria-label="Eighth navbar example">
-  <div class="container div">
+  <div class="container-fluid ml-5">
       <button class="navbar-toggler me-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -102,15 +102,12 @@
             </li>
             
            
-            {% endif %}
         </ul>
-        <ul class="navbar-nav ml-auto">
-            {% if session.logged_in %}
-            <ul class="navbar-nav ml-lg-auto ml-5">
+        <ul class="navbar-nav ml-auto ">
                 <li class="nav-item ">
-                    <a class="nav-link" href="#">Saldo: {{ session.saldo }}</a>
+                    <a class="nav-link" href="#"><p>Saldo: {{ session.saldo }}</p></a>
                 </li>
-            </ul>
+           
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown8" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Login como <strong>{{session.username}}</strong> na Org: <strong>{% if session.org_id %}{{ session.org_id }}{% else %}{{session.last_org}}{% endif %}</strong> <span class="caret-down"></span>
@@ -174,39 +171,5 @@
 </div>
 
 
-<script>
- function carregarDados() {
-    $.get('/saltar_org_id', function(data) {
-        $('#modalTableBody').empty();
-        data.forEach(function(item) {
-            var linha = `<tr>
-                            <td>${item.id}</td>
-                            <td>${item.nome}</td>
-                            <td>${item.Saldo}</td>
-                            <td>
-                                <button class="btn btn-primary btn-sm" onclick="verDetalhes('${item.id}')">
-                                    <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Ver
-                                </button>
-                            </td>
-                        </tr>`;
-            $('#modalTableBody').append(linha);
-        });
-        // Abre o modal após carregar os dados
-        $('#Modal').modal('show');
-    });
-}
-function verDetalhes(id) {
-    fetch(`/get_org/${id}`, {
-            method: 'GET'
-        })
-        .then(response => {
-            if (response.redirected) {
-                window.location.href = response.url;
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao enviar dados:', error);
-        });
-}
-</script>
+<script src="/static/js/modal.js"> </script>
 <script src="/static/js/bootstrap.bundle.min.js"></script>

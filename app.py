@@ -2,7 +2,7 @@ import os
 from twilio.rest import Client
 from twilio.twiml.voice_response import VoiceResponse
 
-from flask import Flask, render_template, request, session, flash, session, logging, url_for, redirect, Response,  send_from_directory, jsonify, send_file
+from flask import Flask, render_template, request, session, flash, session, logging, url_for, redirect, Response,  send_from_directory, jsonify, send_file, g
 import psycopg2
 from markupsafe import escape
 from flask_sqlalchemy import SQLAlchemy
@@ -22,6 +22,8 @@ import base64
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
+import logging
+import time
 
 from flask_babel import Babel
 
@@ -52,6 +54,29 @@ import numpy as np
 
 app = Flask(__name__)
 
+logging.basicConfig(level=logging.INFO)
+
+@app.before_request
+def before_request():
+    # Código antes da requisição
+    pass
+
+@app.after_request
+def after_request(response):
+    # Código após a requisição
+    return response
+
+@app.teardown_request
+def teardown_request(exception):
+    if exception:
+        app.logger.error(f"Erro: {exception}")
+        return render_template('erro.html', error=exception), 500
+    
+# Tratamento global de exceções
+@app.errorhandler(Exception)
+def handle_exception(e):
+    app.logger.error(f"Erro inesperado: {e}")
+    return render_template('erro.html', error= e), 500    
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
@@ -683,7 +708,7 @@ def add_contact():
       cursor.execute("SELECT * FROM grupo ;")
       grupo = cursor.fetchall()
 
-      cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contact_org.org_id = '{org_id}';")
+      cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contacts.phone ='{phone}' and contact_org.org_id = '{org_id}';")
       contactos = cursor.fetchone()
     except psycopg2.Error as e:
        error_msg = f"Erro ao fazer a transação: {e}"
@@ -2998,6 +3023,8 @@ def ver_relatorio(id):
    except psycopg2.Error as e:
         error_msg = f"Erro ao fazer a transação: {e}"
         return render_template('erro.html', error=error_msg) 
+   
+
 
 @app.route('/pdf_obra')
 @is_logged_in
@@ -3020,7 +3047,6 @@ def pdf_obra():
     JOIN 
     cliente ON relatorios.cliente_id = cliente.id; """)
     relatoriopdf = cur.fetchall() 
-    cur.close()
     conn.close()
     return render_template('relatorio_de_obra_pdf.html', user=user, relatorios=relatoriopdf)
    except psycopg2.Error as e:
@@ -3096,6 +3122,7 @@ def novo_cliente():
     except psycopg2.Error as e:
         error_msg = f"Erro ao fazer a transação: {e}"
         return render_template('erro.html', error=error_msg)
+    
 
 @app.route('/edit_cliente/<int:id>', methods=['GET','POST'])
 def edit_cliente(id):
@@ -3197,6 +3224,8 @@ def gerar_pdf(id):
 
     return send_file(filename, as_attachment=True)
 
+
+
 # FUNCAO DE BUTAO SALTAR
 @app.route('/saltar_org_id', methods=['GET'])
 @is_logged_in
@@ -3214,12 +3243,30 @@ def saltar_org_id():
     
     cursor.execute(f"SELECT * FROM organizacao join usuario_org on organizacao.org_id = usuario_org.org_id where usuario_org.usuario_id = 15798 ;")
     orgs = cursor.fetchall()
-    print(orgs)
     conn.close()
     data = [{'id': org[1], 'nome': org[0], 'Saldo': org[7]} for org in orgs]
 
     return jsonify(data)
 
+
+# essa funcao busca os grupos possiveis para selecao para enviar a sms
+@app.route('/selecionar_group', methods=['GET'])
+@is_logged_in
+def selecionar_group():
+    org_id = session['org_id']
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+    print(org_id)
+    
+    cursor.execute(f"SELECT * FROM grupo")
+    grupos = cursor.fetchall()
+    conn.close()
+    data = [{'id': grupo[0], 'nome': grupo[1] }for grupo in grupos]
+
+    return jsonify(data)
+
+
+# essa metodo pega a Org_id selecionada e redericiona o usuario na organizacao
 @app.route('/get_org/<org_id>', methods=['GET'])
 def get_org(org_id):
     print( "cheguei")
@@ -3243,6 +3290,9 @@ def org_id(org_id):
     session['saldo'] = org[7]
 
     return render_template('tasks.html')
+
+
+
 
 # FUNCAO DE RELATORIO DE CAMERAS
 @app.route('/Relatorio_camera')
@@ -3404,8 +3454,10 @@ def gerar_pdf_cameras(id_resumo):
     return send_file(filename, as_attachment=True)
 
 
+
 UPLOAD_FOLDER = 'static/videos'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 
 
 @app.route('/videos', methods=['GET','POST'])
@@ -3442,6 +3494,9 @@ def videos():
     conn.close()        
     return render_template('Testemunhos.html', testemunhos=testemunhos)
         
+
+
+
     
 @app.route('/formulario_videos')
 def formulario_videos():
@@ -3459,6 +3514,9 @@ def atualizar(id):
 
     return redirect('/videos')
 
+
+
+
 @app.route('/Link_video/<int:testemunho_id>',methods=['GET'])
 def Link_video(testemunho_id):
     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
@@ -3467,6 +3525,9 @@ def Link_video(testemunho_id):
     testemunho = cur.fetchone()
     conn.close() 
     return redirect(url_for('detalhes', nome=testemunho[1]))
+
+
+
 
 @app.route('/detalhes/<nome>',methods=['POST','GET'])
 def detalhes(nome):
@@ -3487,6 +3548,8 @@ def detalhes(nome):
         return render_template('Testemunhos.html', testemunhos=testemunhos, erro=erro)
       
 
+
+
 @app.route('/buscar_testemunho', methods=['POST'])
 def buscar_testemunho(): 
     nome = request.form['nome']
@@ -3502,11 +3565,17 @@ def buscar_testemunho():
      error_msg = f"Erro ao fazer a transação: {e}"
      return render_template('erro.html', error=error_msg) 
 
+
+
+
 # FUNCAO PROJECTO OV
 @app.route('/testes_OV')
 def testes_OV():
       return redirect( url_for('teste_ov',tipo = 'iniciar' )) 
-               
+
+
+
+
 @app.route('/teste_ov/<tipo>',methods=['POST','GET'])
 def teste_ov(tipo): 
   if request.method =='POST':
@@ -3582,7 +3651,9 @@ def teste_ov(tipo):
      error_msg = f"Erro ao fazer a transação: {e}"
      return render_template('erro.html', error=error_msg) 
     
-     
+
+
+
 # Rota para a página de avaliação
 @app.route('/resultado/<int:usuario_id>')
 def resultado(usuario_id):
@@ -3630,6 +3701,9 @@ def resultado(usuario_id):
   total_respostas = [ percentual_correto_logico, percentual_correto_numerico,  percentual_correto_verbal] 
   return render_template('resultado.htm', resultados=resultados,  tipo=tipo, total_respostas=total_respostas, usuario=usuario)
 
+
+
+
 @app.route('/reniciar/<int:usuario_id>')
 def reniciar(usuario_id):
     try:
@@ -3654,6 +3728,8 @@ def reniciar(usuario_id):
     logico = True
     return render_template('testes_OV.html', questoes=questoes, logico = logico)
 
+
+
 # FUNCAO DE TICKETS
 db_params = {
     'user': 'admin',
@@ -3674,6 +3750,9 @@ def connect_to_db():
 @app.route('/suport')
 def suport():
     return render_template('novo_ticket.html')
+
+
+
 
 @app.route('/tickets')
 def tickets():
@@ -3701,6 +3780,9 @@ def ticket(id):
     conn.close() 
     return render_template('ticket.html', ticket=ticket)
 
+
+
+
 @app.route('/novo_ticket', methods=['GET', 'POST'])
 def novo_ticket():
     if request.method == 'POST':
@@ -3725,6 +3807,9 @@ def novo_ticket():
         return  redirect(url_for('confirmacao', ticket_id=ticket_id))
     return render_template('novo_ticket.html')
 
+
+
+# metodo para atualizar tickets
 @app.route('/atualizar_ticket/<int:id>', methods=['GET', 'POST'])
 def atualizar_ticket(id):
     if request.method == 'POST':
@@ -3743,6 +3828,9 @@ def atualizar_ticket(id):
           return render_template('erro.html', error=error_msg)  
         conn.close() 
         return redirect(url_for('tickets'))
+
+
+        
     
 @app.route('/confirmacao/<ticket_id>')
 def confirmacao(ticket_id):
@@ -3773,6 +3861,9 @@ def funcionarios(ticket_id):
         if func[6] != 'Ocupado':
             funcionarios.append(func)
     return render_template('atribuir_ticket.html', ticket=ticket, funcionarios=funcionarios)
+
+
+
 
 @app.route('/atribuir_ticket/<int:ticket_id>', methods=['GET', 'POST'])
 def atribuir_ticket(ticket_id):
@@ -3807,6 +3898,9 @@ def atribuir_ticket(ticket_id):
              funcionarios.append(f)
     return render_template('atribuir_ticket.html', ticket=ticket, funcionarios=funcionarios)
 
+
+
+
 @app.route('/deletar_ticket/<int:ticket_id>', methods=['GET', 'POST'])
 def deletar_ticket(ticket_id):
     conn = connect_to_db()
@@ -3823,6 +3917,8 @@ def deletar_ticket(ticket_id):
     except psycopg2.Error as e:
      error_msg = f"Erro ao fazer a transação: {e}"
      return render_template('erro.html', error=error_msg)  
+
+
     
 @app.route('/concluir_ticket/<int:ticket_id>', methods=['GET', 'POST'])
 def concluir_ticket(ticket_id):
