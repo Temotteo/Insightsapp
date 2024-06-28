@@ -3988,7 +3988,7 @@ def deletar_ticket(ticket_id):
      return render_template('erro.html', error=error_msg)  
 
 
-    
+ #funcao   
 @app.route('/concluir_ticket/<int:ticket_id>', methods=['GET', 'POST'])
 def concluir_ticket(ticket_id):
     conn = connect_to_db()
