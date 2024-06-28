@@ -695,7 +695,7 @@ def add_contact():
       return render_template('erro.html', error=error_msg) 
    
     agent = 'Saldo insuficiente, Recarregue a sua conta!'
-    
+
    else: 
     org_id = session['org_id']
     try: 
@@ -4011,8 +4011,8 @@ def concluir_ticket(ticket_id):
     
 if __name__ == '__main__':
     app.secret_key='secret123'
-    app.run(debug=True)
-    #http_server = WSGIServer(('', 5000), app)
-    #http_server.serve_forever()
+    #app.run(debug=True)
+    http_server = WSGIServer(('', 5000), app)
+    http_server.serve_forever()
     
 
