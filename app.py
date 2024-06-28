@@ -101,6 +101,7 @@ TWILIO_ACCOUNT_SID = "AC952933e9303a9c0021be3c0ce432caec"
 TWILIO_AUTH_TOKEN = "5e14a5105201307f6d9a77af3fd81853"
 TWILIO_PHONE_NUMBER = '+19495652625'
 
+
 # URLs of audio files for each question
 QUESTION_AUDIO_URLS = [
     "https://insightsap.com/audio/conjutiviteintro.mp3",
@@ -678,27 +679,46 @@ class ProformaInvoiceForm(FlaskForm):
 @app.route('/add_contact', methods=['GET', 'POST'])
 @is_logged_in
 def add_contact():
-   org_id = session['org_id']
-   try: 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-    cursor = conn.cursor()
-    cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contact_org.org_id = '{org_id}';")
-    contacts = cursor.fetchall()
-    cursor.execute("SELECT * FROM grupo ;")
-    grupo = cursor.fetchall()
-    conn.close()
-   except psycopg2.Error as e:
-     error_msg = f"Erro ao fazer a transação: {e}"
-     return render_template('erro.html', error=error_msg) 
    
-   if request.method == 'POST':
-    name = request.form['name']
-    location = request.form['location']
-    phone = request.form['phone']
-    gender = request.form['gender']
-    grupo_id = request.form['grupo']
+   if session['last_org']:
+    org_id =session['last_org']
+    try: 
+     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+     cursor = conn.cursor()
+     cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contact_org.org_id = '{org_id}';")
+     contacts = cursor.fetchall()
+     cursor.execute("SELECT * FROM grupo ;")
+     grupo = cursor.fetchall()
+     conn.close()
+    except psycopg2.Error as e:
+      error_msg = f"Erro ao fazer a transação: {e}"
+      return render_template('erro.html', error=error_msg) 
+   
+    agent = 'Saldo insuficiente, Recarregue a sua conta!'
+    
+   else: 
+    org_id = session['org_id']
+    try: 
+     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+     cursor = conn.cursor()
+     cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contact_org.org_id = '{org_id}';")
+     contacts = cursor.fetchall()
+     cursor.execute("SELECT * FROM grupo ;")
+     grupo = cursor.fetchall()
+     conn.close()
+    except psycopg2.Error as e:
+      error_msg = f"Erro ao fazer a transação: {e}"
+      return render_template('erro.html', error=error_msg) 
+   
+    if request.method == 'POST':
+     name = request.form['name']
+     location = request.form['location']
+     phone = request.form['phone']
+     gender = request.form['gender']
+     grupo_id = request.form['grupo']
      
-    try:
+    
+     try:
       #Connect to database
       conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
        
@@ -710,13 +730,13 @@ def add_contact():
 
       cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contacts.phone ='{phone}' and contact_org.org_id = '{org_id}';")
       contactos = cursor.fetchone()
-    except psycopg2.Error as e:
+     except psycopg2.Error as e:
        error_msg = f"Erro ao fazer a transação: {e}"
        return render_template('erro.html', error=error_msg) 
-    if contactos:
+     if contactos:
           erro = 'Este número de telefone já está registrado.'
           return render_template('add_contat.html', contacts=contacts, grupo = grupo,erro =erro)
-    else:    
+     else:    
         # Insert a new contact into the database
         insert_query1 = '''
             INSERT INTO contacts (name, location, phone, gender, org_id)
@@ -736,16 +756,18 @@ def add_contact():
 
         cursor.execute(insert_query2, (contact_id, org_id))
         conn.commit()
-
-        cursor.execute(insert_query3, (contact_id,grupo_id ))
-        conn.commit()
+        if grupo_id:
+          cursor.execute(insert_query3, (contact_id,grupo_id ))
+          conn.commit()
 
         cursor.execute("SELECT * FROM contacts where org_id ="+"'"+ str(org_id)+"';")
         contacts = cursor.fetchall()
         conn.close()
         return render_template('add_contat.html', contacts=contacts,grupo = grupo)
-
-   return render_template('add_contat.html', contacts=contacts, grupo = grupo)
+    else:
+        return render_template('add_contat.html', contacts=contacts,grupo = grupo)
+   
+   return render_template('add_contat.html', contacts=contacts, grupo = grupo, agent= agent)
 
 
 @app.route('/edit_contact/<int:id>', methods=['GET','POST'])
@@ -1132,6 +1154,7 @@ def send_sms(msg,dst,sender_id):
   cursor.execute("""INSERT INTO sms("from",dst,body,account_sid,auth_token,data) VALUES ('%s','%s','%s','%s','%s','%s')""" %(sender_id, dst, msg, account_sid, auth_token, data1))
   
   conn.commit()
+  return message.sid
 
 @app.route('/saldo', methods=['GET', 'POST'])
 @is_logged_in
@@ -1723,25 +1746,40 @@ def testes():
         print(form.sms.data)
         
         # Send SMS
-        send_sms(form.sms.data,str("+258"+form.contacto.data),form.site.data)
+        #sid= send_sms(form.sms.data,str("+258"+form.contacto.data),form.site.data)
+        account_sid = "AC952933e9303a9c0021be3c0ce432caec"
+        auth_token = "5e14a5105201307f6d9a77af3fd81853"
         
+        message_sid = 'SMbc7fc62463f463c39ba12f9be200802a'
+        client = Client(account_sid, auth_token)
+        messagem = client.messages(message_sid).fetch()
+        status = messagem.status
+        print(f'este e o status do encio da mensagem:  {status}')
         # Execute query
-        cmd='INSERT INTO envio_sms("Mensagem", "Contato", "NV_enviadas", "sender_id") VALUES ('+"'"+form.sms.data+"'"+",'"+str("+258"+form.contacto.data)+"','0','"+form.site.data+"')"
+        cmd='INSERT INTO envio_sms(mensagem, contato, nv_enviadas, sender_id, status_sms) VALUES ('+"'"+form.sms.data+"'"+",'"+str("+258"+form.contacto.data)+"','0','"+form.site.data+"'"+status+"'"+') RETURNING id_alerta'
 
         cursor.execute(cmd)
+        dnh = cursor.fetchone()[0]
         print(cmd)
+        print(f"Este e o dnh: {dnh}")
         # Commit to DB
         conn.commit()
 
         # Close connection
         conn.close()
 
-        flash('Teste criado com sucesso', 'success')
+        flash(f'Teste criado com sucesso {status}', 'success')
 
         return redirect(url_for('testes'))
 
     return render_template('testes.html', form = form)
 
+
+def status_sms(message_sid):
+    message = Client.messages(message_sid).fetch()
+    status_msg = message.status
+
+    return  status_msg
 
 # User login
 @app.route('/login', methods=['GET', 'POST'])
@@ -1842,7 +1880,7 @@ def login():
              session['username'] = username
 
              session['last_org'] = str(resulte[6])
-             session['org_id'] = " "
+             
              session['saldo'] = "00.0"
              dados = str(resulte[6])
 
@@ -3234,14 +3272,14 @@ def saltar_org_id():
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
     print(org_id)
-    #user = session['username']
-    #query ="SELECT id FROM user where "+ ' "user"=' + "'" + user + "';"
-    #cursor.execute(query)
-    #user_id= cursor.fetchone()[0]
-    #cursor.execute('SELECT * FROM usuario_org WHERE usuario_id = %s ;',(user_id,))
-    #user_id= cursor.fetchone()[0]
-    
-    cursor.execute(f"SELECT * FROM organizacao join usuario_org on organizacao.org_id = usuario_org.org_id where usuario_org.usuario_id = 15798 ;")
+    user = session['username']
+    query ="SELECT * FROM usuarios where "+ ' "user"=' + "'" + user + "';"
+    cursor.execute(query)
+    user_id= cursor.fetchone()[0]
+    print(user_id)
+    cursor.execute(f"SELECT * FROM grupo")
+    grupos = cursor.fetchall()
+    cursor.execute(f"SELECT * FROM organizacao join usuario_org on organizacao.org_id = usuario_org.org_id where organizacao.org_id = '{org_id}' and usuario_org.usuario_id = {user_id} ;")
     orgs = cursor.fetchall()
     conn.close()
     data = [{'id': org[1], 'nome': org[0], 'Saldo': org[7]} for org in orgs]
@@ -3256,7 +3294,6 @@ def selecionar_group():
     org_id = session['org_id']
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
-    print(org_id)
     
     cursor.execute(f"SELECT * FROM grupo")
     grupos = cursor.fetchall()
@@ -3269,7 +3306,6 @@ def selecionar_group():
 # essa metodo pega a Org_id selecionada e redericiona o usuario na organizacao
 @app.route('/get_org/<org_id>', methods=['GET'])
 def get_org(org_id):
-    print( "cheguei")
     return redirect(url_for('org_id',org_id=org_id))
 
 @app.route('/org_id/<org_id>', methods=['GET'])
@@ -3291,6 +3327,39 @@ def org_id(org_id):
 
     return render_template('tasks.html')
 
+
+@app.route('/enviar_sms_grupo', methods=['GET','POST'])
+@is_logged_in
+def enviar_sms_grupo():
+        org_id = session['org_id']
+        form = SmsForm(request.form)
+        data = request.get_json()
+    
+        grupo_id = data.get('grupo')
+        mensagem = data.get('mensagem')
+        
+        print(mensagem)
+        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+
+        cursor = conn.cursor()
+
+        cursor.execute(f"SELECT * FROM contacts join contact_group on contacts.id = contact_group.id_cont where contact_group.grp_id = '{grupo_id}';")
+        
+        sms_grupo=cursor.fetchall()
+        conn.close()
+        for sms in sms_grupo:
+          # Send SMS
+          print(sms[3])
+          status = send_sms(mensagem,str("+258"+sms[3]),org_id)
+          print('este e o status do encio da mensagem')
+        return redirect(url_for('sucesso_sms'))
+
+@app.route('/sucesso_sms', methods=['GET'])
+@is_logged_in
+def sucesso_sms():
+        form = SmsForm(request.form)
+        flash('Teste criado com sucesso', 'success')
+        return render_template('testes.html', form = form)
 
 
 
@@ -3942,8 +4011,8 @@ def concluir_ticket(ticket_id):
     
 if __name__ == '__main__':
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()
     
 

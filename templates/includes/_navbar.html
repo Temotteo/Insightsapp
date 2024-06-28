@@ -1,6 +1,6 @@
 <link href="/static/css/insghtscss.css" rel="stylesheet">
 <nav class="navbar navbar-expand-lg navbar-light bg-light" aria-label="Eighth navbar example">
-  <div class="container-fluid ml-5">
+  <div class="container-fluid ml-5 ">
       <button class="navbar-toggler me-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -95,7 +95,6 @@
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown7" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Orientação Vocal <span class="caret-down"></span></a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown7">
-                    <li class="dropdown-header">Quiz</li>
                     <li><a class="dropdown-item" href="/testes_OV">Testes</a></li>
                     <li><a class="dropdown-item" href="{{ url_for('resultado', usuario_id=1 ) }}">Resultados</a></li>
                 </ul>
@@ -105,7 +104,7 @@
         </ul>
         <ul class="navbar-nav ml-auto ">
                 <li class="nav-item ">
-                    <a class="nav-link" href="#"><p>Saldo: {{ session.saldo }}</p></a>
+                    <a class="nav-link" href="#">Saldo: {{ session.saldo }}</a>
                 </li>
            
             <li class="nav-item dropdown">
@@ -140,7 +139,7 @@
 </nav>
 
 <!-- Modal -->
-<div class="modal" id="Modal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+<div class="modal" id="ModalOrg" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -163,9 +162,7 @@
           </tbody>
         </table>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-      </div>
+      
     </div>
   </div>
 </div>
