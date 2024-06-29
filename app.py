@@ -2,7 +2,7 @@ import os
 from twilio.rest import Client
 from twilio.twiml.voice_response import VoiceResponse
 
-from flask import Flask, render_template, request, session, flash, session, logging, url_for, redirect, Response,  send_from_directory, jsonify, send_file, g
+from flask import Flask, render_template, request, session, flash, session, logging, url_for, redirect, Response,  send_from_directory, jsonify, send_file
 import psycopg2
 from markupsafe import escape
 from flask_sqlalchemy import SQLAlchemy
@@ -23,7 +23,6 @@ import base64
 from apscheduler.schedulers.background import BackgroundScheduler
 
 import logging
-import time
 
 from flask_babel import Babel
 
