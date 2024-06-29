@@ -7,11 +7,13 @@ gevent
 twilio
 apscheduler
 matplotlib
+numpy
 babel
 flask_babel
 flask_wtf
 reportlab
 pypdf2
+functools
 google
 google-auth
 google-auth-oauthlib
