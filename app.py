@@ -3277,7 +3277,7 @@ def saltar_org_id():
     print(user_id)
     cursor.execute(f"SELECT * FROM grupo")
     grupos = cursor.fetchall()
-    cursor.execute(f"SELECT * FROM organizacao join usuario_org on organizacao.org_id = usuario_org.org_id where organizacao.org_id = '{org_id}' and usuario_org.usuario_id = {user_id} ;")
+    cursor.execute(f"SELECT * FROM organizacao join usuario_org on organizacao.org_id = usuario_org.org_id where  usuario_org.usuario_id = {user_id} ;")
     orgs = cursor.fetchall()
     conn.close()
     data = [{'id': org[1], 'nome': org[0], 'Saldo': org[7]} for org in orgs]
