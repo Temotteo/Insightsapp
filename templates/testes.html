@@ -25,7 +25,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="ModalSmsGroupLabel">Selecionar Grupo</h5>
-                <button type="button" class="close" onclick="close()" aria-label="Close">
+                <button type="button" class="close" onclick="return $('#ModalSmsGroup').modal('hide');" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -35,5 +35,6 @@
           </div>
       </div>
   </div>
-
+ 
+  
 {% endblock %}

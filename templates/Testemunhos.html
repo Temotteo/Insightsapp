@@ -57,6 +57,15 @@ textarea:focus + .label {
             <li class="nav-item">
                 <a class="nav-link" data-toggle="tab" href="#profecias">Profecias</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#profecias_nac">Profecias Nacionais</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#profecias_inter">Profecias internacional</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#pastoral">Atendimento Pastoral</a>
+            </li>
         </ul>
         <!-- Aba testemunho -->
         <div class="tab-content">
@@ -99,6 +108,80 @@ textarea:focus + .label {
                     {% endfor %}
                 </div>
             </div>
+
+             <!-- Aba profecia -->
+             <div class="tab-pane" id="profecias_nac">
+                <div class="scrolling-wrapper">
+                    {% for testemunho in testemunhos %}
+                    {% if testemunho[5] == 'Profecia Nacional' %}
+                        <div class="video-card">
+                            <video width="220" height="140">
+                                <source src="{{ testemunho[3] }}" type="video/mp4">
+                                Seu navegador não suporta a reprodução de vídeos.
+                            </video>
+                            <a href="{{ url_for('detalhes', nome=testemunho[1]) }}" class="link text-dark text-start mt-0">
+                                <p>{{ testemunho[1] }}</p>
+                            </a> 
+                        </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="tab-pane" id="profecias_inter">
+                <div class="scrolling-wrapper">
+                    {% for testemunho in testemunhos %}
+                    {% if testemunho[5] == 'Profecia internacional' %}
+                        <div class="video-card">
+                            <video width="220" height="140">
+                                <source src="{{ testemunho[3] }}" type="video/mp4">
+                                Seu navegador não suporta a reprodução de vídeos.
+                            </video>
+                            <a href="{{ url_for('detalhes', nome=testemunho[1]) }}" class="link text-dark text-start mt-0">
+                                <p>{{ testemunho[1] }}</p>
+                            </a> 
+                        </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="tab-pane" id="pastoral">
+                <div class="scrolling-wrapper">
+                    {% for testemunho in testemunhos %}
+                    {% if testemunho[5] == 'Atendimento Pastoral' %}
+                        <div class="video-card">
+                            <video width="220" height="140">
+                                <source src="{{ testemunho[3] }}" type="video/mp4">
+                                Seu navegador não suporta a reprodução de vídeos.
+                            </video>
+                            <a href="{{ url_for('detalhes', nome=testemunho[1]) }}" class="link text-dark text-start mt-0">
+                                <p>{{ testemunho[1] }}</p>
+                            </a> 
+                        </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="tab-pane" id="pastoral">
+                <div class="scrolling-wrapper">
+                    {% for testemunho in testemunhos %}
+                    {% if testemunho[5] == 'Atendimento Pastoral' %}
+                        <div class="video-card">
+                            <video width="220" height="140">
+                                <source src="{{ testemunho[3] }}" type="video/mp4">
+                                Seu navegador não suporta a reprodução de vídeos.
+                            </video>
+                            <a href="{{ url_for('detalhes', nome=testemunho[1]) }}" class="link text-dark text-start mt-0">
+                                <p>{{ testemunho[1] }}</p>
+                            </a> 
+                        </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
         </div>
     </div>
     

@@ -678,7 +678,7 @@ class ProformaInvoiceForm(FlaskForm):
 @is_logged_in
 def add_contact():
    
-   if session['last_org']:
+   if session['saldo'] == '00.0':
     org_id =session['last_org']
     try: 
      conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
@@ -688,14 +688,15 @@ def add_contact():
      cursor.execute("SELECT * FROM grupo ;")
      grupo = cursor.fetchall()
      conn.close()
+     agent = 'Saldo insuficiente, Recarregue a sua conta!'
+     return render_template('add_contat.html', contacts=contacts, grupo = grupo, agent= agent)
     except psycopg2.Error as e:
       error_msg = f"Erro ao fazer a transação: {e}"
       return render_template('erro.html', error=error_msg) 
    
-    agent = 'Saldo insuficiente, Recarregue a sua conta!'
 
    else: 
-    org_id = session['org_id']
+    org_id = session['last_org']
     try: 
      conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
      cursor = conn.cursor()
@@ -765,13 +766,12 @@ def add_contact():
     else:
         return render_template('add_contat.html', contacts=contacts,grupo = grupo)
    
-   return render_template('add_contat.html', contacts=contacts, grupo = grupo, agent= agent)
 
 
 @app.route('/edit_contact/<int:id>', methods=['GET','POST'])
 @is_logged_in
 def edit_contact(id):
-   org_id = session['org_id']
+   org_id = session['last_org']
    name = request.form['name']
    location = request.form['location']
    phone = request.form['contact']
@@ -798,7 +798,7 @@ def edit_contact(id):
 @app.route('/delete_contact/<int:id>', methods=['GET','POST'])
 @is_logged_in
 def delete_contact(id):
-   org_id = session['org_id']
+   org_id = session['last_org']
    try:
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cur = conn.cursor()  
@@ -1758,8 +1758,6 @@ def testes():
 
         cursor.execute(cmd)
         dnh = cursor.fetchone()[0]
-        print(cmd)
-        print(f"Este e o dnh: {dnh}")
         # Commit to DB
         conn.commit()
 
@@ -1868,8 +1866,7 @@ def login():
              session['logged_in'] = True
              session['username'] = username
 
-             session['last_org'] = str(result[6])
-             session['org_id'] = str(result[8])
+             session['last_org'] = str(result[8])
              session['saldo'] = str(result[9])
              dados = str(result[6])
 
@@ -2116,7 +2113,7 @@ def create_camp():
             create_table(cursor, new_table_name)
 
             # Include into main campagn list
-            cursor.execute('INSERT INTO public.campanhas (orgid, campanha_ref) VALUES (%s, %s)',(session['org_id'],new_table_name))
+            cursor.execute('INSERT INTO public.campanhas (orgid, campanha_ref) VALUES (%s, %s)',(session['last_org'],new_table_name))
 
             connection.commit()
 
@@ -3266,21 +3263,31 @@ def gerar_pdf(id):
 @app.route('/saltar_org_id', methods=['GET'])
 @is_logged_in
 def saltar_org_id():
-    org_id = session['org_id']
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-    cursor = conn.cursor()
-    print(org_id)
+  conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+  cursor = conn.cursor()
+  if session['last_org'] == 'Demo_Org':
+    org_id = session['last_org']
     user = session['username']
     query ="SELECT * FROM usuarios where "+ ' "user"=' + "'" + user + "';"
     cursor.execute(query)
     user_id= cursor.fetchone()[0]
-    print(user_id)
-    cursor.execute(f"SELECT * FROM grupo")
-    grupos = cursor.fetchall()
+    cursor.execute(f"SELECT * FROM  usuarios  where  id_usuarios = {user_id} ;")
+    orgs = cursor.fetchall()
+    conn.close()
+    data = [{'Org_id': org[6], 'Nome': org[1], 'Saldo': '00.0'} for org in orgs]
+    print(data)
+    return jsonify(data)
+
+  else:  
+    org_id = session['last_org']
+    user = session['username']
+    query ="SELECT * FROM usuarios where "+ ' "user"=' + "'" + user + "';"
+    cursor.execute(query)
+    user_id= cursor.fetchone()[0]
     cursor.execute(f"SELECT * FROM organizacao join usuario_org on organizacao.org_id = usuario_org.org_id where  usuario_org.usuario_id = {user_id} ;")
     orgs = cursor.fetchall()
     conn.close()
-    data = [{'id': org[1], 'nome': org[0], 'Saldo': org[7]} for org in orgs]
+    data = [{'Org_id': org[1], 'Nome': org[0], 'Saldo': org[7]} for org in orgs]
 
     return jsonify(data)
 
@@ -3289,7 +3296,7 @@ def saltar_org_id():
 @app.route('/selecionar_group', methods=['GET'])
 @is_logged_in
 def selecionar_group():
-    org_id = session['org_id']
+    org_id = session['last_org']
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
     
@@ -3320,7 +3327,7 @@ def org_id(org_id):
 
     # Close connection
     conn.close()
-    session['org_id'] = org_id
+    session['last_org'] = org_id
     session['saldo'] = org[7]
 
     return render_template('tasks.html')
@@ -3329,12 +3336,13 @@ def org_id(org_id):
 @app.route('/enviar_sms_grupo', methods=['GET','POST'])
 @is_logged_in
 def enviar_sms_grupo():
-        org_id = session['org_id']
+        org_id = session['last_org']
         form = SmsForm(request.form)
         data = request.get_json()
     
         grupo_id = data.get('grupo')
         mensagem = data.get('mensagem')
+        Sender_id = data.get('Sender_id')
         
         print(mensagem)
         conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
@@ -3344,12 +3352,22 @@ def enviar_sms_grupo():
         cursor.execute(f"SELECT * FROM contacts join contact_group on contacts.id = contact_group.id_cont where contact_group.grp_id = '{grupo_id}';")
         
         sms_grupo=cursor.fetchall()
-        conn.close()
+
+        account_sid = "AC952933e9303a9c0021be3c0ce432caec"
+        auth_token = "5e14a5105201307f6d9a77af3fd81853"
+        
+        #message_sid = 'SMbc7fc62463f463c39ba12f9be200802a'
+    
         for sms in sms_grupo:
-          # Send SMS
-          print(sms[3])
-          status = send_sms(mensagem,str("+258"+sms[3]),org_id)
-          print('este e o status do encio da mensagem')
+          message_sid = send_sms(mensagem,str("+258"+sms[3]),Sender_id)
+          client = Client(account_sid, auth_token)
+          messagem = client.messages(message_sid).fetch()
+          status = messagem.status
+          cmd='INSERT INTO envio_sms(mensagem, contato, nv_enviadas, sender_id, status_sms) VALUES ('+"'"+mensagem+"'"+",'"+str("+258"+sms[3])+"','0','"+org_id+"'"+status+"'"+') RETURNING id_alerta'
+          cursor.execute(cmd)
+          conn.commit()
+
+        conn.close()  
         return redirect(url_for('sucesso_sms'))
 
 @app.route('/sucesso_sms', methods=['GET'])
@@ -3724,7 +3742,7 @@ def teste_ov(tipo):
 # Rota para a página de avaliação
 @app.route('/resultado/<int:usuario_id>')
 def resultado(usuario_id):
-  query = """
+  query = f"""
         SELECT u.id AS usuario_id, u.nome AS usuario_nome,
                r.questao_id, r.resposta,
                q.questao, q.opcoes,  q.opcao_correcta, q.tipo,
@@ -3732,14 +3750,14 @@ def resultado(usuario_id):
         FROM usuario u
         JOIN respostas r ON u.id = r.usuario_id
         JOIN quiz q ON r.questao_id = q.id
-        WHERE u.id =1
+        WHERE u.id ={usuario_id}
          """
   try:
      conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Quizdb')
      cur = conn.cursor()
      cur.execute(query)
      resultados = cur.fetchall()
-     cur.execute('select * from usuario where id =1')
+     cur.execute(f'select * from usuario where id = {usuario_id}')
      usuario = cur.fetchone()
      conn.close()
   except psycopg2.Error as e:
@@ -4009,8 +4027,8 @@ def concluir_ticket(ticket_id):
     
 if __name__ == '__main__':
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()
     
 

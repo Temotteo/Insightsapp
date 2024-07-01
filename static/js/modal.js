@@ -3,8 +3,8 @@ function carregarDados() {
           $('#modalTableBody').empty();
           data.forEach(function(item) {
               var linha = `<tr>
-                              <td>${item.id}</td>
-                              <td>${item.nome}</td>
+                              <td>${item.Org_id}</td>
+                              <td>${item.Nome}</td>
                               <td>${item.Saldo}</td>
                               <td>
                                   <button class="btn btn-primary btn-sm" onclick="verDetalhes('${item.id}')">
@@ -23,6 +23,10 @@ function carregarDados() {
    
         $('#modalBodySms').empty();
             var linha = `
+                    <div class="form-group">
+                        <label for="Sender_id">Sender_id:</label>
+                         <input type="text" class="form-control" id="Sender_id" name="Sender_id"  required ></input>
+                         </div>
                       <div class="form-group">
                         <label for="mensagem">Mensage:</label>
                          <textarea type="text" class="form-control" id="mensagem" row="5" name="mensagem"  required ></textarea>
@@ -95,7 +99,4 @@ function carregarDados() {
         });
 }
 
-function close() {
-    // Aqui você pode adicionar a lógica para salvar os dados na tabela
-    alert('chueguei')
-};
+
