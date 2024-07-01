@@ -21,7 +21,5 @@ google-api-python-client
 pdfminer.six
 importlib-metadata
 plotly
-matplotlib
 werkzeug
 flask_sqlalchemy
-logging
