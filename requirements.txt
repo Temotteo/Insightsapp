@@ -13,7 +13,6 @@ flask_babel
 flask_wtf
 reportlab
 pypdf2
-functools
 google
 google-auth
 google-auth-oauthlib
@@ -23,3 +22,4 @@ importlib-metadata
 plotly
 werkzeug
 flask_sqlalchemy
+logging

@@ -22,7 +22,7 @@ import base64
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-
+import logging
 
 from flask_babel import Babel
 
@@ -53,6 +53,29 @@ import numpy as np
 
 app = Flask(__name__)
 
+logging.basicConfig(level=logging.INFO)
+
+@app.before_request
+def before_request():
+    # Código antes da requisição
+    pass
+
+@app.after_request
+def after_request(response):
+    # Código após a requisição
+    return response
+
+@app.teardown_request
+def teardown_request(exception):
+    if exception:
+        app.logger.error(f"Erro: {exception}")
+        return render_template('erro.html', error=exception), 500
+    
+# Tratamento global de exceções
+@app.errorhandler(Exception)
+def handle_exception(e):
+    app.logger.error(f"Erro inesperado: {e}")
+    return render_template('erro.html', error= e), 500    
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
