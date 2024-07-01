@@ -16,7 +16,6 @@ from werkzeug.utils import secure_filename
 from psycopg2 import sql
 from flask_wtf import FlaskForm
 import matplotlib.pyplot as plt
-
 from io import BytesIO
 import base64
 
