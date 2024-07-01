@@ -22,4 +22,3 @@ importlib-metadata
 plotly
 werkzeug
 flask_sqlalchemy
-logging
