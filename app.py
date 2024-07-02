@@ -698,9 +698,6 @@ def add_contact():
      agent = 'Saldo insuficiente, Recarregue a sua conta!'
      return render_template('add_contat.html', contacts=contacts, grupo = grupo, agent= agent)
     
-
-    
-    
    
    if request.method == 'POST':
      name = request.form['name']
