@@ -7,7 +7,7 @@ function carregarDados() {
                               <td>${item.Nome}</td>
                               <td>${item.Saldo}</td>
                               <td>
-                                  <button class="btn btn-primary btn-sm" onclick="verDetalhes('${item.id}')">
+                                  <button class="btn btn-primary btn-sm" onclick="verDetalhes('${item.Org_id}')">
                                       <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Ver
                                   </button>
                               </td>

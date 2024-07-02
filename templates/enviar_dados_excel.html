@@ -1,0 +1,16 @@
+{% extends 'layout.html'%}
+
+
+{% block body%}
+    <div class="container">
+        <h1>Enviar Dados do Excel para o Banco de Dados</h1>
+        <form action="/import_contacts" method="post" enctype="multipart/form-data" class="form-inline">
+            <div class="form-group">
+                <label for="file">Selecione o arquivo Excel:</label>
+                <input type="hidden" name="org_id" id="file" class="form-control" >
+                <input type="file" name="file" id="file" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+    </div>
+    {% endblock %}

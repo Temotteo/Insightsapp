@@ -2,23 +2,42 @@
 
 {% block body %}
 <link href="/static/css/insghtscss.css" rel="stylesheet">
-  <div class="container div">
+  <div class="container ">
     {% if user %}
-      {% if session.username == "Temoteo"  or session.username == "Marta" or session.username == "Shelton" %}
-      <h2 class="mt-5">Relatório</h2>
+      {% if session.username == "Temoteo"  or session.username == "Marta" or session.username == "Shelton"  %}
+      <h2 class="mt-3">Relatório</h2>
       <ul>
       {% for relatorio in relatorios %}
-         <li>
-            <strong class="col-md-6">Relatorio referente a obra de {{ relatorio[7] }}</strong> | Data: {{ relatorio[5] }}   {% if relatorio[0] %}<a href="{{ url_for('gerar_pdf', id= relatorio[0] ) }}"  class="icon-link icon-link-hover " style="margin-left: 20px;" title="Detalhes">
+         <li class="row">
+            <strong class="col-md-5">Relatorio referente a obra de {{ relatorio[7] }}</strong > |<span class="col-md-2"> Data:  {{ relatorio[5] }}  | </span> {% if relatorio[0] %}<a href="{{ url_for('gerar_pdf', id= relatorio[0] ) }}"  class="icon-link icon-link-hover " style="margin-left: 20px;" title="Detalhes">
               <i class="fas fa-file-pdf"> </i> baixar pdf  {% endif %} 
          </a>
          <a href="{{ url_for('ver_relatorio', id= relatorio[0] ) }}"  class="icon-link icon-link-hover " style="margin-left: 20px;" title="Detalhes">
           <i class="fas fa-eye">ver relatorio </i> 
-     </a>
+         </a>
+         <a href="{{ url_for('deletar_relatorio', id= relatorios[-1][0] ) }}"  class="link-danger text-danger" style="margin-left: 20px;" title="Detalhes">
+          <i class="fas fa-trash-alt">deletar relatorio </i> 
+           </a>
         </li>
+        <hr>
         {% endfor %}
       </ul>
-        {% endif %}
+      {% else %}
+      <h2 class="mt-2">Relatório</h2>
+         <ul>
+           <li class="row">
+              <strong class="col-md-5">Relatorios referente a obra de {{ relatorios[-1][7] }}</strong > |<span class="col-md-2"> Data:  {{ relatorios[-1][5] }}  | </span> {% if relatorios[-1][0] %}<a href="{{ url_for('gerar_pdf', id= relatorios[-1][0] ) }}"  class="icon-link icon-link-hover " style="margin-left: 20px;" title="Detalhes">
+                <i class="fas fa-file-pdf"> </i> baixar pdf  {% endif %} 
+           </a>
+           <a href="{{ url_for('ver_relatorio', id= relatorios[-1][0] ) }}"  class="icon-link icon-link-hover " style="margin-left: 20px;" title="Detalhes">
+            <i class="fas fa-eye">ver relatorio </i> 
+       </a>
+       <a href="{{ url_for('deletar_relatorio', id= relatorios[-1][0] ) }}"  class="link-danger text-danger" style="margin-left: 20px;" title="Detalhes">
+        <i class="fas fa-trash-alt">deletar relatorio </i> 
+         </a>
+          </li>
+      {% endif %}
+
     {% else %}
         <h4 class=" px-1">O seu relatorio foi concluido com sucesso</h4>
          <p>clique no link abaixa para baixar o pdf do relatorio</p>

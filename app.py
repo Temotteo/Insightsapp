@@ -79,7 +79,6 @@ def handle_exception(e):
     return render_template('erro.html', error= e), 500    
 
 
-
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
 # Dummy survey data for demonstration
@@ -694,6 +693,7 @@ def add_contact():
      error_msg = f"Erro ao fazer a transação: {e}"
      return render_template('erro.html', error=error_msg) 
    
+   #Verifica se o saldo e suficiente para prosseguir
    if session['saldo'] == '00.0':
      agent = 'Saldo insuficiente, Recarregue a sua conta!'
      return render_template('add_contat.html', contacts=contacts, grupo = grupo, agent= agent)
@@ -706,6 +706,10 @@ def add_contact():
      gender = request.form['gender']
      grupo_id = request.form['grupo']
      
+
+     # intera sobre os dados no formato Json para dinamizar os atributos do contacto
+     # as organizacao podem ter diferentes  atributos para a insercao dos seus contacto.
+     # quando esse atributos sao colocados em JSON ele pode aceitar receber qualquer tipo de atributo de forma dinamica
      dados = {"name" : name,
         "location" : location,
         "phone" : phone,
@@ -720,14 +724,18 @@ def add_contact():
       # Create cursor
       cursor = conn.cursor()
 
+      #verifica se o contacto ja existe!
       cursor.execute(f"SELECT * FROM contacts WHERE phone = '{phone}';")
       cont = cursor.fetchone()
 
+      #verifica se o contacto ja existe na organizacao!
       cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contacts.phone ='{phone}' and contact_org.org_id = '{org_id}';")
       contactos = cursor.fetchone()
      except psycopg2.Error as e:
        error_msg = f"Erro ao fazer a transação: {e}"
        return render_template('erro.html', error=error_msg) 
+     
+     #verifica se o contacto ja existe na organizacao! e lanca uma mensagem de baramento
      if contactos:
           erro = 'Este número de telefone já está registrado.'
           return render_template('add_contat.html', contacts=contacts, grupo = grupo,erro =erro)
@@ -746,6 +754,7 @@ def add_contact():
             VALUES (%s, %s);
             '''
         
+        #verifica se o contacto ja existe e pula a sua insercao
         if not cont:
            cursor.execute(insert_query1, (name, location, phone, gender, org_id, psycopg2.extras.Json(dados)))
            contact_id = cursor.fetchone()[0]
@@ -768,53 +777,42 @@ def add_contact():
    return render_template('add_contat.html', contacts=contacts,grupo = grupo)
   
 
-# funcao para inserir dados do exccel
-@app.route('/processar', methods=['POST'])
-def processar_excel():
-
+# funcao para inserir dados pelo exccel
+@app.route('/import_contacts', methods=['POST','GET'])
+def import_contacts():
     org_id = session['last_org']
-    # Verificar se o arquivo foi enviado
-    if 'file' not in request.files:
-        return "Nenhum arquivo enviado."
 
+    if request.method == 'POST':
     # Ler o arquivo Excel enviado
-    file = request.files['file']
-    if file.filename == '':
-        print('nao cheguei')
+      file = request.files['file']
+      if file.filename == '':
         return "Nome de arquivo vazio."
     
-    df = pd.read_excel(file)
-
-    # Conectar ao banco de dados
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-    cur = conn.cursor()
-
-    # Iterar sobre as linhas do DataFrame e inserir os dados no banco de dados
-    for index, row in df.iterrows():
-        print('cheguei')
+      df = pd.read_excel(file)      
+      conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+      cur = conn.cursor()
+      # Iterar sobre as linhas do DataFrame e inserir os dados no banco de dados
+      for index, row in df.iterrows():
         valores = row.to_json()
         insert_query = "INSERT INTO contacts (dados_contactos) VALUES (%s) RETURNING id;"
         try:
+          
           cur.execute(insert_query, [valores])
           inserted_id = cur.fetchone()[0]
           conn.commit()
           print(f"Inserido ID: {inserted_id}")
-          cur = conn.cursor()
           cur.execute("INSERT INTO contact_org VALUES (%s,%s);",(inserted_id,org_id,))
           conn.commit()
         except Exception as e:
           print(f"Erro ao inserir a linha {index}: {e}")
+        
+      conn.close()
+      return redirect(url_for('add_contact'))
+    
+    return render_template('enviar_dados_excel.html')
 
 
-   
-    # Fechar o cursor e a conexão
-   
-    conn.close()
-
-    return redirect(url_for('detalhes_proj', org_id=org_id))
-
-
-
+# funcao para editar dados do contacto
 @app.route('/edit_contact/<int:id>', methods=['GET','POST'])
 @is_logged_in
 def edit_contact(id):
@@ -3125,13 +3123,33 @@ def pdf_obra():
     FROM 
     relatorios
     JOIN 
-    cliente ON relatorios.cliente_id = cliente.id; """)
+    cliente ON relatorios.cliente_id = cliente.id ORDER BY relatorios.data; """)
     relatoriopdf = cur.fetchall() 
     conn.close()
-    return render_template('relatorio_de_obra_pdf.html', user=user, relatorios=relatoriopdf)
+    today = datetime.now().date()
+    return render_template('relatorio_de_obra_pdf.html', user=user, relatorios=relatoriopdf, today=today)
    except psycopg2.Error as e:
         error_msg = f"Erro ao fazer a transação: {e}"
         return render_template('erro.html', error=error_msg)
+   
+
+@app.route('/deletar_relatorio/<int:id>', methods=['GET','POST'])
+def deletar_relatorio(id):
+   try:
+    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
+    cur = conn.cursor() 
+    cur.execute("DELETE FROM dificuldades WHERE rel_id = %s;",(id,))
+    conn.commit() 
+    cur.execute("DELETE FROM relatorios WHERE id = %s;",(id,))
+    conn.commit()
+    conn.close()
+    flash = "Relatorio Removido com sucesso"
+    return redirect(url_for('pdf_obra'))
+   except psycopg2.Error as e:
+        error_msg = f"Erro ao fazer a transação: {e}"
+        return render_template('erro.html', error=error_msg) 
+
+
 
 #funcao para submessao de relatorio de obra
 @app.route('/submit_rel', methods=['POST'])
@@ -3372,11 +3390,9 @@ def org_id(org_id):
         
     org=cursor.fetchone()
 
-    # Close connection
-    conn.close()
     session['last_org'] = org_id
-    session['saldo'] = org[7]
-
+    session['saldo'] = str(org[7])
+    conn.close()
     return render_template('tasks.html')
 
 

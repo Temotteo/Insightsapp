@@ -4,22 +4,21 @@
 {% block body%}
 
 <h1>Add Contact</h1>
-<hr>
+
 {% from "includes/_formhelpers.html" import render_field %}
 
-    <p>Aqui você pode criar os detalhes da organização como projetos e grupos.</p>
-    <p>Exemplo de como criar projetos e grupos:</p>
-  
     {% if erro %}
     <div class="alert alert-danger">{{erro}}</div>
    {% endif %} 
    {% if agent %}
    <div class="alert alert-danger">{{agent}}</div>
   {% endif %} 
-   <a class="icon-link icon-link-hover"  href="#">
+   <a class="icon-link icon-link-hover"  href="{{url_for('import_contacts')}}">
     <use xlink:href="#clipboard"></use></svg>
      @importar dados do excel
    </a>
+
+   <hr>
     <form action="/add_contact"  method="post">
       <div class="form-group">
         <label for="nome">Nome:</label>
