@@ -26,14 +26,12 @@
           {{render_field(form.action, class_="form-control")}}
         </div>
       </div> 
-      <div class="container mt-5">
-        <div class="right-container">
-          <h6 style="font-size: 14px; font-weight: bold;">Calendar</h6>
-          <div class="input-group mb-3 col-md-4">
-            {{ form.calendar(class_="form-control stringfield datepicker", placeholder="Select a date", readonly=true, style="background-color: white;") }}
-            <div class="input-group-append">
-            <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
-          </div>
+      <div class="container mt-3">
+        <div class="form-row">
+          <div class="from-group  col-md-4">
+            {{ render_field(form.calendar, class_="form-control") }}
+            
+        </div>
 
           <!--div class="input-group mb-3 col-md-4">
             <input type="text" class="form-control stringfield datepicker" placeholder="Select a date" readonly style="background-color: white;">
@@ -88,7 +86,7 @@
   </script>
 
 
-
+   <div class="container-fluid">
     <h4>Timeline</h4>
       <hr>
       <table class="table table-striped">
@@ -113,5 +111,6 @@
             </tr>
         {% endfor %}
       </table>
+    </div>
   
 {% endblock %}

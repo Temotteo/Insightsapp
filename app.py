@@ -4,6 +4,7 @@ from twilio.twiml.voice_response import VoiceResponse
 
 from flask import Flask, render_template, request,  flash, session, logging, url_for, redirect, Response,  send_from_directory, jsonify, send_file
 import psycopg2
+import psycopg2.extras
 from markupsafe import escape
 from flask_sqlalchemy import SQLAlchemy
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, SelectField, DecimalField, DateField, IntegerField, EmailField, TimeField, FileField,  SubmitField, FieldList, FormField, DateTimeField
@@ -28,6 +29,7 @@ from flask_babel import Babel
 from babel.numbers import format_currency
 
 from flask import make_response
+import pandas as pd
 from io import BytesIO
 from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_RIGHT, TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_JUSTIFY
@@ -75,6 +77,8 @@ def teardown_request(exception):
 def handle_exception(e):
     app.logger.error(f"Erro inesperado: {e}")
     return render_template('erro.html', error= e), 500    
+
+
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
@@ -677,45 +681,40 @@ class ProformaInvoiceForm(FlaskForm):
 @app.route('/add_contact', methods=['GET', 'POST'])
 @is_logged_in
 def add_contact():
+   org_id =session['last_org']
+   try: 
+     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+     cursor = conn.cursor()
+     cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contact_org.org_id = '{org_id}';")
+     contacts = cursor.fetchall()
+     cursor.execute("SELECT * FROM grupo ;")
+     grupo = cursor.fetchall()
+     conn.close()
+   except psycopg2.Error as e:
+     error_msg = f"Erro ao fazer a transação: {e}"
+     return render_template('erro.html', error=error_msg) 
    
    if session['saldo'] == '00.0':
-    org_id =session['last_org']
-    try: 
-     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-     cursor = conn.cursor()
-     cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contact_org.org_id = '{org_id}';")
-     contacts = cursor.fetchall()
-     cursor.execute("SELECT * FROM grupo ;")
-     grupo = cursor.fetchall()
-     conn.close()
      agent = 'Saldo insuficiente, Recarregue a sua conta!'
      return render_template('add_contat.html', contacts=contacts, grupo = grupo, agent= agent)
-    except psycopg2.Error as e:
-      error_msg = f"Erro ao fazer a transação: {e}"
-      return render_template('erro.html', error=error_msg) 
-   
+    
 
-   else: 
-    org_id = session['last_org']
-    try: 
-     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-     cursor = conn.cursor()
-     cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contact_org.org_id = '{org_id}';")
-     contacts = cursor.fetchall()
-     cursor.execute("SELECT * FROM grupo ;")
-     grupo = cursor.fetchall()
-     conn.close()
-    except psycopg2.Error as e:
-      error_msg = f"Erro ao fazer a transação: {e}"
-      return render_template('erro.html', error=error_msg) 
+    
+    
    
-    if request.method == 'POST':
+   if request.method == 'POST':
      name = request.form['name']
      location = request.form['location']
      phone = request.form['phone']
      gender = request.form['gender']
      grupo_id = request.form['grupo']
      
+     dados = {"name" : name,
+        "location" : location,
+        "phone" : phone,
+        "gender": gender,
+        "Org_id": org_id
+       }
     
      try:
       #Connect to database
@@ -724,8 +723,8 @@ def add_contact():
       # Create cursor
       cursor = conn.cursor()
 
-      cursor.execute("SELECT * FROM grupo ;")
-      grupo = cursor.fetchall()
+      cursor.execute(f"SELECT * FROM contacts WHERE phone = '{phone}';")
+      cont = cursor.fetchone()
 
       cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contacts.phone ='{phone}' and contact_org.org_id = '{org_id}';")
       contactos = cursor.fetchone()
@@ -738,8 +737,8 @@ def add_contact():
      else:    
         # Insert a new contact into the database
         insert_query1 = '''
-            INSERT INTO contacts (name, location, phone, gender, org_id)
-            VALUES (%s, %s, %s, %s, %s) RETURNING id;
+            INSERT INTO contacts (name, location, phone, gender, org_id, dados_contactos)
+            VALUES (%s, %s, %s, %s, %s,%s) RETURNING id;
             '''
         insert_query2 = '''
             INSERT INTO contact_org (id_cont, org_id)
@@ -749,9 +748,14 @@ def add_contact():
             INSERT INTO contact_group (id_cont, grp_id)
             VALUES (%s, %s);
             '''
-        cursor.execute(insert_query1, (name, location, phone, gender, org_id))
-        contact_id = cursor.fetchone()[0]
-        conn.commit()
+        
+        if not cont:
+           cursor.execute(insert_query1, (name, location, phone, gender, org_id, psycopg2.extras.Json(dados)))
+           contact_id = cursor.fetchone()[0]
+           conn.commit()
+
+        else:
+           contact_id = cont[0]    
 
         cursor.execute(insert_query2, (contact_id, org_id))
         conn.commit()
@@ -763,9 +767,55 @@ def add_contact():
         contacts = cursor.fetchall()
         conn.close()
         return render_template('add_contat.html', contacts=contacts,grupo = grupo)
-    else:
-        return render_template('add_contat.html', contacts=contacts,grupo = grupo)
+
+   return render_template('add_contat.html', contacts=contacts,grupo = grupo)
+  
+
+# funcao para inserir dados do exccel
+@app.route('/processar', methods=['POST'])
+def processar_excel():
+
+    org_id = session['last_org']
+    # Verificar se o arquivo foi enviado
+    if 'file' not in request.files:
+        return "Nenhum arquivo enviado."
+
+    # Ler o arquivo Excel enviado
+    file = request.files['file']
+    if file.filename == '':
+        print('nao cheguei')
+        return "Nome de arquivo vazio."
+    
+    df = pd.read_excel(file)
+
+    # Conectar ao banco de dados
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cur = conn.cursor()
+
+    # Iterar sobre as linhas do DataFrame e inserir os dados no banco de dados
+    for index, row in df.iterrows():
+        print('cheguei')
+        valores = row.to_json()
+        insert_query = "INSERT INTO contacts (dados_contactos) VALUES (%s) RETURNING id;"
+        try:
+          cur.execute(insert_query, [valores])
+          inserted_id = cur.fetchone()[0]
+          conn.commit()
+          print(f"Inserido ID: {inserted_id}")
+          cur = conn.cursor()
+          cur.execute("INSERT INTO contact_org VALUES (%s,%s);",(inserted_id,org_id,))
+          conn.commit()
+        except Exception as e:
+          print(f"Erro ao inserir a linha {index}: {e}")
+
+
    
+    # Fechar o cursor e a conexão
+   
+    conn.close()
+
+    return redirect(url_for('detalhes_proj', org_id=org_id))
+
 
 
 @app.route('/edit_contact/<int:id>', methods=['GET','POST'])
@@ -1375,7 +1425,7 @@ class TaskForm(Form):
     text = TextAreaField('Description:',[validators.Length(min=9, max=190),validators.DataRequired()])
     time = TimeField('Time:', format='%H:%M')
     action= SelectField('Next action:',coerce=str,choices=[("Call","Call"),("Meeting","Meeting"),("submission of proposal","submission of proposal")])
-    calendar = StringField('Calendar')
+    calendar = DateField('Calendar:', format='%d/%m/%Y')
     
 class OptionForm(Form):
     opcao = StringField('Opção:',[validators.Length(min=3, max=120),validators.DataRequired()])

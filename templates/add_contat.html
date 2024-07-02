@@ -84,19 +84,26 @@
  {% endif %}
 <table class="table table-striped">
     <tr>
-        <th>Name</th>
-        <th>Location</th>
-        <th>Phone</th>
-        <th>Gender</th>
-        <th>Organization ID</th>
+      {% for contact in contacts %} 
+      {% if loop.index ==1 %}
+      {% for dados in contact[6] %}
+      
+        <td>{{dados}}</td>
+        
+        {% endfor %}
+        {% endif %}
+        {% endfor %}
+        
     </tr>
     {% for contact in contacts %}
     <tr>
-        <td>{{ contact[1] }}</td>
-        <td>{{ contact[2] }}</td>
-        <td><a href="{{ url_for('detalhes_contact', id=contact[0]) }}">{{ contact[3] }}</a></td>
-        <td>{{ contact[4] }}</td>
-        <td>{{ contact[5] }}</td>
+      {% for key, dados in contact[6].items() %}
+        {% if loop.index ==3 %}
+        <td><a href="{{ url_for('detalhes_contact', id=contact[0]) }}">{{ dados }}</a></td>
+        {% else %}
+        <td>{{ dados }}</td>
+        {% endif %}
+        {% endfor %}
     </tr>
     {% endfor %}
 </table>
