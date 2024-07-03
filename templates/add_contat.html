@@ -12,68 +12,92 @@
    {% endif %} 
    {% if agent %}
    <div class="alert alert-danger">{{agent}}</div>
-  {% endif %} 
+   {% endif %}
+   {% if session.saldo == '00.0' %}
+   <form action="/add_contact"  method="post">
+    <div class="form-group">
+      <label for="nome">Nome:</label>
+      <input type="hidden" name="orgId" value="{% if org %}{{ org.id }}{% endif %}">
+      <input type="text" class="form-control" id="nome" name="name" placeholder="Digite o nome" required>
+    </div>
+    <div class="form-group">
+      <label for="local">location:</label>
+      <input type="text" class="form-control" id="local" name="location" placeholder="Digite uma referencia"{% if grp %} value="{{ grp.nome }}" {% endif %} required>
+    </div>
+
+    <div class="form-group">
+      <label for="gender">gender:</label>
+      <select class="form-control" id="gender"  name ="gender" >
+        <option value="">selecione...</option>
+        <option value="Masculino">Masculino</option>
+        <option value="Femenino">Femenino</option>
+      </select>
+     </div>
+    <div class="row">
+      <div class="col-sm-7">
+        <div class="form-group">
+        <label for="nrdocumento" class="form-label">Contacto</label>
+        <input type="text" class="form-control" id="nrdocumento" name ="phone" placeholder="insere o numero de contacto" required>
+        <div class="invalid-feedback">
+          codigo do documento requerido.
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-5">
+      <div class="form-group">
+      <label for="country" class="form-label">Grupo</label>
+      <select class="form-control" id="country"  name ="grupo" >
+        <option value="">selecione...</option>
+        {% if grupo %}
+        {% for grupo in grupo %}
+            <option value="{{ grupo[0] }}">{{ grupo[1] }}</option>
+        {% endfor %}
+      {% endif %}
+      </select>
+    </div>
+    </div>
+    
+  </div>
+    <div class="d-flex gap-2 justify-content-start ">
+      <button type="submit" class="btn btn-info px-4">Criar</button>
+      {% if org %}  
+      <a href="{{ url_for('detalhes_proj', org_id=org.id) }}" class="btn  btn-danger ml-3 px-4" title="Detalhes">voltar</a>
+      {% endif %}
+    </div>   
+  </form>
+  <hr> 
+   {% else %}
    <a class="icon-link icon-link-hover"  href="{{url_for('import_contacts')}}">
     <use xlink:href="#clipboard"></use></svg>
      @importar dados do excel
    </a>
-
    <hr>
-    <form action="/add_contact"  method="post">
-      <div class="form-group">
-        <label for="nome">Nome:</label>
-        <input type="hidden" name="orgId" value="{% if org %}{{ org.id }}{% endif %}">
-        <input type="text" class="form-control" id="nome" name="name" placeholder="Digite o nome" required>
-      </div>
-      <div class="form-group">
-        <label for="nomeGrupo">location:</label>
-        <input type="text" class="form-control" id="local" name="location" placeholder="Digite uma referencia"{% if grp %} value="{{ grp.nome }}" {% endif %} required>
-      </div>
-  
-      <div class="form-group">
-        <label for="gender">gender:</label>
-        <select class="form-control" id="gender"  name ="gender" >
-          <option value="">selecione...</option>
-          <option value="Masculino">Masculino</option>
-          <option value="Femenino">Femenino</option>
-        </select>
-       </div>
-      <div class="row">
-        <div class="col-sm-7">
-          <div class="form-group">
-          <label for="nrdocumento" class="form-label">Contacto</label>
-          <input type="text" class="form-control" id="nrdocumento" name ="phone" placeholder="insere o numero de contacto" required>
-          <div class="invalid-feedback">
-            codigo do documento requerido.
-          </div>
-        </div>
-      </div>
-  
-      <div class="col-sm-5">
-        <div class="form-group">
-        <label for="country" class="form-label">Grupo</label>
-        <select class="form-control" id="country"  name ="grupo" >
-          <option value="">selecione...</option>
-          {% if grupo %}
-          {% for grupo in grupo %}
-              <option value="{{ grupo[0] }}">{{ grupo[1] }}</option>
-          {% endfor %}
-        {% endif %}
-        </select>
-      </div>
-      </div>
+  <form action="/add_contact"  method="post" enctype="multipart/form-data">
+  <input type="file" style="display: none;" name="file">
+   {% for contact in contacts %} 
+    {% if loop.index ==1 %}
+     {% for dados in contact[6] %}
+     <div class="form-group">
+      <label for="{{dados}}">{{dados}}:</label>
+      <input type="text" class="form-control" id="{{dados}}" name="{{dados}}" placeholder="{{dados}}" required>
     </div>
-      <div class="d-flex gap-2 justify-content-start ">
-        <button type="submit" class="btn btn-info px-4">Criar</button>
-        {% if org %}  
-        <a href="{{ url_for('detalhes_proj', org_id=org.id) }}" class="btn  btn-danger ml-3 px-4" title="Detalhes">voltar</a>
-        {% endif %}
-      </div>    
-     
-    </form>
-    <hr>
-  </div>
-  </div>
+      {% endfor %}
+     {% endif %}  
+    {% endfor %}
+    <div class="form-group">
+      <label for="country" class="form-label">Grupo</label>
+      <select class="form-control" id="country"  name ="grupo" >
+        <option value="">selecione...</option>
+        <option>GRUPO_1</option>
+        <option>GRUPO_2</option>
+        <option>GRUPO_3</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-info px-4">Criar</button>  
+  </form>
+  {% endif %}
+
   
 <hr>
 <div class="container">

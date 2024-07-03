@@ -14,7 +14,7 @@ from datetime import datetime, time, timedelta, date
 from decimal import Decimal
 from wtforms.validators import InputRequired
 from werkzeug.utils import secure_filename
-from psycopg2 import sql
+from psycopg2 import sql, extras
 from flask_wtf import FlaskForm
 import matplotlib.pyplot as plt
 from io import BytesIO
@@ -53,6 +53,7 @@ import plotly.graph_objs as go
 import numpy as np
 
 app = Flask(__name__)
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -700,79 +701,125 @@ def add_contact():
     
    
    if request.method == 'POST':
-     name = request.form['name']
-     location = request.form['location']
-     phone = request.form['phone']
-     gender = request.form['gender']
-     grupo_id = request.form['grupo']
-     
-
-     # intera sobre os dados no formato Json para dinamizar os atributos do contacto
-     # as organizacao podem ter diferentes  atributos para a insercao dos seus contacto.
-     # quando esse atributos sao colocados em JSON ele pode aceitar receber qualquer tipo de atributo de forma dinamica
-     dados = {"name" : name,
-        "location" : location,
-        "phone" : phone,
-        "gender": gender,
-        "Org_id": org_id
-       }
-    
-     try:
-      #Connect to database
-      conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-       
-      # Create cursor
-      cursor = conn.cursor()
-
-      #verifica se o contacto ja existe!
-      cursor.execute(f"SELECT * FROM contacts WHERE phone = '{phone}';")
-      cont = cursor.fetchone()
-
-      #verifica se o contacto ja existe na organizacao!
-      cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contacts.phone ='{phone}' and contact_org.org_id = '{org_id}';")
-      contactos = cursor.fetchone()
-     except psycopg2.Error as e:
-       error_msg = f"Erro ao fazer a transação: {e}"
-       return render_template('erro.html', error=error_msg) 
-     
-     #verifica se o contacto ja existe na organizacao! e lanca uma mensagem de baramento
-     if contactos:
-          erro = 'Este número de telefone já está registrado.'
-          return render_template('add_contat.html', contacts=contacts, grupo = grupo,erro =erro)
-     else:    
-        # Insert a new contact into the database
-        insert_query1 = '''
-            INSERT INTO contacts (name, location, phone, gender, org_id, dados_contactos)
-            VALUES (%s, %s, %s, %s, %s,%s) RETURNING id;
-            '''
-        insert_query2 = '''
-            INSERT INTO contact_org (id_cont, org_id)
-            VALUES (%s, %s);
-            '''
-        insert_query3 = '''
-            INSERT INTO contact_group (id_cont, grp_id)
-            VALUES (%s, %s);
-            '''
-        
-        #verifica se o contacto ja existe e pula a sua insercao
-        if not cont:
-           cursor.execute(insert_query1, (name, location, phone, gender, org_id, psycopg2.extras.Json(dados)))
-           contact_id = cursor.fetchone()[0]
-           conn.commit()
-
-        else:
-           contact_id = cont[0]    
-
-        cursor.execute(insert_query2, (contact_id, org_id))
-        conn.commit()
-        if grupo_id:
-          cursor.execute(insert_query3, (contact_id,grupo_id ))
-          conn.commit()
-
-        cursor.execute("SELECT * FROM contacts where org_id ="+"'"+ str(org_id)+"';")
-        contacts = cursor.fetchall()
+     file = request.files['file']
+     if file:
+        df = pd.read_excel(file)      
+        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        cur = conn.cursor()
+        # Iterar sobre as linhas do DataFrame e inserir os dados no banco de dados
+        for index, row in df.iterrows():
+            valores = row.to_json()
+            insert_query = "INSERT INTO contacts (dados_contactos) VALUES (%s) RETURNING id;"
+            try:
+             cur.execute(insert_query, [valores])
+             inserted_id = cur.fetchone()[0]
+             conn.commit()
+             print(f"Inserido ID: {inserted_id}")
+             cur.execute("INSERT INTO contact_org VALUES (%s,%s);",(inserted_id,org_id,))
+             conn.commit()
+            except Exception as e:
+             print(f"Erro ao inserir a linha {index}: {e}")
+   
+             conn.close()
+             return redirect(url_for('add_contact'))
+            
+     else:
+        grupo_id = request.form['grupo']
+        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where  contact_org.org_id = '{org_id}' LIMIT 1;")
+        contactos = cursor.fetchone()
+        print(contactos)
+        print(org_id)
         conn.close()
-        return render_template('add_contat.html', contacts=contacts,grupo = grupo)
+        dados = {}
+        for contact in contactos[6]:  
+             # Pegando o nome do campo a ser atualizado
+             field = contact
+             print(field)
+             dados[field] = []
+
+             if field:
+                # Atualizando o campo específico com o valor do formulário
+                field_to_update = request.form[field]
+                print(field_to_update)
+                # Insere o valor atualizado no dicionário dados
+                dados[field] = field_to_update
+        
+        print(org_id)
+        print(dados)
+        #location = request.form['location']
+        #phone = request.form['phone']
+        #gender = request.form['gender']
+        #grupo_id = request.form['grupo']
+     
+        # intera sobre os dados no formato Json para dinamizar os atributos do contacto
+        # as organizacao podem ter diferentes  atributos para a insercao dos seus contacto.
+        # quando esse atributos sao colocados em JSON ele pode aceitar receber qualquer tipo de atributo de forma dinamica
+        #dados = {"name" : name,
+        #   "location" : location,
+        #   "phone" : phone,
+        #   "gender": gender,
+        #   "Org_id": org_id
+        #  }
+       
+        try:
+         #Connect to database
+         conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+          
+         # Create cursor
+         cursor = conn.cursor()
+   
+         #verifica se o contacto ja existe!
+         for field, values in dados.items():
+             cursor.execute(f"SELECT * FROM contacts WHERE phone = '{values[-1]}';")
+             cont = cursor.fetchone()
+   
+             #verifica se o contacto ja existe na organizacao!
+             cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contacts.phone ='{values[-1]}' and contact_org.org_id = '{org_id}';")
+             contactos = cursor.fetchone()
+        except psycopg2.Error as e:
+          error_msg = f"Erro ao fazer a transação: {e}"
+          return render_template('erro.html', error=error_msg) 
+        
+        #verifica se o contacto ja existe na organizacao! e lanca uma mensagem de baramento
+        if contactos:
+             erro = 'Este número de telefone já está registrado.'
+             return render_template('add_contat.html', contacts=contacts, grupo = grupo,erro =erro)
+        else:    
+           # Insert a new contact into the database
+           insert_query1 = '''
+               INSERT INTO contacts (dados_contactos)
+               VALUES (%s) RETURNING id;
+               '''
+           insert_query2 = '''
+               INSERT INTO contact_org (id_cont, org_id)
+               VALUES (%s, %s);
+               '''
+           insert_query3 = '''
+               INSERT INTO contact_group (id_cont, grp_id)
+               VALUES (%s, %s);
+               '''
+           
+           #verifica se o contacto ja existe e pula a sua insercao
+           if not cont:
+              cursor.execute(insert_query1, (extras.Json(dados),))
+              contact_id = cursor.fetchone()[0]
+              conn.commit()
+   
+           else:
+              contact_id = cont[0]    
+   
+           cursor.execute(insert_query2, (contact_id, org_id))
+           conn.commit()
+           if grupo_id:
+             cursor.execute(insert_query3, (contact_id,grupo_id ))
+             conn.commit()
+   
+           cursor.execute(f"SELECT * FROM contacts where id in (select id_cont from contact_org where org_id = '{org_id}');")
+           contacts = cursor.fetchall()
+           conn.close()
+           return render_template('add_contat.html', contacts=contacts,grupo = grupo)
 
    return render_template('add_contat.html', contacts=contacts,grupo = grupo)
   
@@ -1920,8 +1967,8 @@ def login():
              session['username'] = username
 
              session['last_org'] = str(resulte[6])
-             
-             session['saldo'] = "00.0"
+             if username == "Temoteo" or username == "Shelton" or username == "Marta":
+                session['saldo'] = "Ilimitado"
              dados = str(resulte[6])
 
             
