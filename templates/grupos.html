@@ -1,0 +1,19 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<form action="/grupos" method="POST">
+    <div class="form-group"><label for="grupo">Nome do Grupo</label><input class="form-control" id="grupo" name="grupo" type="text"></div>
+    <div class="form-group"><label for="categoria">Categoria do Grupo</label><select class="form-control" id="categoria" name="categoria" type="text">
+      {% if contact %}  
+        {% for key, contact in contact[6].items() %}
+         <option value="{{ key }}">{{key}}</option>
+        {% endfor %}
+    {% endif %}
+    </select>
+   </div>
+    <div class="form-group"><label for="referencia">Referencia</label><input class="form-control" id="referencia" name="referencia" type="text"></div>
+
+    <button type="submit" class="btn btn-success">criar</button>
+</form>
+
+{% endblock %}

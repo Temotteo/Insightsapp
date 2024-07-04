@@ -12,7 +12,7 @@ from gevent.pywsgi import WSGIServer
 from functools import wraps
 from datetime import datetime, time, timedelta, date
 from decimal import Decimal
-from wtforms.validators import InputRequired
+from wtforms.validators import InputRequired,DataRequired
 from werkzeug.utils import secure_filename
 from psycopg2 import sql, extras
 from flask_wtf import FlaskForm
@@ -54,7 +54,6 @@ import numpy as np
 
 app = Flask(__name__)
 
-
 logging.basicConfig(level=logging.INFO)
 
 @app.before_request
@@ -78,6 +77,7 @@ def teardown_request(exception):
 def handle_exception(e):
     app.logger.error(f"Erro inesperado: {e}")
     return render_template('erro.html', error= e), 500    
+
 
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -720,8 +720,8 @@ def add_contact():
             except Exception as e:
              print(f"Erro ao inserir a linha {index}: {e}")
    
-             conn.close()
-             return redirect(url_for('add_contact'))
+        conn.close()
+        return redirect(url_for('add_contact'))
             
      else:
         grupo_id = request.form['grupo']
@@ -744,24 +744,12 @@ def add_contact():
                 field_to_update = request.form[field]
                 print(field_to_update)
                 # Insere o valor atualizado no dicionário dados
+                # intera sobre os dados no formato Json para dinamizar os atributos do contacto
+                # as organizacao podem ter diferentes  atributos para a insercao dos seus contacto.
+                # quando esse atributos sao colocados em JSON ele pode aceitar receber qualquer tipo de atributo de forma dinamica
+       
                 dados[field] = field_to_update
         
-        print(org_id)
-        print(dados)
-        #location = request.form['location']
-        #phone = request.form['phone']
-        #gender = request.form['gender']
-        #grupo_id = request.form['grupo']
-     
-        # intera sobre os dados no formato Json para dinamizar os atributos do contacto
-        # as organizacao podem ter diferentes  atributos para a insercao dos seus contacto.
-        # quando esse atributos sao colocados em JSON ele pode aceitar receber qualquer tipo de atributo de forma dinamica
-        #dados = {"name" : name,
-        #   "location" : location,
-        #   "phone" : phone,
-        #   "gender": gender,
-        #   "Org_id": org_id
-        #  }
        
         try:
          #Connect to database
@@ -796,10 +784,6 @@ def add_contact():
                INSERT INTO contact_org (id_cont, org_id)
                VALUES (%s, %s);
                '''
-           insert_query3 = '''
-               INSERT INTO contact_group (id_cont, grp_id)
-               VALUES (%s, %s);
-               '''
            
            #verifica se o contacto ja existe e pula a sua insercao
            if not cont:
@@ -808,13 +792,10 @@ def add_contact():
               conn.commit()
    
            else:
-              contact_id = cont[0]    
-   
-           cursor.execute(insert_query2, (contact_id, org_id))
+              contact_id = cont[0]  
+              cursor.execute(insert_query2, (contact_id, org_id))
            conn.commit()
-           if grupo_id:
-             cursor.execute(insert_query3, (contact_id,grupo_id ))
-             conn.commit()
+           
    
            cursor.execute(f"SELECT * FROM contacts where id in (select id_cont from contact_org where org_id = '{org_id}');")
            contacts = cursor.fetchall()
@@ -825,38 +806,60 @@ def add_contact():
   
 
 # funcao para inserir dados pelo exccel
-@app.route('/import_contacts', methods=['POST','GET'])
-def import_contacts():
+@app.route('/grupos', methods=['POST','GET'])
+def grupos():
     org_id = session['last_org']
+    
 
     if request.method == 'POST':
     # Ler o arquivo Excel enviado
-      file = request.files['file']
-      if file.filename == '':
-        return "Nome de arquivo vazio."
-    
-      df = pd.read_excel(file)      
+      grupo = request.form['grupo']
+      categoria = request.form['categoria']
+      referencia = request.form['referencia']
+      
       conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
       cur = conn.cursor()
       # Iterar sobre as linhas do DataFrame e inserir os dados no banco de dados
-      for index, row in df.iterrows():
-        valores = row.to_json()
-        insert_query = "INSERT INTO contacts (dados_contactos) VALUES (%s) RETURNING id;"
-        try:
-          
-          cur.execute(insert_query, [valores])
-          inserted_id = cur.fetchone()[0]
-          conn.commit()
-          print(f"Inserido ID: {inserted_id}")
-          cur.execute("INSERT INTO contact_org VALUES (%s,%s);",(inserted_id,org_id,))
-          conn.commit()
-        except Exception as e:
-          print(f"Erro ao inserir a linha {index}: {e}")
-        
+      cur.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where  contact_org.org_id = '{org_id}';")
+      contactos = cur.fetchall()
+      dados = {}
+
+      for contact in contactos:
+          for key, value in contact[6].items():  
+            # Pegando o nome do campo a ser atualizado
+            print(grupo)
+            dados[key] = []  
+            # verificando se a coluna e a valor correspondem com a categoria e a referencia dada
+            if key == categoria and value == referencia:
+               cur.execute(f"SELECT id FROM grupo WHERE nome_grupo = '{grupo}';")
+               grupo_id = cur.fetchone()[0]
+               insert_grupo = f"INSERT INTO grupo (nome_grupo) VALUES ('{grupo}') RETURNING id;"
+                
+               print(grupo_id)
+               if not grupo_id: 
+                cur.execute(insert_grupo)
+                grupo_id = cur.fetchone()[0]
+                conn.commit
+               
+               print(grupo_id)
+               
+               # Atualizando o campo específico com o valor do formulário
+               insert_query = f"UPDATE contact_org SET grupo_id = {grupo_id} WHERE id_cont = {contact[0]};"
+               cur.execute(insert_query) 
+               conn.commit()
       conn.close()
-      return redirect(url_for('add_contact'))
+      redirect(url_for('grupos'))
+               
+
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+    # Iterar sobre as linhas do DataFrame e inserir os dados no banco de dados
+    cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where  contact_org.org_id = '{org_id}' LIMIT 1;")
+    contacto = cursor.fetchone()
     
-    return render_template('enviar_dados_excel.html')
+    conn.close()           
+    print(contacto)
+    return render_template('grupos.html', contact=contacto)
 
 
 # funcao para editar dados do contacto
@@ -1465,9 +1468,9 @@ class CadastroForm(Form):
 
 class TaskForm(Form):
     text = TextAreaField('Description:',[validators.Length(min=9, max=190),validators.DataRequired()])
-    time = TimeField('Time:', format='%H:%M')
+    time = TimeField('Time:', format='%H:%M', validators=[DataRequired()])
     action= SelectField('Next action:',coerce=str,choices=[("Call","Call"),("Meeting","Meeting"),("submission of proposal","submission of proposal")])
-    calendar = DateField('Calendar:', format='%d/%m/%Y')
+    calendar = DateField('Calendar:', format='%d/%m/%Y',validators=[DataRequired()])
     
 class OptionForm(Form):
     opcao = StringField('Opção:',[validators.Length(min=3, max=120),validators.DataRequired()])

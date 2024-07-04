@@ -11,16 +11,17 @@
                         <h2>ContactID: {{ contact[0] }}</h2>
                     </div>
                     <div class="card-body">
-                        <p style="text-align: justify;"><strong>Name:</strong> {{ contact[1] }}</p>
-                        <p><strong>Location:</strong> {{ contact[2] }}</p>
-                        <p><strong>Phone:</strong> {{ contact[3] }}</p>
-                        <p><strong>Gender:</strong> {{ contact[4] }}</p>
+                        {% for key, dados in contact[6].items() %}
+                        <p style="text-align: justify;" class="text-uppercase"><strong>{{key}}:</strong> {{ dados }}</p>
+                        
+                        {% endfor %}
                          </div>
                 </div>
                 <div class="card-footer">
                     <button type="button" class="btn btn-default" data-toggle="modal" data-target="#editarcontact{{ contact[0] }}" data-toggle="tooltip" data-placement="top" title="Editar contact">
                         <i class="fas fa-edit"></i>
                     </button>
+
                     <!-- Modal para editar ticket -->
                     <div class="modal fade" id="editarcontact{{ contact[0] }}" tabindex="-1" role="dialog" aria-labelledby="editarcontactModalLabel{{ contact[0] }}" aria-hidden="true">
                         <div class="modal-dialog" role="document">
