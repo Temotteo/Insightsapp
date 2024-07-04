@@ -59,14 +59,12 @@
             </div>
             <div class="col-md-4">
                 <h3>Grupos Relacionados</h3>
-                {% if grupo %}
+                {% if contact %}
                  <ul class="list-group" id="grupos-list">
-                 {% for grupo in grupo %}
-                  <li class="list-group-item" id="lg"> {{ grupo[1] }} <a href="{{ url_for('remove_group', id=contact[0]) }}" class="text-danger" data-toggle="tooltip" data-placement="top" title="remover" onclick="return confirm('Tem certeza que deseja excluir o contacto desse Gropo?')">
+                  <li class="list-group-item" id="lg"> {{ contact[11] }} <a href="{{ url_for('remove_group', id=contact[0]) }}" class="text-danger" data-toggle="tooltip" data-placement="top" title="remover" onclick="return confirm('Tem certeza que deseja excluir o contacto desse Gropo?')">
                     <i class="fas fa-trash-alt"></i></a>
                 </li>
                     <!-- Adicione mais grupos aqui -->
-                   {% endfor %}
                  </ul>
                  {% endif %}
                  <button class="btn btn-info ml-2 px-1" data-toggle="modal" data-target="#ModalGroup" data-toggle="tooltip" data-placement="top" title="adicionar cliente">
@@ -85,9 +83,9 @@
                                         <label for="country" class="form-label">Grupo</label>
                                           <select class="form-control" id="country"  name ="group" >
                                             <option value="">selecione...</option>
-                                              {% if group %}
-                                                {% for group in group %}
-                                                 <option value="{{ group[0] }}">{{ group[1] }}</option>
+                                              {% if grupo %}
+                                                {% for grupo in grupo %}
+                                                 <option value="{{ grupo[0] }}">{{ grupo[1] }}</option>
                                                 {% endfor %}
                                             {% endif %}
                                           </select>

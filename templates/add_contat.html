@@ -119,7 +119,7 @@
     {% for contact in contacts %}
     <tr>
       {% for key, dados in contact[6].items() %}
-        {% if loop.index ==3 %}
+        {% if loop.index ==1 %}
         <td><a href="{{ url_for('detalhes_contact', id=contact[0]) }}">{{ dados }}</a></td>
         {% else %}
         <td>{{ dados }}</td>

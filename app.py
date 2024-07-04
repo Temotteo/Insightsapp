@@ -827,22 +827,26 @@ def grupos():
       for contact in contactos:
           for key, value in contact[6].items():  
             # Pegando o nome do campo a ser atualizado
-            print(grupo)
-            dados[key] = []  
+            print(key)
+            dados[key] = [] 
+            grupo_id = 3 
             # verificando se a coluna e a valor correspondem com a categoria e a referencia dada
             if key == categoria and value == referencia:
-               cur.execute(f"SELECT id FROM grupo WHERE nome_grupo = '{grupo}';")
-               grupo_id = cur.fetchone()[0]
+               cur.execute(f"SELECT * FROM grupo WHERE nome_grupo = '{grupo}';")
+               grupos = cur.fetchone()
                insert_grupo = f"INSERT INTO grupo (nome_grupo) VALUES ('{grupo}') RETURNING id;"
                 
                print(grupo_id)
-               if not grupo_id: 
+               if not grupos: 
                 cur.execute(insert_grupo)
                 grupo_id = cur.fetchone()[0]
                 conn.commit
                
+               else:
+                grupo_id = grupos[0]
+
                print(grupo_id)
-               
+   
                # Atualizando o campo específico com o valor do formulário
                insert_query = f"UPDATE contact_org SET grupo_id = {grupo_id} WHERE id_cont = {contact[0]};"
                cur.execute(insert_query) 
@@ -916,18 +920,24 @@ def delete_contact(id):
 @app.route('/detalhes_contact/<int:id>', methods=['GET','POST'])
 @is_logged_in
 def detalhes_contact(id):
+   org_id = session['last_org']
    try:
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cur = conn.cursor()  
-    cur.execute(f"SELECT * FROM contacts  where id = {id};")
+    query = f"""
+        SELECT *
+        FROM contacts c
+        JOIN contact_org r ON c.id = r.id_cont
+        JOIN grupo g ON r.grupo_id = g.id
+        WHERE c.id = {id};
+         """
+    cur.execute(query)
     contacts= cur.fetchone() 
-    cur.execute(f"SELECT * FROM grupo join contact_group on grupo.id = contact_group.grp_id WHERE contact_group.id_cont ={id} ;")
-    grupo = cur.fetchall()
-    cur.execute("SELECT * FROM grupo ;")
-    group = cur.fetchall()
+    cur.execute(f"select * from grupo where id in (select grupo_id from contact_org where org_id = '{org_id}');")
+    grupo= cur.fetchall() 
     conn.close()
-    sucesso = "Cliente Removido com sucesso"
-    return render_template('detalhes_de_contactos.html', contact=contacts,grupo = grupo,group = group,sucesso = sucesso)
+    print(contacts)
+    return render_template('detalhes_de_contactos.html', contact=contacts, grupo=grupo)
    except psycopg2.Error as e:
         error_msg = f"Erro ao fazer a transação: {e}"
         return render_template('erro.html', error=error_msg) 
@@ -936,14 +946,13 @@ def detalhes_contact(id):
 @is_logged_in
 def add_group(id):
    grupo_id = request.form['group']
+   org_id = session['last_org']
    try:
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
-    insert_query3 = '''
-            INSERT INTO contact_group (id_cont, grp_id)
-            VALUES (%s, %s);
-            '''
-    cursor.execute(insert_query3, (id,grupo_id ))
+    insert_query = f"insert into contact_org values( {id},'{org_id}',{grupo_id});"
+
+    cursor.execute(insert_query)
     conn.commit()
     conn.close()
     sucesso = "Cliente Removido com sucesso"
