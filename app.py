@@ -747,14 +747,11 @@ def add_contact():
         cursor = conn.cursor()
         cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where  contact_org.org_id = '{org_id}' LIMIT 1;")
         contactos = cursor.fetchone()
-        print(contactos)
-        print(org_id)
         conn.close()
         dados = {}
         for contact in contactos[6]:  
              # Pegando o nome do campo a ser atualizado
              field = contact
-             print(field)
              dados[field] = []
 
              if field:
@@ -888,14 +885,25 @@ def grupos():
 @app.route('/edit_contact/<int:id>', methods=['GET','POST'])
 @is_logged_in
 def edit_contact(id):
-   org_id = session['last_org']
-   name = request.form['name']
-   location = request.form['location']
-   phone = request.form['contact']
-   try:
+    org_id = session['last_org']
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-    cur = conn.cursor()  
-    cur.execute("UPDATE contacts SET name = %s, location = %s, phone = %s WHERE id = %s",(name,phone, location,id,))
+    cur = conn.cursor() 
+    cur.execute(f"SELECT * FROM contacts where id = {id};")
+    contactos = cur.fetchone() 
+    for contact in contactos[6]:  
+             # Pegando o nome do campo a ser atualizado
+             field = contact
+             print(field)
+             dados[field] = []
+
+             if field:
+                # Atualizando o campo específico com o valor do formulário
+                field_to_update = request.form[field]
+                print(field_to_update)
+               
+                dados[field] = field_to_update
+        
+    cur.execute("UPDATE contacts SET dados_contactos = %s WHERE id = %s ;",(extras.Json(dados), id,))
     conn.commit()
     cur.close()
     cur = conn.cursor()
@@ -906,9 +914,6 @@ def edit_contact(id):
     conn.close()
     sucesso = "Contacto Atualizado com sucesso"
     return render_template('add_contat.html', contacts=contacts,grupo = grupo,sucesso = sucesso)
-   except psycopg2.Error as e:
-        error_msg = f"Erro ao fazer a transação: {e}"
-        return render_template('erro.html', error=error_msg) 
    
 
 
@@ -1876,7 +1881,7 @@ def testes():
         status = messagem.status
         print(f'este e o status do encio da mensagem:  {status}')
         # Execute query
-        cmd='INSERT INTO envio_sms(mensagem, contato, nv_enviadas, sender_id, status_sms) VALUES ('+"'"+form.sms.data+"'"+",'"+str("+258"+form.contacto.data)+"','0','"+form.site.data+"',"+status+"'"+') RETURNING id_alerta'
+        cmd=f"INSERT INTO envio_sms(mensagem, contato, nv_enviadas, sender_id, status_sms) VALUES ('{form.sms.data}','+258{form.contacto.data}','0','{form.site.data}','{status}') RETURNING id_alerta"
 
         cursor.execute(cmd)
         dnh = cursor.fetchone()[0]
