@@ -1866,17 +1866,17 @@ def testes():
         print(form.sms.data)
         
         # Send SMS
-        #sid= send_sms(form.sms.data,str("+258"+form.contacto.data),form.site.data)
+        sid= send_sms(form.sms.data,str("+258"+form.contacto.data),form.site.data)
         account_sid = "AC952933e9303a9c0021be3c0ce432caec"
         auth_token = "5e14a5105201307f6d9a77af3fd81853"
         
-        message_sid = 'SMbc7fc62463f463c39ba12f9be200802a'
+        #message_sid = 'SMbc7fc62463f463c39ba12f9be200802a'
         client = Client(account_sid, auth_token)
-        messagem = client.messages(message_sid).fetch()
+        messagem = client.messages(sid).fetch()
         status = messagem.status
         print(f'este e o status do encio da mensagem:  {status}')
         # Execute query
-        cmd='INSERT INTO envio_sms(mensagem, contato, nv_enviadas, sender_id, status_sms) VALUES ('+"'"+form.sms.data+"'"+",'"+str("+258"+form.contacto.data)+"','0','"+form.site.data+"'"+status+"'"+') RETURNING id_alerta'
+        cmd='INSERT INTO envio_sms(mensagem, contato, nv_enviadas, sender_id, status_sms) VALUES ('+"'"+form.sms.data+"'"+",'"+str("+258"+form.contacto.data)+"','0','"+form.site.data+"',"+status+"'"+') RETURNING id_alerta'
 
         cursor.execute(cmd)
         dnh = cursor.fetchone()[0]
@@ -1885,8 +1885,8 @@ def testes():
 
         # Close connection
         conn.close()
-
-        flash(f'Teste criado com sucesso {status}', 'success')
+       
+        flash(f'Sms enviado com sucesso', 'success')
 
         return redirect(url_for('testes'))
 
