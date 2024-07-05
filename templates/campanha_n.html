@@ -32,13 +32,16 @@
                           <button type="button" class="close"  onclick="return $('#ModalAudio{{ column[0] }}').modal('hide');" aria-label="Close">
                               <span aria-hidden="true">&times;</span>
                     </div>
-                  </div>
+                  
                   <div class="modal-body">
-                  </a><audio class="mt-2" controls>
-                      <source src="/static/audio/{% if column[2] %} {{column[2].strip()}} {% endif %}" type="audio/mpeg">
+                  {% if  column[2] %}
+                   <audio controls>
+                      <source src="{{ url_for('static', filename='audios/' + column[2]) }}" type="audio/mpeg">
                       Your browser does not support the audio element.
                   </audio> 
+                  {% endif %}
                   </div>
+                </div>
               </div>
           </div>
       </div> 

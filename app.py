@@ -2352,7 +2352,11 @@ def perguntas(id):
 
     conn.close()
 
-    return render_template('perguntas.html', dados = dados, pergunta = pergunta, pergunta_ref = id)
+    string = "campanha_36_pergunta_3"
+    partes = id.split("_")
+    resultado = "_".join(partes[:2])
+
+    return render_template('perguntas.html', dados = dados, pergunta = pergunta, pergunta_ref = id, campang = resultado)
 
 
 @app.route('/survey_dashboard')
@@ -2840,7 +2844,7 @@ def assign_camp(id):
     return render_template('assign_camp.html', form=form)
 
 
-AUDIO_FOLDER = 'static/audio'
+AUDIO_FOLDER = 'static/audios'
 app.config['AUDIO_FOLDER'] = AUDIO_FOLDER
 # Criação do diretório de uploads se não existir
 if not os.path.exists(app.config['AUDIO_FOLDER']):
@@ -2894,8 +2898,11 @@ def assign_question(id,type):
           conn.close()
 
           flash('Audio inserido com sucesso', 'success')
+          
+          partes = id.split("_")
+          resultado = "_".join(partes[:2])
    
-          return redirect(url_for('campanha_n', id=id))
+          return redirect(url_for('campanha_n', id=resultado))
 
         else:
          
@@ -3740,8 +3747,8 @@ def uploaded_file(filename):
     return send_from_directory(app.config['AUDIO_FOLDER'], filename)
 
 #Funcao para inserco de Audios
-@app.route('/audios/<string:id>', methods=['GET', 'POST'])
-def audios(id):
+@app.route('/audios', methods=['GET', 'POST'])
+def audios():
     form = AudioForm()
     if form.validate_on_submit():
         audio_file = form.audio_file.data
