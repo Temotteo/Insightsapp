@@ -2194,16 +2194,28 @@ def campanha_n(id):
         print(columns_list)
         # Campanha
         # table_name_to_list = display_ref(cursor,table_name_to_list)
-        for i in range(len(columns_list)):
-            item = columns_list[i]
-            var = display_ref(cursor,id + "_" + item)
-            if var is not None:
+        for item in columns_list:
+            cursor.execute("SELECT  ref, audio_ref FROM display_ref WHERE id = %s", (id + "_" + item,))
+            result = cursor.fetchone()
+            if result is not None:
+                ref_value, audio_value = result
                 print(id + "_" + item)
-                print(var)
-                couples.append((item,var))
+                print(ref_value, audio_value)
+                couples.append((item, ref_value, audio_value))
                 print(couples)
             else:
                 print("Error: display_ref() returned None for", id + "_" + item)
+
+
+        cursor.execute("SELECT * FROM display_ref WHERE id LIKE %s", (id + "_%",))
+        display_ref_data = cursor.fetchall()
+
+        for row in display_ref_data:
+            print(row)
+            # Processar os dados conforme necessário
+            ref_id = row[0]  # Supondo que o id está na primeira coluna
+            ref_value = row[1]  # Supondo que o ref está na segunda coluna
+            audio_value = row[2]  # Supondo que o audio está na terceira coluna        
 
         campanha_ref = display_ref(cursor,table_name_to_list)
     except Exception as e:
@@ -2802,8 +2814,8 @@ def assign_camp(id):
     # Populate tikrts form fields
     form.projecto.data = campanha[2]
     
-
     if request.method == 'POST':
+        
         projecto = request.form['projecto']
         
         #current_dateTime = datetime.now()
@@ -2828,10 +2840,15 @@ def assign_camp(id):
     return render_template('assign_camp.html', form=form)
 
 
+AUDIO_FOLDER = 'static/audio'
+app.config['AUDIO_FOLDER'] = AUDIO_FOLDER
+# Criação do diretório de uploads se não existir
+if not os.path.exists(app.config['AUDIO_FOLDER']):
+    os.makedirs(app.config['AUDIO_FOLDER'])
 # Assign question
-@app.route('/assign_question/<string:id>', methods=['GET', 'POST'])
+@app.route('/assign_question/<string:id>/<string:type>', methods=['GET', 'POST'])
 @is_logged_in
-def assign_question(id):
+def assign_question(id,type):
 
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     
@@ -2846,36 +2863,65 @@ def assign_question(id):
     #conn.close()
     
     # Get form
-
-    form = PerguntaForm(request.form)
+    if type == 'audio':
+       form = AudioForm()
+    else:   
+       form = PerguntaForm(request.form)
+       form.pergunta.data = pergunta[1]
 
     # Populate tikrts form fields
-    form.pergunta.data = pergunta[1]
+
+   
+           
     
-
     if request.method == 'POST':
-        pergunta = request.form['pergunta']
-        
-        #current_dateTime = datetime.now()
+         #verifica se o fromulario e da inserssao de audio
+        if type == 'audio':
+          audio_file = form.audio_file.data
+          filename = secure_filename(audio_file.filename)
+          filepath = os.path.join(app.config['AUDIO_FOLDER'], filename)
+          audio_file.save(filepath)
+          
+          cursor = conn.cursor()
+           
+           # Execute
+          cursor.execute("UPDATE display_ref SET audio_ref=%s WHERE id=%s",(filename,id))
+           
+           # Commit to DB
+          conn.commit()
+   
+           #Close connection
+          conn.close()
 
-        # Create Cursor
-        cursor = conn.cursor()
-        #app.logger.info(title)
-        
-        # Execute
-        cursor.execute("UPDATE display_ref SET ref=%s WHERE id=%s",(pergunta,id))
-        
-        # Commit to DB
-        conn.commit()
+          flash('Audio inserido com sucesso', 'success')
+   
+          return redirect(url_for('campanha_n', id=id))
 
-        #Close connection
-        conn.close()
-
-        flash('Pergunta atualizada', 'success')
-
-        return redirect(url_for('perguntas', id=id))
-
-    return render_template('assign_question.html', form=form)
+        else:
+         
+           pergunta = request.form['pergunta']
+           
+           #current_dateTime = datetime.now()
+   
+           # Create Cursor
+           cursor = conn.cursor()
+           #app.logger.info(title)
+           
+           # Execute
+           cursor.execute("UPDATE display_ref SET ref=%s WHERE id=%s",(pergunta,id))
+           
+           # Commit to DB
+           conn.commit()
+   
+           #Close connection
+           conn.close()
+   
+           flash('Pergunta atualizada', 'success')
+   
+           return redirect(url_for('perguntas', id=id))
+    
+   
+    return render_template('assign_question.html', form=form, type = type, id=id)
 
 
 @app.route('/addfunction', methods=['GET', 'POST'])
@@ -3686,9 +3732,7 @@ def gerar_pdf_cameras(id_resumo):
 
 
 UPLOAD_FOLDER = 'static/videos'
-AUDIO_FOLDER = 'static/audio'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['AUDIO_FOLDER'] = AUDIO_FOLDER
 
 
 @app.route('/uploads/<filename>')
@@ -3696,8 +3740,8 @@ def uploaded_file(filename):
     return send_from_directory(app.config['AUDIO_FOLDER'], filename)
 
 #Funcao para inserco de Audios
-@app.route('/audios', methods=['GET', 'POST'])
-def audios():
+@app.route('/audios/<string:id>', methods=['GET', 'POST'])
+def audios(id):
     form = AudioForm()
     if form.validate_on_submit():
         audio_file = form.audio_file.data

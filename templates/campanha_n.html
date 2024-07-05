@@ -11,7 +11,9 @@
       
       <th>Pergunta</th>
       <th>Conteudo</th>
+      <th>audio</th>
       
+      <th></th>
       <th></th>
       <th></th>
 
@@ -20,11 +22,36 @@
       <tr>
         <td>{{ column[0] }}</td>
         <td>{{ column[1] }}</td>
+        <td>
+          <a href="#" onclick="return $('#ModalAudio{{ column[0] }}').modal('show');" > {{ column[2] }} </a>
+          <div class="modal " id="ModalAudio{{ column[0] }}" tabindex="-1"  aria-labelledby="ModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h4 class="modal-title" class="modal-title" id="ModalLabel">Audio</h4>
+                          <button type="button" class="close"  onclick="return $('#ModalAudio{{ column[0] }}').modal('hide');" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                    </div>
+                  </div>
+                  <div class="modal-body">
+                  </a><audio class="mt-2" controls>
+                      <source src="/static/audio/{% if column[2] %} {{column[2].strip()}} {% endif %}" type="audio/mpeg">
+                      Your browser does not support the audio element.
+                  </audio> 
+                  </div>
+              </div>
+          </div>
+      </div> 
+    </td>
 
         <td><a href="/perguntas/{{campanha}}_{{column[0]}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
         
-        <td><a href="/assign_question/{{campanha}}_{{column[0]}}" class="btn btn-default pull-right">Editar Pergunta</a></td>
-        
+        <td><a href="/assign_question/{{campanha}}_{{column[0]}}/question" class="btn btn-default pull-right">Editar Pergunta</a></td>
+        {% if column[2] %}
+        <td><a href="/assign_question/{{campanha}}_{{column[0]}}/audio" class="btn btn-default pull-right" >Editar Audio</a></td>
+        {% else %}
+        <td><a href="/assign_question/{{campanha}}_{{column[0]}}/audio" class="btn btn-default pull-right" >Adicionar Audio</a></td>
+        {% endif %}
       </tr>
     {% endfor %}
     
