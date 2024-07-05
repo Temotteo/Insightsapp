@@ -667,6 +667,24 @@ class ItemForm(FlaskForm):
     quantity = StringField('Quantity')
     price = StringField('Price')
 
+class AudioForm(FlaskForm):
+    organization = SelectField('Organization', choices=[], validators=[DataRequired()])
+    project = StringField('Project', validators=[DataRequired()])
+    audio_file = FileField('Audio File', validators=[DataRequired()])
+    submit = SubmitField('Upload')    
+
+@app.before_request
+def before_request():
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cur = conn.cursor()
+    cur.execute('SELECT nome_organizacao, org_id FROM organizacao')
+    organizations = cur.fetchall()
+    cur.close()
+    conn.close()
+    choices = [(org[1], org[0]) for org in organizations]
+    AudioForm.organization.kwargs['choices'] = choices
+
+
 class ProformaInvoiceForm(FlaskForm):
     invoice_number = StringField('Invoice Number')
     date = DateField('Date')
@@ -3663,7 +3681,39 @@ def gerar_pdf_cameras(id_resumo):
 
 
 UPLOAD_FOLDER = 'static/videos'
+AUDIO_FOLDER = 'static/audio'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['AUDIO_FOLDER'] = AUDIO_FOLDER
+
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['AUDIO_FOLDER'], filename)
+
+#Funcao para inserco de Audios
+@app.route('/audios', methods=['GET', 'POST'])
+def audios():
+    form = AudioForm()
+    if form.validate_on_submit():
+        audio_file = form.audio_file.data
+        filename = secure_filename(audio_file.filename)
+        filepath = os.path.join(app.config['AUDIO_FOLDER'], filename)
+        audio_file.save(filepath)
+
+        organization_id = form.organization.data
+        project = form.project.data
+
+        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        cursor = conn.cursor()
+        cursor.execute(f"INSERT INTO audios(org_id, projecto, audio) VALUES('{organization_id}','{project}','{filename}') ;")
+        conn.commit()
+        return redirect(url_for('audios'))
+    
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM audios ;")
+    audios = cursor.fetchall()
+    return render_template('audios.html', form=form, audios=audios)
 
 
 

@@ -1,5 +1,6 @@
 <link href="/static/css/insghtscss.css" rel="stylesheet">
 <nav class="navbar navbar-expand-lg navbar-light bg-light" aria-label="Eighth navbar example">
+  <a href="#" class="navbar-brand pb-3"><img src="/static/cod_OV/Logo-Insigths-2.png" height="30" width="auto" alt=""></a>
   <div class="container-fluid ml-5 ">
       <button class="navbar-toggler me-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -25,6 +26,8 @@
                     <li class="dropdown-divider"></li>
                     <li class="dropdown-header">Voz</li>
                     <li><a class="dropdown-item" href="/ivr_test">IVR</a></li>
+                    <li class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="/audios">Audios</a></li>
                     <li class="dropdown-divider"></li>
                     <li class="dropdown-header">Dashboard</li>
                     <li><a class="dropdown-item" href="/dashboard_demo">Demo</a></li>
@@ -92,13 +95,13 @@
                     <li><a class="dropdown-item" href="/grupos">Criar Grupo</a></li>
                 </ul>
             </li>
-            <li class="nav-item dropdown">
+            <!--<li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown7" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Orientação Vocal <span class="caret-down"></span></a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown7">
                     <li><a class="dropdown-item" href="/testes_OV">Testes</a></li>
                     <li><a class="dropdown-item" href="{{ url_for('resultado', usuario_id=1 ) }}">Resultados</a></li>
                 </ul>
-            </li>
+            </li>-->
             
            
         </ul>
