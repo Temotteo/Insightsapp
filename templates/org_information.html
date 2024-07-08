@@ -1,0 +1,63 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h2>Adicionar Línguas</h2>
+        <form action="/adicionar_lingua" method="POST">
+            <div class="form-group">
+                <label for="lingua">Selecione a Língua</label>
+                <select class="form-control" id="lingua" name="lingua" required>
+                    <option value="">Selecione uma língua</option>
+                    <option value="Portugues">Português</option>
+                    <option value="Emakhuwa">Emakhuwa</option>
+                    <option value="Cisena">Cisena</option>
+                    <option value="Xichangana">Xichangana</option>
+                    <option value="Cinyanja">Cinyanja</option>
+                    <option value="Ciswati">Ciswati</option>
+                    <option value="Gitonga">Gitonga</option>
+                    <option value="Elomwe">Elomwe</option>
+                    <option value="Chuwabo">Chuwabo</option>
+                    <option value="Shimakonde">Shimakonde</option>
+                    <option value="Cinyungwe">Cinyungwe</option>
+                    <option value="Koti">Koti</option>
+                    <option value="Ronga">Ronga</option>
+                    <option value="Bitonga">Bitonga</option>
+                    <option value="Kimwani">Kimwani</option>
+                    <option value="Shona">Shona</option>
+                    <!-- Adicione outras opções conforme necessário -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="abreviatura">Abreviatura da Língua</label>
+                <input type="text" class="form-control" id="abreviatura" name="abreviatura" required readonly>
+            </div>
+            <button type="submit" class="btn btn-primary">Adicionar</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('lingua').addEventListener('change', function() {
+            const abreviacoes = {
+                'Portugues': 'PT',
+                'Emakhuwa': 'EMA',
+                'Cisena': 'CIS',
+                'Xichangana': 'XIC',
+                'Cinyanja': 'CIN',
+                'Ciswati': 'CISW',
+                'Gitonga': 'GIT',
+                'Elomwe': 'ELM',
+                'Chuwabo': 'CHU',
+                'Shimakonde': 'SHI',
+                'Cinyungwe': 'CIN',
+                'Koti': 'KOT',
+                'Ronga': 'RON',
+                'Bitonga': 'BIT',
+                'Kimwani': 'KIM',
+                'Shona': 'SHO',
+                // Adicione outras abreviações conforme necessário
+            };
+            const linguaSelecionada = this.value;
+            document.getElementById('abreviatura').value = abreviacoes[linguaSelecionada] || '';
+        });
+    </script>
+{% endblock %}

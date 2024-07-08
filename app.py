@@ -675,13 +675,14 @@ class AudioForm(FlaskForm):
 
 @app.before_request
 def before_request():
+    org_id =session['last_org']
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cur = conn.cursor()
-    cur.execute('SELECT nome_organizacao, org_id FROM organizacao')
+    cur.execute(f"SELECT * FROM org_linguas where org_id = '{org_id}'")
     organizations = cur.fetchall()
     cur.close()
     conn.close()
-    choices = [(org[1], org[0]) for org in organizations]
+    choices = [(org[2], org[1]) for org in organizations]
     AudioForm.organization.kwargs['choices'] = choices
 
 
@@ -2173,6 +2174,28 @@ def addoption(id):
 
     return render_template('addoption.html', form=form)
 
+# Funcao par carragar audios referentes a uma questao do inquerito
+@app.route('/carragar_Audio/<string:id>', methods=['GET'])
+@is_logged_in
+def carragar_Audio(id):
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+  
+    org_id = session['last_org']
+    print(id)
+    
+    cursor.execute(f"SELECT * FROM  display_ref_linguas  where  id = '{id}' ;")
+    audios = cursor.fetchall()
+    conn.close()
+    print(audios)
+    if len(audios) == 1:
+        audio = audios[0]
+        data = [{'id': audio[0], 'audio': audio[1]}]
+    else:
+        data = [{'id': audio[0], 'audio': audio[1]} for audio in audios]
+
+    print(data)
+    return jsonify(data)
 
 @app.route('/campanha_n/<string:id>')
 @is_logged_in
@@ -2229,7 +2252,7 @@ def campanha_n(id):
     
     
 
-    return render_template('campanha_n.html', columns_list = couples, campanha=table_name_to_list, campanha_ref=campanha_ref)
+    return render_template('campanha_n.html', columns_list = couples, campanha=table_name_to_list, campanha_ref=campanha_ref,audios=audios)
 
 
 @app.route('/create_camp')
@@ -2879,22 +2902,30 @@ def assign_question(id,type):
            
     
     if request.method == 'POST':
-         #verifica se o fromulario e da inserssao de audio
+        #verifica se o fromulario e da inserssao de audio
         if type == 'audio':
           audio_file = form.audio_file.data
+          audio_lingua = form.organization.data
           filename = secure_filename(audio_file.filename)
-          filepath = os.path.join(app.config['AUDIO_FOLDER'], filename)
+
+          # Separando o nome do arquivo e a extensão
+          name, ext = os.path.splitext(filename)
+          
+          # Alterando o nome do arquivo adicionando audio_lingua no meio
+          new_filename = f"{name}_{audio_lingua}{ext}"
+
+          filepath = os.path.join(app.config['AUDIO_FOLDER'], new_filename)
           audio_file.save(filepath)
           
           cursor = conn.cursor()
            
-           # Execute
-          cursor.execute("UPDATE display_ref SET audio_ref=%s WHERE id=%s",(filename,id))
+          # Execute
+          cursor.execute("INSERT INTO display_ref_linguas VALUES (%s,%s)",(id,new_filename,))
            
-           # Commit to DB
+          # Commit to DB
           conn.commit()
    
-           #Close connection
+          #Close connection
           conn.close()
 
           flash('Audio inserido com sucesso', 'success')
@@ -3509,6 +3540,26 @@ def selecionar_group():
 
 
 # essa metodo pega a Org_id selecionada e redericiona o usuario na organizacao
+@app.route('/adicionar_lingua', methods=['GET','POST'])
+@is_logged_in
+def adicionar_lingua():
+    if  request.form: 
+        org_id = session['last_org']  
+        lingua = request.form['lingua']
+        abreviatura = request.form['abreviatura']
+
+        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        cursor = conn.cursor()
+        
+        cursor.execute(f"INSERT INTO org_linguas VALUES('{org_id}','{lingua}','{abreviatura}')")
+        conn.commit()
+        conn.close()
+        flash('Lingua Insirida com sucesso', 'success')
+        
+    return render_template('org_information.html')
+
+
+# essa metodo pega a Org_id selecionada e redericiona o usuario na organizacao
 @app.route('/get_org/<org_id>', methods=['GET'])
 def get_org(org_id):
     return redirect(url_for('org_id',org_id=org_id))
@@ -3520,7 +3571,7 @@ def org_id(org_id):
 
     cursor = conn.cursor()
 
-    # Execute query
+    # Faz a captura das org_id referentes ao usurio  
     cursor.execute(f"SELECT * FROM organizacao WHERE org_id = '{org_id}' ;")
         
     org=cursor.fetchone()
@@ -3579,11 +3630,13 @@ def sucesso_sms():
 
 # FUNCAO DE RELATORIO DE CAMERAS
 @app.route('/Relatorio_camera')
+@is_logged_in
 def Relatorio_camera():
     return render_template('Resumo_rel_camera.html')
 
 
 @app.route('/resumo', methods=['POST'])
+@is_logged_in
 def resumo():
     cliente = request.form['clientes']
     resumo = request.form['resumo']
@@ -3607,6 +3660,7 @@ def resumo():
     return render_template('relatorio_camera.html', resumo=resumo, idResumo=idResumo, cli_id=cli_id)
 
 @app.route('/submit_rel_cm', methods=['POST'])
+@is_logged_in
 def submit_rel_cm():
     descricao = request.form['descricao']
     estado = request.form['estado']
@@ -3642,6 +3696,7 @@ def submit_rel_cm():
 
 
 @app.route('/ralatorios/pdf/<int:id_resumo>')
+@is_logged_in
 def gerar_pdf_cameras(id_resumo):
     # Obtendo relatórios do banco de dados para o usuário
     
@@ -3743,11 +3798,13 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 @app.route('/uploads/<filename>')
+@is_logged_in
 def uploaded_file(filename):
     return send_from_directory(app.config['AUDIO_FOLDER'], filename)
 
 #Funcao para inserco de Audios
 @app.route('/audios', methods=['GET', 'POST'])
+@is_logged_in
 def audios():
     form = AudioForm()
     if form.validate_on_submit():
@@ -3969,6 +4026,7 @@ def teste_ov(tipo):
 
 # Rota para a página de avaliação
 @app.route('/resultado/<int:usuario_id>')
+@is_logged_in
 def resultado(usuario_id):
   query = f"""
         SELECT u.id AS usuario_id, u.nome AS usuario_nome,
@@ -4018,6 +4076,7 @@ def resultado(usuario_id):
 
 
 @app.route('/reniciar/<int:usuario_id>')
+@is_logged_in
 def reniciar(usuario_id):
     try:
      conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Quizdb')
@@ -4068,6 +4127,7 @@ def suport():
 
 
 @app.route('/tickets')
+@is_logged_in
 def tickets():
     conn = connect_to_db()
     try:
@@ -4081,6 +4141,7 @@ def tickets():
     return render_template('lista_ticket.html', tickets=tickets)
 
 @app.route('/ticket/<int:id>')
+@is_logged_in
 def ticket(id):
     conn = connect_to_db()
     try:
@@ -4097,6 +4158,7 @@ def ticket(id):
 
 
 @app.route('/novo_ticket', methods=['GET', 'POST'])
+@is_logged_in
 def novo_ticket():
     if request.method == 'POST':
         titulo = request.form['titulo']
@@ -4124,6 +4186,7 @@ def novo_ticket():
 
 # metodo para atualizar tickets
 @app.route('/atualizar_ticket/<int:id>', methods=['GET', 'POST'])
+@is_logged_in
 def atualizar_ticket(id):
     if request.method == 'POST':
         titulo = request.form['titulo']
@@ -4146,10 +4209,12 @@ def atualizar_ticket(id):
         
     
 @app.route('/confirmacao/<ticket_id>')
+@is_logged_in
 def confirmacao(ticket_id):
     return render_template('confirmacao.html', ticket_id=ticket_id)
 
 @app.route('/funcionarios/<int:ticket_id>', methods=['GET', 'POST'])
+@is_logged_in
 def funcionarios(ticket_id):
     funcionarios =[]
     conn = connect_to_db()
@@ -4179,6 +4244,7 @@ def funcionarios(ticket_id):
 
 
 @app.route('/atribuir_ticket/<int:ticket_id>', methods=['GET', 'POST'])
+@is_logged_in
 def atribuir_ticket(ticket_id):
     funcionarios =[]
     if request.method == 'POST':
@@ -4215,6 +4281,7 @@ def atribuir_ticket(ticket_id):
 
 
 @app.route('/deletar_ticket/<int:ticket_id>', methods=['GET', 'POST'])
+@is_logged_in
 def deletar_ticket(ticket_id):
     conn = connect_to_db()
     try:
@@ -4234,6 +4301,7 @@ def deletar_ticket(ticket_id):
 
  #funcao   
 @app.route('/concluir_ticket/<int:ticket_id>', methods=['GET', 'POST'])
+@is_logged_in
 def concluir_ticket(ticket_id):
     conn = connect_to_db()
     try:

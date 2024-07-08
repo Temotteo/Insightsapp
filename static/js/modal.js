@@ -99,4 +99,36 @@ function carregarDados() {
         });
 }
 
+function carregarAudio(id, modal) {
+    $.get(`/carragar_Audio/${id}`, function(data) {
+        $('#modbody').empty();
 
+        // Verifica se data é um array
+        if (Array.isArray(data)) {
+            // Se for um array de objetos
+            data.forEach(function(item) {
+                var linha = `<p><strong>${item.audio}</strong> <a href="#" onclick="$('#audio_${item.id}').removeClass('d-none').addClass('d-flex'); return false;">play</a>
+                                  
+                               <audio id="audio_${item.id}" class="d-none" controls>
+                                  <source src="{{ url_for('static', filename='audios/' + item.audio) }}" type="audio/mpeg">
+                                  Your browser does not support the audio element.
+                              </audio> 
+                             </p>`;
+                $('#modbody').append(linha);
+            });
+        } else {
+            // Se data não for um array (caso de apenas um objeto)
+            var linha = `<p>escreva audio<strong>${data.audio}</strong> <a href="#" onclick="$('#audio_${data.id}').removeClass('d-none').addClass('d-flex'); return false;">play</a>
+                              
+                           <audio id="audio_${data.id}" class="d-none" controls>
+                              <source src="{{ url_for('static', filename='audios/' + data.audio) }}" type="audio/mpeg">
+                              Your browser does not support the audio element.
+                          </audio> 
+                        </p>`;
+            $('#modbody').append(linha);
+        }
+
+        // Abre o modal após carregar os dados
+        $('#ModalAudio').modal('show');
+    });
+}

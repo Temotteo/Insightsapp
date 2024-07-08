@@ -23,38 +23,17 @@
         <td>{{ column[0] }}</td>
         <td>{{ column[1] }}</td>
         <td>
-          <a href="#" onclick="return $('#ModalAudio{{ column[0] }}').modal('show');" > {{ column[2] }} </a>
-          <div class="modal " id="ModalAudio{{ column[0] }}" tabindex="-1"  aria-labelledby="ModalLabel" aria-hidden="true">
-              <div class="modal-dialog">
-              <div class="modal-content">
-                  <div class="modal-header">
-                      <h4 class="modal-title" class="modal-title" id="ModalLabel">Audio</h4>
-                          <button type="button" class="close"  onclick="return $('#ModalAudio{{ column[0] }}').modal('hide');" aria-label="Close">
-                              <span aria-hidden="true">&times;</span>
-                    </div>
-                  
-                  <div class="modal-body">
-                  {% if  column[2] %}
-                   <audio controls>
-                      <source src="{{ url_for('static', filename='audios/' + column[2]) }}" type="audio/mpeg">
-                      Your browser does not support the audio element.
-                  </audio> 
-                  {% endif %}
-                  </div>
-                </div>
-              </div>
-          </div>
-      </div> 
+          <a href="#" onclick="carregarAudio('{{campanha}}_{{column[0]}}','{{ column[3] }}')" > Audios </a>
+          
+       
     </td>
 
         <td><a href="/perguntas/{{campanha}}_{{column[0]}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
         
         <td><a href="/assign_question/{{campanha}}_{{column[0]}}/question" class="btn btn-default pull-right">Editar Pergunta</a></td>
-        {% if column[2] %}
-        <td><a href="/assign_question/{{campanha}}_{{column[0]}}/audio" class="btn btn-default pull-right" >Editar Audio</a></td>
-        {% else %}
+       
         <td><a href="/assign_question/{{campanha}}_{{column[0]}}/audio" class="btn btn-default pull-right" >Adicionar Audio</a></td>
-        {% endif %}
+       
       </tr>
     {% endfor %}
     
@@ -63,7 +42,21 @@
   <a class="btn btn-success" href="/campanhas">Voltar a campanhas</a>
   <a class="btn btn-success" href="/campanhas">Testar</a>
   
-  
+  <div class="modal " id="ModalAudio" tabindex="-1"  aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title" class="modal-title" id="ModalLabel">Audio</h4>
+                <button type="button" class="close"  onclick="return $('#ModalAudio').modal('hide');" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+          </div>
+        
+        <div class="modal-body" id="modbody">
+        
+        </div>
+      </div>
+    </div>
+</div>
   
 
 {% endblock %}
