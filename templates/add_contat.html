@@ -103,15 +103,18 @@
 {% if sucesso %}
   <div class="alert alert-danger">{{erro}}</div>
  {% endif %}
-<table class="table table-striped">
+ <form action="/delete" method="post">
+  <table class="table table-striped">
     <tr>
       {% for contact in contacts %} 
+      
       {% if loop.index ==1 %}
       {% for dados in contact[6] %}
       
         <td>{{dados}}</td>
         
         {% endfor %}
+        <td>select</td>
         {% endif %}
         {% endfor %}
         
@@ -125,8 +128,11 @@
         <td>{{ dados }}</td>
         {% endif %}
         {% endfor %}
+        <td><input type="checkbox" name="delete_ids" value="{{ contact[0] }}"></td>
+
     </tr>
     {% endfor %}
 </table>
+<button type="submit" class="btn btn-info">Deletar Selecionados</button>
 </div>
 {% endblock %}

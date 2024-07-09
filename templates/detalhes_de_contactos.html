@@ -53,11 +53,13 @@
             </div>
             <div class="col-md-4">
                 <h3>Grupos Relacionados</h3>
-                {% if contact %}
+                {% if grupo %}
                  <ul class="list-group" id="grupos-list">
-                  <li class="list-group-item" id="lg"> {{ contact[11] }} <a href="{{ url_for('remove_group', id=contact[0]) }}" class="text-danger" data-toggle="tooltip" data-placement="top" title="remover" onclick="return confirm('Tem certeza que deseja excluir o contacto desse Gropo?')">
+                    {% for grupo in grupo %}   
+                  <li class="list-group-item" id="lg"> {{ grupo[1] }} <a href="{{ url_for('remove_group', id=contact[0]) }}" class="text-danger" data-toggle="tooltip" data-placement="top" title="remover" onclick="return confirm('Tem certeza que deseja excluir o contacto desse Gropo?')">
                     <i class="fas fa-trash-alt"></i></a>
                 </li>
+                {% endfor %}
                     <!-- Adicione mais grupos aqui -->
                  </ul>
                  {% endif %}
@@ -77,8 +79,8 @@
                                         <label for="country" class="form-label">Grupo</label>
                                           <select class="form-control" id="country"  name ="group" >
                                             <option value="">selecione...</option>
-                                              {% if grupo %}
-                                                {% for grupo in grupo %}
+                                              {% if grupos %}
+                                                {% for grupo in grupos %}
                                                  <option value="{{ grupo[0] }}">{{ grupo[1] }}</option>
                                                 {% endfor %}
                                             {% endif %}

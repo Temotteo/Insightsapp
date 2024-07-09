@@ -79,7 +79,6 @@ def handle_exception(e):
     return render_template('erro.html', error= e), 500    
 
 
-
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
 # Dummy survey data for demonstration
@@ -818,8 +817,24 @@ def add_contact():
            conn.close()
            return render_template('add_contat.html', contacts=contacts,grupo = grupo)
 
-   return render_template('add_contat.html', contacts=contacts,grupo = grupo)
+   return render_template('add_contat.html', contacts=contacts, grupo = grupo)
   
+
+# essa funcao deleta uma lista de contactos referentes as linhas selecionadas na tabela
+@app.route('/delete', methods=['POST'])
+def delete():
+    delete_ids = request.form.getlist('delete_ids')
+    if delete_ids:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        delete_ids_str = ', '.join(cursor.mogrify("%s", (id,)).decode('utf-8') for id in delete_ids)
+        cursor.execute(f"DELETE FROM contacts WHERE id IN ({delete_ids_str})")
+        conn.commit()
+        cursor.close()
+        conn.close()
+    return redirect(url_for('add_contact'))
+
+
 
 # funcao para inserir dados pelo exccel
 @app.route('/grupos', methods=['POST','GET'])
@@ -891,6 +906,7 @@ def edit_contact(id):
     cur = conn.cursor() 
     cur.execute(f"SELECT * FROM contacts where id = {id};")
     contactos = cur.fetchone() 
+    dados = {}
     for contact in contactos[6]:  
              # Pegando o nome do campo a ser atualizado
              field = contact
@@ -958,10 +974,12 @@ def detalhes_contact(id):
     cur.execute(query)
     contacts= cur.fetchone() 
     cur.execute(f"select * from grupo where id in (select grupo_id from contact_org where org_id = '{org_id}');")
-    grupo= cur.fetchall() 
+    grupos= cur.fetchall() 
+    cur.execute(f"select * from grupo where id in (select grupo_id from contact_org where id_cont = '{id}');")
+    grupo= cur.fetchall()
     conn.close()
     print(contacts)
-    return render_template('detalhes_de_contactos.html', contact=contacts, grupo=grupo)
+    return render_template('detalhes_de_contactos.html', contact=contacts, grupo=grupo, grupos=grupos)
    except psycopg2.Error as e:
         error_msg = f"Erro ao fazer a transação: {e}"
         return render_template('erro.html', error=error_msg) 
@@ -979,7 +997,6 @@ def add_group(id):
     cursor.execute(insert_query)
     conn.commit()
     conn.close()
-    sucesso = "Cliente Removido com sucesso"
     return redirect(url_for('detalhes_contact',id=int(id)))
    except psycopg2.Error as e:
         error_msg = f"Erro ao fazer a transação: {e}"
