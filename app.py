@@ -51,8 +51,96 @@ from googleapiclient.discovery import build
 
 import plotly.graph_objs as go
 import numpy as np
+from celery import Celery
 
 app = Flask(__name__)
+
+
+app.config['CELERY_BROKER_URL'] = 'amqp://guest:guest@localhost'
+app.config['CELERY_RESULT_BACKEND'] = 'rpc://'
+
+celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+celery.conf.update(app.config)
+
+@celery.task
+def enviar_email(destinatario, assunto, mensagem,usuario, email_usuario, senha):
+    import smtplib
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    import ssl
+
+
+    mensagem_html = f"""<!DOCTYPE html>
+          <html>
+          <head>
+          <style>
+         .btn {{ display: inline-block; font-weight: 400; text-align: center; white-space: nowrap; vertical-align: middle; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; border: 1px solid transparent; padding: .375rem .75rem; font-size: 1rem; line-height: 1.5; border-radius: .25rem; transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out; }}'
+         .btn-primary {{ color: #fff; background-color: #007bff; border-color: #007bff; }}
+         .btn-primary:hover {{ color: #fff; background-color: #0069d9; border-color: #0062cc; }}
+         .container {{ width: 100%; padding-right: 15px; padding-left: 15px; margin-right: 15px; margin-left: 15px; }}
+         .row {{ display: flex; flex-wrap: wrap; margin-right: -15px; margin-left: -15px; }}
+         .col {{ position: relative; width: 100%; padding-right: 15px; padding-left: 15px; }}
+         .text-center {{ text-align: center!important; color: #ddd;}}
+         .d-flex {{ display: flex!important; }}
+         .align-items-center {{  align-items: center!important; }}
+         .justify-content-center {{  justify-content: center!important; }}
+         .text-decoration-none {{ text-decoration: none!important; }}
+         </style>
+         </head>
+         <body >
+           <div class="container d-flex justify-content-center" style="background-color: rgb(22, 20, 20);>
+             <div style="color: #ddd;">
+               <a href="https://insightsap.com/">
+                <img src="https://i.ibb.co/MBbsnDK/Logo-Insigths-2.png" alt="" height="100" width="auto"></a>
+             
+               <h2>Detalhes do erro reportado: <b>{mensagem}</b><h2>
+                
+              </div>
+             <footer >
+            <div style="color: #ddd;">
+               <p>&copy; 2024 Company, Inc. All rights reserved.</p>
+                <a href="https://https://www.facebook.com/share/42AoHbA7TY65UGTW/?mibextid=qi2Omg">
+                <img src="https://img.icons8.com/?size=100&id=yGcWL8copNNQ&format=png&color=000000" alt="Facebook" width="24" height="24">
+              </a>
+               <a href="https://www.linkedin.com/company/insights-mz/">
+               <img src="https://img.icons8.com/?size=100&id=13930&format=png&color=000000" alt="LinkedIn" width="24" height="24">
+             </a>
+              <a href="htts://helpdesk@cardinalt.com" >
+              <img src="https://img.icons8.com/?size=100&id=SGCKpmr2U7Sq&format=png&color=000000" alt="email" width="24" height="24">
+             </a>
+             
+         </footer>
+         </div>
+         </body>
+         </html>
+       """
+    try:
+        # Criar objeto MIMEMultipart
+        msg = MIMEMultipart()
+        msg['From'] = email_usuario
+        msg['To'] = destinatario
+        msg['Subject'] = assunto
+
+        # Adicionar corpo da mensagem
+        msg.attach(MIMEText(mensagem_html, 'html'))
+
+        # Iniciar conexão segura com o servidor SMTP
+        context = ssl.create_default_context()
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls(context=context)
+            
+            # Login com as credenciais
+            server.login(email_usuario, senha)
+
+            # Enviar e-mail
+            server.sendmail(email_usuario, destinatario, msg.as_string())
+
+        print("E-mail enviado com sucesso para:", destinatario)
+        return True  # Retorna True se o e-mail foi enviado com sucesso
+    except Exception as e:
+        print("Erro ao enviar e-mail:", e)
+        return False  # Retorna False se ocorrer um erro ao enviar o e-mail
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -70,13 +158,17 @@ def after_request(response):
 def teardown_request(exception):
     if exception:
         app.logger.error(f"Erro: {exception}")
-        return render_template('erro.html', error=exception), 500
+        usuario = session.get('username')
+        enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+        return render_template('erro.html'), 500
     
 # Tratamento global de exceções
 @app.errorhandler(Exception)
 def handle_exception(e):
     app.logger.error(f"Erro inesperado: {e}")
-    return render_template('erro.html', error= e), 500    
+    usuario = session.get('username')
+    enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+    return render_template('erro.html'), 500    
 
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']

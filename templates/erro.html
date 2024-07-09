@@ -23,9 +23,16 @@
 
 
     <div class="jumbotron ">
-        <h1>Erro ao executar a transação</h1>
-        <p class="lead">{{ error }}</p>
+        <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9 9C9 10.1046 8.10457 11 7 11C5.89543 11 5 10.1046 5 9C5 7.89543 5.89543 7 7 7C8.10457 7 9 7.89543 9 9Z" fill="#3E4347"/>
+            <path d="M19 9C19 10.1046 18.1046 11 17 11C15.8954 11 15 10.1046 15 9C15 7.89543 15.8954 7 17 7C18.1046 7 19 7.89543 19 9Z" fill="#3E4347"/>
+            <path d="M8 16C8 13.3333 10.6667 11 13 11C15.3333 11 18 13.3333 18 16" stroke="#3E4347" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h1>Lamentamos,</h1>
+        <p>Ocorreu um Erro ao tentar executar a transacao</p>
         <p>Por favor, tente novamente mais tarde ou entre em contacto com a equipe de suporte.</p>
+        <a href="mailto:helpdesk@cardinalt.com"> helpdesk@cardinalt.com</a>
     </div>
 
 {% endblock %}
