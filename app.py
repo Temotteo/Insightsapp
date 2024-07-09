@@ -675,7 +675,7 @@ class AudioForm(FlaskForm):
 
 @app.before_request
 def before_request():
-    org_id =session['last_org']
+    org_id = session.get('last_org')
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cur = conn.cursor()
     cur.execute(f"SELECT * FROM org_linguas where org_id = '{org_id}'")
