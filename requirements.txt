@@ -24,4 +24,3 @@ werkzeug
 flask_sqlalchemy
 openpyxl
 pandas
-celery
