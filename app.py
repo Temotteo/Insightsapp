@@ -51,7 +51,7 @@ from googleapiclient.discovery import build
 
 import plotly.graph_objs as go
 import numpy as np
-from celery import Celery
+#from celery import Celery
 
 app = Flask(__name__)
 
