@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta por Letra</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Consulta por Letra</h1>
+    <input type="search" id="nameInput"  placeholder="Digite o nome">
+
+    <table id="nameTable">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Idade</th>
+                <th>Cidade</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Alice</td><td>25</td><td>New York</td></tr>
+            <tr><td>Bob</td><td>30</td><td>Los Angeles</td></tr>
+            <tr><td>Charlie</td><td>35</td><td>Chicago</td></tr>
+            <tr><td>David</td><td>40</td><td>Houston</td></tr>
+            <tr><td>Edward</td><td>45</td><td>Phoenix</td></tr>
+            <tr><td>Fiona</td><td>50</td><td>Philadelphia</td></tr>
+            <tr><td>George</td><td>55</td><td>San Antonio</td></tr>
+            <tr><td>Hannah</td><td>60</td><td>San Diego</td></tr>
+            <tr><td>Ian</td><td>65</td><td>Dallas</td></tr>
+            <tr><td>Jack</td><td>70</td><td>San Jose</td></tr>
+        </tbody>
+    </table>
+
+
+   
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const nameInput = document.getElementById('nameInput');
+    const tableBody = document.querySelector('#nameTable tbody');
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+    nameInput.addEventListener('input', () => {
+        const searchValue = nameInput.value.toUpperCase();
+
+        rows.forEach(row => {
+            const name = row.firstElementChild.textContent.toUpperCase();
+            if (name.startsWith(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+</body>
+</html>

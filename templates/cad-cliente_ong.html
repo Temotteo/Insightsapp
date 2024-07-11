@@ -3,8 +3,12 @@
 
 {% block body%}
   <h1>ONGs</h1>
+  <!--<div class=" d-flex justify-content-end">
+    <input type="search" name="search" id="nameInput" class="form-control col-md-4 rounded-5" placeholder="Search..." >
+  </div>-->
   <hr>
-  <table class="table table-striped">
+  
+  <table id="nameTable" class="table table-striped">
     <tr>
       <th>ID</th>
       <th>Name</th>
@@ -38,6 +42,25 @@
       </tr>
     {% endfor %}
   </table>
-
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const nameInput = document.getElementById('nameInput');
+      const tableBody = document.querySelector('#nameTable tbody');
+      const rows = Array.from(tableBody.querySelectorAll('tr'));
+  
+      nameInput.addEventListener('input', () => {
+          const searchValue = nameInput.value.toUpperCase();
+  
+          rows.forEach(row => {
+              const name = row.children[1].textContent.toUpperCase();
+              if (name.startsWith(searchValue)) {
+                  row.style.display = '';
+              } else {
+                  row.style.display = 'none';
+              }
+          });
+      });
+  });
+  </script>
 
 {% endblock %}

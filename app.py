@@ -2655,9 +2655,9 @@ def serie():
     categorias = ["Call","Meeting", "Submission proposal"] 
     for data in calendar_data:
         if data[1] == 'Marta':
-            call = sum(1 for calendar in calendar_data if calendar[4] == 'Call' and calendar[1]=='Marta')
-            meeting = sum(1 for calendar in calendar_data if calendar[4] == "Meeting" and calendar[1]=="Marta")
-            proposal = sum(1 for calendar in calendar_data if calendar[4] == "submission proposal" and calendar[1]=="Marta")
+            call = sum(1 for calendar in calendar_data if calendar[3] == 'Call' and calendar[1]=='Marta')
+            meeting = sum(1 for calendar in calendar_data if calendar[3] == "Meeting" and calendar[1]=="Marta")
+            proposal = sum(1 for calendar in calendar_data if calendar[3] == "submission proposal" and calendar[1]=="Marta")
             
 
         if data[1] == 'Sara':
