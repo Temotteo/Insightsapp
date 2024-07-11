@@ -2616,7 +2616,7 @@ def add_call(id):
         task_title = "Follow-up feito ao cliente: " + client[0] + " no Sistema"       
         insert_query = sql.SQL("INSERT INTO tasks (title, due_date, responsible, accepted_time, completed_time, accepted, completed) VALUES ({}, CURRENT_DATE,{}, now(),now(), 'TRUE','TRUE')")
         cursor.execute(insert_query.format(sql.Literal(task_title), sql.Literal(session['username'])))
-
+        conn.commit()
         
         conn.close()
 
