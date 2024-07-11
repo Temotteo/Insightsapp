@@ -1376,6 +1376,25 @@ def campanhas():
     return render_template('campanhas.html', campanhas = dados)
 
 
+@app.route('/surveys')
+@is_logged_in
+def surveys():
+
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM campanhas WHERE projecto IS NOT NULL")
+
+    dados=cursor.fetchall()
+
+    # Close connection
+    conn.close()
+
+    return render_template('campanhas.html', surveys = dados)
+   
+
+
 @app.route('/pendentes')
 @is_logged_in
 def pendentes():
@@ -2667,9 +2686,9 @@ def tarefas_diarias():
             
 
         if data[1] == 'Sara':
-            calls = sum(1 for calendar in calendar_data if calendar[4] == "Call" and calendar[1]=="Sara")
-            meetings = sum(1 for calendar in calendar_data if calendar[4] == "Meeting" and calendar[1]=="Sara")
-            proposals = sum(1 for calendar in calendar_data if calendar[4] == "submission proposal" and calendar[1]=="Sara")
+            calls = sum(1 for calendar in calendar_data if calendar[3] == "Call" and calendar[1]=="Sara")
+            meetings = sum(1 for calendar in calendar_data if calendar[3] == "Meeting" and calendar[1]=="Sara")
+            proposals = sum(1 for calendar in calendar_data if calendar[3] == "submission proposal" and calendar[1]=="Sara")
      
 
     Marta = [call, meeting, proposal]
@@ -2921,25 +2940,29 @@ def assign_camp(id):
     
     # Create cursor
     cursor = conn.cursor()
+    print(id)
+    if id =='org_id':
+        org_id = session['last_org']
+        form = CampForm(request.form)
+        cursor.execute(f"SELECT * FROM campanhas WHERE orgid = '{org_id}' and projecto IS NULL")
+        orgs = cursor.fetchall()
+        print(f"SELECT * FROM campanhas WHERE orgid = '{org_id}' ")
+        return render_template('assign_camp.html', orgs=orgs, form=form)
 
     # Get article by id
-    result = cursor.execute("SELECT * FROM campanhas WHERE id_campanha = %s", [id])
+    #result = cursor.execute("SELECT * FROM campanhas WHERE id_campanha = %s", [id])
 
-    campanha = cursor.fetchone()
+    #campanha = cursor.fetchone()
     
-    #conn.close()
-    
-    # Get form
-
     form = CampForm(request.form)
 
     # Populate tikrts form fields
-    form.projecto.data = campanha[2]
+    
     
     if request.method == 'POST':
         
         projecto = request.form['projecto']
-        
+        print(projecto)
         #current_dateTime = datetime.now()
 
         # Create Cursor
@@ -2947,10 +2970,21 @@ def assign_camp(id):
         #app.logger.info(title)
         
         # Execute
-        cursor.execute("UPDATE campanhas SET projecto=%s WHERE id_campanha=%s",(projecto,id))
-        cursor.execute("INSERT INTO display_ref(id, ref) VALUES (%s,%s)",(campanha[3],projecto))
-        # Commit to DB
-        conn.commit()
+        if request.form['campanha']:
+            campanha = request.form['campanha']
+            cursor.execute("SELECT * FROM campanhas WHERE id_campanha = %s", [campanha])
+            form.projecto.data = campanha[2]
+            result = cursor.fetchone()
+            print(campanha)            
+            cursor.execute("UPDATE campanhas SET projecto=%s WHERE id_campanha=%s",(projecto,campanha))
+            cursor.execute("INSERT INTO display_ref(id, ref) VALUES (%s,%s)",(result[3],projecto))
+            conn.commit()
+
+        else:
+          cursor.execute("UPDATE campanhas SET projecto=%s WHERE id_campanha=%s",(projecto,id))
+          cursor.execute("INSERT INTO display_ref(id, ref) VALUES (%s,%s)",(campanha[3],projecto))
+          # Commit to DB
+          conn.commit()
 
         #Close connection
         conn.close()
@@ -4418,8 +4452,8 @@ def concluir_ticket(ticket_id):
     
 if __name__ == '__main__':
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()
     
 

@@ -5,6 +5,7 @@
 <div class="container my-5">
 
   <h1>{{campanha}}</h1>
+  
   <hr>
   <table class="table table-striped">
     <tr>
@@ -18,6 +19,7 @@
       <th></th>
 
     </tr>
+    {% if campanhas %}
     {% for pendente in campanhas %}
       <tr>
         <td>{{pendente[0]}}</td>
@@ -35,8 +37,28 @@
         </td>
       </tr>
     {% endfor %}
+  {% elif surveys %}
+  {% for pendente in surveys %}
+  <tr>
+    <td>{{pendente[0]}}</td>
+    <td>{{pendente[3]}}</td>
+    <td>{{pendente[2]}}</td>
+   
+    
+    <td><a href="campanha_n/{{pendente[3]}}" class="btn btn-default pull-right">Perguntas</a></td>
+    <td><a href="assign_camp/{{pendente[0]}}" class="btn btn-default pull-right">Assign Camp</a></td>
+    <td>
+      <form action="{{url_for('del_tiket', id=pendente[0])}}" method="post">
+        <input type="hidden" name="_method" value="DELETE">
+        <input type="submit" value="Delete" class="btn btn-danger">
+      </form>
+    </td>
+  </tr>
+{% endfor %}
   </table>
   <a class="btn btn-success" href="/create_camp">Add Camp</a>
+
+  {% endif %}
   
   
   <div class="modal" tabindex="-1">
