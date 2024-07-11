@@ -1932,7 +1932,7 @@ def status_sms(message_sid):
 
 
 def check_referer():
-    return '/status_tarefas' in request.headers.get('Referer', '')
+    return '/tarefas' in request.headers.get('Referer', '')
 # User login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -2041,7 +2041,7 @@ def login():
             # Close connection
             conn.close()
             if check_referer():
-                return redirect(url_for('status_tarefas_diarias'))
+                return redirect(url_for('tarefas_diarias'))
             else:
                 return redirect(url_for('tasks', dados = dados))
 
@@ -2640,9 +2640,9 @@ def add_call(id):
     return render_template('/task.html', client=client, calendar_data=calendar_data, form=form)
 
 
-@app.route('/status_tarefas_diarias', methods=['GET', 'POST'])
+@app.route('tarefas_diarias', methods=['GET', 'POST'])
 @is_logged_in
-def status_tarefas_diarias():
+def tarefas_diarias():
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
     today = datetime.now().date()
