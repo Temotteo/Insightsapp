@@ -56,92 +56,6 @@ import numpy as np
 app = Flask(__name__)
 
 
-#app.config['CELERY_BROKER_URL'] = 'amqp://guest:guest@localhost'
-#app.config['CELERY_RESULT_BACKEND'] = 'rpc://'
-#
-#celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
-#celery.conf.update(app.config)
-#
-#@celery.task
-#def enviar_email(destinatario, assunto, mensagem,usuario, email_usuario, senha):
-#    import smtplib
-#    from email.mime.multipart import MIMEMultipart
-#    from email.mime.text import MIMEText
-#    import ssl
-#
-#
-#    mensagem_html = f"""<!DOCTYPE html>
-#          <html>
-#          <head>
-#          <style>
-#         .btn {{ display: inline-block; font-weight: 400; text-align: center; white-space: nowrap; vertical-align: middle; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; border: 1px solid transparent; padding: .375rem .75rem; font-size: 1rem; line-height: 1.5; border-radius: .25rem; transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out; }}'
-#         .btn-primary {{ color: #fff; background-color: #007bff; border-color: #007bff; }}
-#         .btn-primary:hover {{ color: #fff; background-color: #0069d9; border-color: #0062cc; }}
-#         .container {{ width: 100%; padding-right: 15px; padding-left: 15px; margin-right: 15px; margin-left: 15px; }}
-#         .row {{ display: flex; flex-wrap: wrap; margin-right: -15px; margin-left: -15px; }}
-#         .col {{ position: relative; width: 100%; padding-right: 15px; padding-left: 15px; }}
-#         .text-center {{ text-align: center!important; color: #ddd;}}
-#         .d-flex {{ display: flex!important; }}
-#         .align-items-center {{  align-items: center!important; }}
-#         .justify-content-center {{  justify-content: center!important; }}
-#         .text-decoration-none {{ text-decoration: none!important; }}
-#         </style>
-#         </head>
-#         <body >
-#           <div class="container d-flex justify-content-center" style="background-color: rgb(22, 20, 20);>
-#             <div style="color: #ddd;">
-#               <a href="https://insightsap.com/">
-#                <img src="https://i.ibb.co/MBbsnDK/Logo-Insigths-2.png" alt="" height="100" width="auto"></a>
-#             
-#               <h2>Detalhes do erro reportado: <b>{mensagem}</b><h2>
-#                
-#              </div>
-#             <footer >
-#            <div style="color: #ddd;">
-#               <p>&copy; 2024 Company, Inc. All rights reserved.</p>
-#                <a href="https://https://www.facebook.com/share/42AoHbA7TY65UGTW/?mibextid=qi2Omg">
-#                <img src="https://img.icons8.com/?size=100&id=yGcWL8copNNQ&format=png&color=000000" alt="Facebook" width="24" height="24">
-#              </a>
-#               <a href="https://www.linkedin.com/company/insights-mz/">
-#               <img src="https://img.icons8.com/?size=100&id=13930&format=png&color=000000" alt="LinkedIn" width="24" height="24">
-#             </a>
-#              <a href="htts://helpdesk@cardinalt.com" >
-#              <img src="https://img.icons8.com/?size=100&id=SGCKpmr2U7Sq&format=png&color=000000" alt="email" width="24" height="24">
-#             </a>
-#             
-#         </footer>
-#         </div>
-#         </body>
-#         </html>
-#       """
-#    try:
-#        # Criar objeto MIMEMultipart
-#        msg = MIMEMultipart()
-#        msg['From'] = email_usuario
-#        msg['To'] = destinatario
-#        msg['Subject'] = assunto
-#
-#        # Adicionar corpo da mensagem
-#        msg.attach(MIMEText(mensagem_html, 'html'))
-#
-#        # Iniciar conexão segura com o servidor SMTP
-#        context = ssl.create_default_context()
-#        with smtplib.SMTP('smtp.gmail.com', 587) as server:
-#            server.starttls(context=context)
-#            
-#            # Login com as credenciais
-#            server.login(email_usuario, senha)
-#
-#            # Enviar e-mail
-#            server.sendmail(email_usuario, destinatario, msg.as_string())
-#
-#        print("E-mail enviado com sucesso para:", destinatario)
-#        return True  # Retorna True se o e-mail foi enviado com sucesso
-#    except Exception as e:
-#        print("Erro ao enviar e-mail:", e)
-#        return False  # Retorna False se ocorrer um erro ao enviar o e-mail
-
-
 logging.basicConfig(level=logging.INFO)
 
 @app.before_request
@@ -1611,8 +1525,10 @@ class CadastroForm(Form):
 class TaskForm(Form):
     text = TextAreaField('Description:',[validators.Length(min=9, max=190),validators.DataRequired()])
     time = TimeField('Time:', format='%H:%M', validators=[DataRequired()])
+    actionNow= SelectField('Action:',coerce=str,choices=[("Select","Select action...."),("Call","Call"),("Meeting","Meeting"),("submission of proposal","submission of proposal")])
     action= SelectField('Next action:',coerce=str,choices=[("Call","Call"),("Meeting","Meeting"),("submission of proposal","submission of proposal")])
     calendar = DateField('Calendar:', format='%d/%m/%Y',validators=[DataRequired()])
+    submit = SubmitField('submit') 
     
 class OptionForm(Form):
     opcao = StringField('Opção:',[validators.Length(min=3, max=120),validators.DataRequired()])
@@ -2646,6 +2562,24 @@ def cadastro ():
     return render_template('crm.html', form = form)
 
 
+@app.route('/add_call_Now/<string:id>', methods=['GET', 'POST'])
+@is_logged_in
+def add_call_Now(id):
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+    form = TaskForm(request.form)
+    current_dateTime = datetime.now()
+    cursor.execute('SELECT * FROM cliente_vendas WHERE id_vendas = %s', (id,))
+    client = cursor.fetchone()
+    if request.method == 'POST':
+            cursor.execute("INSERT INTO Action_rel(usuario, descricao, action, data, cliente, cliente_id) VALUES (%s,%s,%s,%s,%s,%s)",
+                       (session['username'], form.text.data,  form.actionNow.data, current_dateTime, client[0], client[4]))
+    
+    conn.commit()
+    conn.close()  
+    return redirect(url_for('clientecad'))
+
+
 
 @app.route('/add_call/<string:id>', methods=['GET', 'POST'])
 @is_logged_in
@@ -2661,16 +2595,23 @@ def add_call(id):
     current_dateTime = datetime.now()
     current_dateTime = str(datetime.date(current_dateTime)) + " " + str(datetime.time(current_dateTime))
 
+
     if request.method == 'POST':
+        cursor.execute("INSERT INTO Action_rel(usuario, descricao, action, data, cliente, cliente_id) VALUES (%s,%s,%s,%s,%s,%s)",
+                       (session['username'], form.text.data,  form.actionNow.data, datetime.now(), client[0], client[4]))
+    
+        conn.commit()
+
         cursor.execute("INSERT INTO calendar(usuario, descricao, data, next_action, time, cliente, id_cliente, hora_actual) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
                        (session['username'], form.text.data, form.calendar.data, form.action.data, form.time.data, client[0], client[4], current_dateTime))
-        
+        conn.commit()
+
         # Inserir na tabela actividades
         task_title = "Follow-up feito ao cliente: " + client[0] + " no Sistema"       
         insert_query = sql.SQL("INSERT INTO tasks (title, due_date, responsible, accepted_time, completed_time, accepted, completed) VALUES ({}, CURRENT_DATE,{}, now(),now(), 'TRUE','TRUE')")
         cursor.execute(insert_query.format(sql.Literal(task_title), sql.Literal(session['username'])))
 
-        conn.commit()
+        
         conn.close()
 
         print(client)
@@ -2691,6 +2632,45 @@ def add_call(id):
         conn.close()
 
     return render_template('/task.html', client=client, calendar_data=calendar_data, form=form)
+
+
+@app.route('/series', methods=['GET', 'POST'])
+@is_logged_in
+def serie():
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+    today = datetime.now().date()
+    yesterday = today - timedelta(days=1)
+    cursor.execute(F"SELECT * FROM Action_rel where data ='{yesterday}'")
+    calendar_data = cursor.fetchall()
+    print(calendar_data)
+    conn.close()
+    Marta ={}
+    call = 0
+    meeting =0
+    proposal=0
+    calls = 0
+    meetings =0
+    proposals=0
+    categorias = ["Call","Meeting", "Submission proposal"] 
+    for data in calendar_data:
+        if data[1] == 'Marta':
+            call = sum(1 for calendar in calendar_data if calendar[4] == 'Call' and calendar[1]=='Marta')
+            meeting = sum(1 for calendar in calendar_data if calendar[4] == "Meeting" and calendar[1]=="Marta")
+            proposal = sum(1 for calendar in calendar_data if calendar[4] == "submission proposal" and calendar[1]=="Marta")
+            
+
+        if data[1] == 'Sara':
+            calls = sum(1 for calendar in calendar_data if calendar[4] == "Call" and calendar[1]=="Sara")
+            meetings = sum(1 for calendar in calendar_data if calendar[4] == "Meeting" and calendar[1]=="Sara")
+            proposals = sum(1 for calendar in calendar_data if calendar[4] == "submission proposal" and calendar[1]=="Sara")
+     
+
+    Marta = [call, meeting, proposal]
+    Sara = [calls, meetings, proposals]
+    print(Marta)
+    print(Sara)
+    return render_template('tarefas.html',categorias=categorias, Marta=Marta ,Sara=Sara)
 
     
 @app.route('/pagamento/<string:id>', methods=['GET', 'POST'])

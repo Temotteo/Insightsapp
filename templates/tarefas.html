@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarefas Diárias dos Funcionários</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="container">
+    <h1 class="my-4">Desempenho Diário dos Funcionários</h1>
+    
+    <!-- Gráfico do Funcionário 1 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Marta</h5>
+            <canvas id="chartEmployee1"></canvas>
+        </div>
+    </div>
+
+    <!-- Gráfico do Funcionário 2 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Sara</h5>
+            <canvas id="chartEmployee2"></canvas>
+        </div>
+    </div>
+
+    <!-- Adicione mais gráficos conforme necessário -->
+</div>
+
+<script>
+    const ctx1 = document.getElementById('chartEmployee1').getContext('2d');
+    const chartEmployee1 = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: ['Call', 'Meeting', 'Submission Proposal'],
+            datasets: [{
+                label: 'Metas Diárias',
+                data: [10, 5, 6],
+                backgroundColor: '#6bc352',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }, {
+                label: 'Tarefas Realizadas',
+                data:  {{ Marta | tojson }},
+                backgroundColor: '#fcc034',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    const ctx2 = document.getElementById('chartEmployee2').getContext('2d');
+    const chartEmployee2 = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: ['Call', 'Meeting', 'Submission Proposal'],
+            datasets: [{
+                label: 'Metas Diárias',
+                data: [10, 6, 5],
+                backgroundColor: '#6bc352',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }, {
+                label: 'Tarefas Realizadas',
+                data: {{ Sara | tojson }},
+                backgroundColor: '#fcc034',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Adicione mais scripts para outros gráficos conforme necessário
+</script>
+</body>
+</html>

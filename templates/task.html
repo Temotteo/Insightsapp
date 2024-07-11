@@ -17,19 +17,24 @@
   {% from "includes/_formhelpers.html" import render_field %}
 
   <form id="task-form" method="POST" action="">
-    <div class="container mt-5"></div>
-     <div class="left-container">
+    <div class="container mt-5">
+      <div class="left-container">
         <div class="form-group">
         {{ render_field(form.text, class_="form-control") }}
         </div>
+      
+    </div>
         <div class="form-row">
-        <div class="form-group col-md-4">
+          <div class="form-group col-md-3">
+            {{render_field(form.actionNow, class_="form-control")}}
+        </div>
+        <div class="form-group col-md-3">
           {{render_field(form.action, class_="form-control")}}
         </div>
        
       
 
-          <div class="from-group col-md-4">
+          <div class="from-group col-md-3">
             {{ render_field(form.calendar, class_="form-control") }}
             
         </div>
@@ -40,22 +45,18 @@
               <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
             </div-->
 
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-3">
               {{render_field(form.time, class_="form-control")}}
             </div>
           </div>
-        </div>
           
           <div class="form-group">
             <p><input type="submit" class="btn btn-success" value="Submit"></p>
         </div>
-      </div>
       
-    </div>
+    
     
     </form>
- 
-
 
   
 
