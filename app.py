@@ -2640,7 +2640,7 @@ def add_call(id):
     return render_template('/task.html', client=client, calendar_data=calendar_data, form=form)
 
 
-@app.route('tarefas_diarias', methods=['GET', 'POST'])
+@app.route('/tarefas_diarias', methods=['GET', 'POST'])
 @is_logged_in
 def tarefas_diarias():
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
