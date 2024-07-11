@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarefas Diárias dos Funcionários</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
+ {% extends 'layout.html'%}
+ <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{% block body%}
+
 <div class="container">
     <h1 class="my-4">Desempenho Diário dos Funcionários</h1>
     
@@ -36,16 +31,10 @@
         type: 'bar',
         data: {
             labels: ['Call', 'Meeting', 'Submission Proposal'],
-            datasets: [{
-                label: 'Metas Diárias',
-                data: [10, 5, 6],
-                backgroundColor: '#6bc352',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }, {
+            datasets: [ {
                 label: 'Tarefas Realizadas',
                 data:  {{ Marta | tojson }},
-                backgroundColor: '#fcc034',
+                backgroundColor:['#6bc352','#fcc034','rgba(54, 162, 235, 1)'],
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
             }]
@@ -66,14 +55,8 @@
             labels: ['Call', 'Meeting', 'Submission Proposal'],
             datasets: [{
                 label: 'Metas Diárias',
-                data: [10, 6, 5],
-                backgroundColor: '#6bc352',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }, {
-                label: 'Tarefas Realizadas',
                 data: {{ Sara | tojson }},
-                backgroundColor: '#fcc034',
+                backgroundColor: ['#6bc352','#fcc034','rgba(54, 162, 235, 1)'],
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
             }]
@@ -89,5 +72,4 @@
 
     // Adicione mais scripts para outros gráficos conforme necessário
 </script>
-</body>
-</html>
+{% endblock %}
