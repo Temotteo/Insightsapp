@@ -2641,7 +2641,7 @@ def serie():
     cursor = conn.cursor()
     today = datetime.now().date()
     yesterday = today - timedelta(days=1)
-    cursor.execute(F"SELECT * FROM Action_rel where data ='{yesterday}'")
+    cursor.execute(F"SELECT * FROM Action_rel where data ='{today}'")
     calendar_data = cursor.fetchall()
     print(calendar_data)
     conn.close()
