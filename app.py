@@ -1930,6 +1930,9 @@ def status_sms(message_sid):
 
     return  status_msg
 
+
+def check_referer():
+    return '/status_tarefas' in request.headers.get('Referer', '')
 # User login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -2037,7 +2040,10 @@ def login():
             flash('Login com Sucesso', 'success')
             # Close connection
             conn.close()
-            return redirect(url_for('tasks', dados = dados))
+            if check_referer():
+                return redirect(url_for('status_tarefas_diarias'))
+            else:
+                return redirect(url_for('tasks', dados = dados))
 
     return render_template('login.html')
 
