@@ -1,0 +1,21 @@
+{% extends 'layout.html'%}
+{% block body%}
+<div class="container my-5">
+
+<table class="table table-striped">
+    <tr>
+      
+      <th>Pergunta</th>
+      <th>Conteudo</th>
+      <th>Idioma</th>
+
+    </tr>
+    {% for column in columns_list %}
+      <tr>
+        <td>{{ column[0] }}</td>
+        <td>{{ column[1] }}</td>
+        <td>
+          <a href="#" onclick="carregarAudio('{{campanha}}_{{column[0]}}','{{ column[3] }}')" > Audios </a>
+          {% endfor %}      
+
+{% endblock %}

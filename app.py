@@ -2248,6 +2248,27 @@ def carragar_Audio(id):
     return jsonify(data)
 
 
+
+@app.route('/deletar_audio/<string:id>', methods=['GET'])
+@is_logged_in
+def deletar_audio(id):
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+  
+    print(id)
+    
+    cursor.execute(f"DELETE FROM  display_ref_linguas  WHERE  id = '{id}' ;")
+    conn.commit()
+    conn.close()
+    
+    partes = id.split("_")
+    resultado = "_".join(partes[:2])
+   
+    return redirect(url_for('campanha_n', id=resultado))
+
+
+
+
 @app.route('/carragar_questoes/<string:id>', methods=['GET'])
 @is_logged_in
 def carragar_questoes(id):
@@ -2265,6 +2286,28 @@ def carragar_questoes(id):
 
     print(data)
     return jsonify(data)
+
+
+
+@app.route('/audios_ativos/<string:id>', methods=['GET'])
+@is_logged_in
+def audios_ativos(id):
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM camapnha WHERE id ", (id,))
+    campanhas = cursor.fetchall()
+
+    audios = []
+    for caompanha in campanhas:
+        cursor.execute("SELECT * FROM display_ref WHERE id LIKE %s", (caompanha[3] + "_%",))
+        questoes = cursor.fetchone()
+        audios.append(questoes)
+
+    conn.close()
+    
+    return render_template('audios_ativos.html', campanhas=campanhas, audios=audios)
+
 
 
 @app.route('/campanha_n/<string:id>')

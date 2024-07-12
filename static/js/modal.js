@@ -107,8 +107,8 @@ function carregarAudio(id, modal) {
         if (Array.isArray(data)) {
             // Se for um array de objetos
             data.forEach(function(item) {
-                var linha = `<p><strong>${item.audio}</strong> <a href="#" onclick="$('#audio_${item.id}').removeClass('d-none').addClass('d-flex'); return false;">play</a>
-                                  
+                var linha = `<p><strong>${item.audio}</strong> <a href="#" onclick="$('#audio_${item.id}').removeClass('d-none').addClass('d-flex'); return false;"><i class="fa fa-audio-description"></i>play</a>
+                               <a href="/deletar_audio/${item.id}" class="text-danger" onclick="return confirm('Tem certeza que deseja remover o audio?')"><i class="fa fa-trash-alt" ></i></a>
                                <audio id="audio_${item.id}" class="d-none" controls>
                                   <source src="{{ url_for('static', filename='audios/' + item.audio) }}" type="audio/mpeg">
                                   Your browser does not support the audio element.

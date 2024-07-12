@@ -26,36 +26,26 @@
 </div>
 
 <script>
+    const marta = {{ Marta | safe }};
+    const sara = {{ Sara | safe }};
+
     const ctx1 = document.getElementById('chartEmployee1').getContext('2d');
     const chartEmployee1 = new Chart(ctx1, {
         type: 'bar',
         data: {
-            labels: ['Call', 'Meeting', 'Submission Proposal'],
+            labels: [
+                    'Marta - Call', 'Marta - Meeting', 'Marta - Submission Proposal',
+                    'Sara - Call', 'Sara - Meeting', 'Sara - Submission Proposal'
+                ],
             datasets: [ {
                 label: 'Tarefas Realizadas',
-                data:  {{ Marta | tojson }},
+                data:  marta.concat([0, 0, 0]),
                 backgroundColor:['#6bc352','#fcc034','rgba(54, 162, 235, 1)'],
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    const ctx2 = document.getElementById('chartEmployee2').getContext('2d');
-    const chartEmployee2 = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-            labels: ['Call', 'Meeting', 'Submission Proposal'],
-            datasets: [{
-                label: 'Tarefas Realizadas',
-                data: {{ Sara | tojson }},
+            },
+            {label: 'Tarefas Realizadas',
+                data: [0, 0, 0].concat(sara),
                 backgroundColor: ['#6bc352','#fcc034','rgba(54, 162, 235, 1)'],
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
@@ -70,6 +60,7 @@
         }
     });
 
+   
     // Adicione mais scripts para outros gráficos conforme necessário
 </script>
 {% endblock %}
