@@ -132,3 +132,25 @@ function carregarAudio(id, modal) {
         $('#ModalAudio').modal('show');
     });
 }
+
+function carragar_questoes() {
+    var id = document.getElementById("project").value;
+    $('#questoes').text('Buscando as questoes....')
+    $.get(`/carragar_questoes/${id}`, function(data) {
+        $('#audios').empty();
+
+        // Verifica se data é um array
+        if (Array.isArray(data)) {
+             var linha = `<label for="questao" class="form-label">Questao</label>
+                 <select class="form-control" id="questao"  name ="questao" >
+                  <option value="">selecione...</option>`
+                  data.forEach(function(item) {
+                   linha += `<option value="${item.id}">${item.id}</option>`
+                    });
+                  linha += `</select>`
+                  $('#audios').append(linha);
+        }
+        $('#questoes').hide();
+    });
+}
+        

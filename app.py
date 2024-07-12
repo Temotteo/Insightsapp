@@ -56,33 +56,33 @@ import numpy as np
 app = Flask(__name__)
 
 
-logging.basicConfig(level=logging.INFO)
-
-@app.before_request
-def before_request():
-    # Código antes da requisição
-    pass
-
-@app.after_request
-def after_request(response):
-    # Código após a requisição
-    return response
-
-@app.teardown_request
-def teardown_request(exception):
-    if exception:
-        app.logger.error(f"Erro: {exception}")
-        usuario = session.get('username')
-        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-        return render_template('erro.html'), 500
-    
-# Tratamento global de exceções
-@app.errorhandler(Exception)
-def handle_exception(e):
-    app.logger.error(f"Erro inesperado: {e}")
-    usuario = session.get('username')
-    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-    return render_template('erro.html'), 500    
+#logging.basicConfig(level=logging.INFO)
+#
+#@app.before_request
+#def before_request():
+#    # Código antes da requisição
+#    pass
+#
+#@app.after_request
+#def after_request(response):
+#    # Código após a requisição
+#    return response
+#
+#@app.teardown_request
+#def teardown_request(exception):
+#    if exception:
+#        app.logger.error(f"Erro: {exception}")
+#        usuario = session.get('username')
+#        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+#        return render_template('erro.html'), 500
+#    
+## Tratamento global de exceções
+#@app.errorhandler(Exception)
+#def handle_exception(e):
+#    app.logger.error(f"Erro inesperado: {e}")
+#    usuario = session.get('username')
+#    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+#    return render_template('erro.html'), 500    
 
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -673,7 +673,7 @@ class ItemForm(FlaskForm):
     price = StringField('Price')
 
 class AudioForm(FlaskForm):
-    organization = SelectField('Organization', choices=[], validators=[DataRequired()])
+    organization = SelectField('Idioma', choices=[], validators=[DataRequired()])
     project = StringField('Project', validators=[DataRequired()])
     audio_file = FileField('Audio File', validators=[DataRequired()])
     submit = SubmitField('Upload')    
@@ -2247,6 +2247,26 @@ def carragar_Audio(id):
     print(data)
     return jsonify(data)
 
+
+@app.route('/carragar_questoes/<string:id>', methods=['GET'])
+@is_logged_in
+def carragar_questoes(id):
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+  
+    org_id = session['last_org']
+    print(id)
+    
+    cursor.execute("SELECT * FROM display_ref WHERE id LIKE %s", (id + "_%",))
+    questoes = cursor.fetchall()
+    conn.close()
+    print(questoes)
+    data = [{'id': questao[0], 'questao': questao[1]} for questao in questoes]
+
+    print(data)
+    return jsonify(data)
+
+
 @app.route('/campanha_n/<string:id>')
 @is_logged_in
 def campanha_n(id):
@@ -2682,13 +2702,13 @@ def tarefas_diarias():
         if data[1] == 'Marta':
             call = sum(1 for calendar in calendar_data if calendar[3] == 'Call' and calendar[1]=='Marta')
             meeting = sum(1 for calendar in calendar_data if calendar[3] == "Meeting" and calendar[1]=="Marta")
-            proposal = sum(1 for calendar in calendar_data if calendar[3] == "submission proposal" and calendar[1]=="Marta")
+            proposal = sum(1 for calendar in calendar_data if calendar[3] == "submission of proposal" and calendar[1]=="Marta")
             
 
         if data[1] == 'Sara':
             calls = sum(1 for calendar in calendar_data if calendar[3] == "Call" and calendar[1]=="Sara")
             meetings = sum(1 for calendar in calendar_data if calendar[3] == "Meeting" and calendar[1]=="Sara")
-            proposals = sum(1 for calendar in calendar_data if calendar[3] == "submission proposal" and calendar[1]=="Sara")
+            proposals = sum(1 for calendar in calendar_data if calendar[3] == "submission of proposal" and calendar[1]=="Sara")
      
 
     Marta = [call, meeting, proposal]
@@ -2946,8 +2966,14 @@ def assign_camp(id):
         form = CampForm(request.form)
         cursor.execute(f"SELECT * FROM campanhas WHERE orgid = '{org_id}' and projecto IS NULL")
         orgs = cursor.fetchall()
-        print(f"SELECT * FROM campanhas WHERE orgid = '{org_id}' ")
-        return render_template('assign_camp.html', orgs=orgs, form=form)
+        print(orgs)
+        if orgs:
+          print(f"SELECT * FROM campanhas WHERE orgid = '{org_id}' ")
+          return render_template('assign_camp.html', orgs=orgs, form=form)
+        else:
+          return render_template('assign_camp.html',form=form, null=True)
+  
+
 
     # Get article by id
     #result = cursor.execute("SELECT * FROM campanhas WHERE id_campanha = %s", [id])
@@ -2981,6 +3007,8 @@ def assign_camp(id):
             conn.commit()
 
         else:
+          cursor.execute("SELECT * FROM campanhas WHERE id_campanha = %s", [id])
+          campanha = cursor.fetchone()
           cursor.execute("UPDATE campanhas SET projecto=%s WHERE id_campanha=%s",(projecto,id))
           cursor.execute("INSERT INTO display_ref(id, ref) VALUES (%s,%s)",(campanha[3],projecto))
           # Commit to DB
@@ -3936,26 +3964,41 @@ def uploaded_file(filename):
 @is_logged_in
 def audios():
     form = AudioForm()
+    org_id = session['last_org']
     if form.validate_on_submit():
+        project = request.form['project']
+        questao = request.form['questao']
+
+        audio_lingua = form.organization.data
+
         audio_file = form.audio_file.data
         filename = secure_filename(audio_file.filename)
-        filepath = os.path.join(app.config['AUDIO_FOLDER'], filename)
+        name, ext = os.path.splitext(filename)
+          
+        # Alterando o nome do arquivo adicionando audio_lingua no meio
+        new_filename = f"{name}_{audio_lingua}{ext}"
+        filepath = os.path.join(app.config['AUDIO_FOLDER'], new_filename)
         audio_file.save(filepath)
-
-        organization_id = form.organization.data
-        project = form.project.data
-
+        
         conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
         cursor = conn.cursor()
-        cursor.execute(f"INSERT INTO audios(org_id, projecto, audio) VALUES('{organization_id}','{project}','{filename}') ;")
+         
+        # Execute
+        cursor.execute("INSERT INTO display_ref_linguas VALUES (%s,%s)",(questao,new_filename,))
+         
+        # Commit to DB
         conn.commit()
+
+        #Close connection
+        conn.close()
+        flash('Audio Insirida com sucesso', 'success')
         return redirect(url_for('audios'))
     
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM audios ;")
-    audios = cursor.fetchall()
-    return render_template('audios.html', form=form, audios=audios)
+    cursor.execute(f"SELECT * FROM campanhas where orgid = '{org_id}';")
+    project = cursor.fetchall()
+    return render_template('audios.html', form=form, projects=project)
 
 
 
@@ -4455,5 +4498,3 @@ if __name__ == '__main__':
     #app.run(debug=True)
     http_server = WSGIServer(('', 5000), app)
     http_server.serve_forever()
-    
-
