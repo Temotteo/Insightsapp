@@ -2734,7 +2734,7 @@ def tarefas_diarias():
     cursor = conn.cursor()
     today = datetime.now().date()
     yesterday = today - timedelta(days=2)
-    cursor.execute(F"SELECT * FROM Action_rel where data ='{yesterday}'")
+    cursor.execute(F"SELECT * FROM Action_rel where data ='{today}'")
     calendar_data = cursor.fetchall()
     print(yesterday)
     conn.close()
