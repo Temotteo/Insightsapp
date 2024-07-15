@@ -34,18 +34,17 @@
         type: 'bar',
         data: {
             labels: [
-                    'Marta - Call', 'Marta - Meeting', 'Marta - Submission Proposal',
-                    'Sara - Call', 'Sara - Meeting', 'Sara - Submission Proposal'
+                    'Call', 'Meeting', ' Submission Proposal', 
                 ],
             datasets: [ {
-                label: 'Tarefas Realizadas',
+                label: 'Marta',
                 data:  marta.concat([0, 0, 0]),
                 backgroundColor:['#6bc352','#fcc034','rgba(54, 162, 235, 1)'],
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
             },
-            {label: 'Tarefas Realizadas',
-                data: [0, 0, 0].concat(sara),
+            {label: 'Sara',
+                data: sara.concat([0, 0, 0]),
                 backgroundColor: ['#6bc352','#fcc034','rgba(54, 162, 235, 1)'],
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1

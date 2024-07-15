@@ -43,24 +43,27 @@
     {% endfor %}
   </table>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const nameInput = document.getElementById('nameInput');
-      const tableBody = document.querySelector('#nameTable tbody');
-      const rows = Array.from(tableBody.querySelectorAll('tr'));
-  
-      nameInput.addEventListener('input', () => {
-          const searchValue = nameInput.value.toUpperCase();
-  
-          rows.forEach(row => {
-              const name = row.children[1].textContent.toUpperCase();
-              if (name.startsWith(searchValue)) {
-                  row.style.display = '';
-              } else {
-                  row.style.display = 'none';
-              }
-          });
-      });
-  });
+   document.addEventListener('DOMContentLoaded', () => {
+    const nameInput = document.getElementById('nameInput');
+    const tableBody = document.querySelector('#nameTable tbody');
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+    function filterTable() {
+        const nameValue = nameInput.value.toUpperCase();
+
+        rows.forEach(row => {
+            const name = row.children[1].textContent.toUpperCase();
+
+            if ((name.includes(nameValue) || nameValue === '')) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    nameInput.addEventListener('input', filterTable);
+});
   </script>
 
 {% endblock %}

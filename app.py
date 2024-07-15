@@ -17,6 +17,7 @@ from werkzeug.utils import secure_filename
 from psycopg2 import sql, extras
 from flask_wtf import FlaskForm
 import matplotlib.pyplot as plt
+from collections import defaultdict
 from io import BytesIO
 import base64
 
@@ -56,33 +57,33 @@ import numpy as np
 app = Flask(__name__)
 
 
-#logging.basicConfig(level=logging.INFO)
-#
-#@app.before_request
-#def before_request():
-#    # Código antes da requisição
-#    pass
-#
-#@app.after_request
-#def after_request(response):
-#    # Código após a requisição
-#    return response
-#
-#@app.teardown_request
-#def teardown_request(exception):
-#    if exception:
-#        app.logger.error(f"Erro: {exception}")
-#        usuario = session.get('username')
-#        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-#        return render_template('erro.html'), 500
-#    
-## Tratamento global de exceções
-#@app.errorhandler(Exception)
-#def handle_exception(e):
-#    app.logger.error(f"Erro inesperado: {e}")
-#    usuario = session.get('username')
-#    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-#    return render_template('erro.html'), 500    
+logging.basicConfig(level=logging.INFO)
+
+@app.before_request
+def before_request():
+    # Código antes da requisição
+    pass
+
+@app.after_request
+def after_request(response):
+    # Código após a requisição
+    return response
+
+@app.teardown_request
+def teardown_request(exception):
+    if exception:
+        app.logger.error(f"Erro: {exception}")
+        usuario = session.get('username')
+        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+        return render_template('erro.html'), 500
+    
+# Tratamento global de exceções
+@app.errorhandler(Exception)
+def handle_exception(e):
+    app.logger.error(f"Erro inesperado: {e}")
+    usuario = session.get('username')
+    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+    return render_template('erro.html'), 500    
 
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -2289,24 +2290,28 @@ def carragar_questoes(id):
 
 
 
-@app.route('/audios_ativos/<string:id>', methods=['GET'])
+@app.route('/audios_ativos', methods=['GET'])
 @is_logged_in
-def audios_ativos(id):
+def audios_ativos():
+    org_id = session['last_org']
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
     
-    cursor.execute("SELECT * FROM camapnha WHERE id ", (id,))
-    campanhas = cursor.fetchall()
+    print(org_id)
+    
+    cursor.execute("SELECT * FROM display_ref WHERE audio_ref = %s", (org_id,))
+    questoes = cursor.fetchall()
+    
+   
+    print(' ')
 
-    audios = []
-    for caompanha in campanhas:
-        cursor.execute("SELECT * FROM display_ref WHERE id LIKE %s", (caompanha[3] + "_%",))
-        questoes = cursor.fetchone()
-        audios.append(questoes)
+    cursor.execute("SELECT * FROM display_ref_linguas")
+    audios = cursor.fetchall()
 
+    print(audios) 
     conn.close()
     
-    return render_template('audios_ativos.html', campanhas=campanhas, audios=audios)
+    return render_template('audios_ativos.html',questoes=questoes, audios=audios)
 
 
 
@@ -2728,10 +2733,10 @@ def tarefas_diarias():
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
     today = datetime.now().date()
-    yesterday = today - timedelta(days=1)
-    cursor.execute(F"SELECT * FROM Action_rel where data ='{today}'")
+    yesterday = today - timedelta(days=2)
+    cursor.execute(F"SELECT * FROM Action_rel where data ='{yesterday}'")
     calendar_data = cursor.fetchall()
-    print(calendar_data)
+    print(yesterday)
     conn.close()
     Marta ={}
     call = 0
@@ -2742,6 +2747,7 @@ def tarefas_diarias():
     proposals=0
     categorias = ["Call","Meeting", "Submission proposal"] 
     for data in calendar_data:
+
         if data[1] == 'Marta':
             call = sum(1 for calendar in calendar_data if calendar[3] == 'Call' and calendar[1]=='Marta')
             meeting = sum(1 for calendar in calendar_data if calendar[3] == "Meeting" and calendar[1]=="Marta")

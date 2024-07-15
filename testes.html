@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta por Letra</title>
+    <title>Consulta por Nome e Idade</title>
     <style>
         table, th, td {
             border: 1px solid black;
@@ -16,8 +16,9 @@
     </style>
 </head>
 <body>
-    <h1>Consulta por Letra</h1>
-    <input type="search" id="nameInput"  placeholder="Digite o nome">
+    <h1>Consulta por Nome e Idade</h1>
+    <input type="text" id="nameInput" placeholder="Digite o nome">
+    <input type="number" id="ageInput" placeholder="Digite a idade">
 
     <table id="nameTable">
         <thead>
@@ -29,9 +30,11 @@
         </thead>
         <tbody>
             <tr><td>Alice</td><td>25</td><td>New York</td></tr>
-            <tr><td>Bob</td><td>30</td><td>Los Angeles</td></tr>
+            <tr><td>Bobdidi</td><td>30</td><td>Los Angeles</td></tr>
             <tr><td>Charlie</td><td>35</td><td>Chicago</td></tr>
             <tr><td>David</td><td>40</td><td>Houston</td></tr>
+            <tr><td>tataBob</td><td>30</td><td>Los lesbi</td></tr>
+            <tr><td>dioBobis</td><td>30</td><td>Los Angelesall</td></tr>
             <tr><td>Edward</td><td>45</td><td>Phoenix</td></tr>
             <tr><td>Fiona</td><td>50</td><td>Philadelphia</td></tr>
             <tr><td>George</td><td>55</td><td>San Antonio</td></tr>
@@ -40,27 +43,32 @@
             <tr><td>Jack</td><td>70</td><td>San Jose</td></tr>
         </tbody>
     </table>
-
-
    
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+ document.addEventListener('DOMContentLoaded', () => {
     const nameInput = document.getElementById('nameInput');
+    const ageInput = document.getElementById('ageInput');
     const tableBody = document.querySelector('#nameTable tbody');
     const rows = Array.from(tableBody.querySelectorAll('tr'));
 
-    nameInput.addEventListener('input', () => {
-        const searchValue = nameInput.value.toUpperCase();
+    function filterTable() {
+        const nameValue = nameInput.value.toUpperCase();
+        const ageValue = ageInput.value;
 
         rows.forEach(row => {
-            const name = row.firstElementChild.textContent.toUpperCase();
-            if (name.startsWith(searchValue)) {
+            const name = row.children[0].textContent.toUpperCase();
+            const age = row.children[1].textContent;
+
+            if ((name.includes(nameValue) || nameValue === '') && (age.includes(ageValue) || ageValue === '')) {
                 row.style.display = '';
             } else {
                 row.style.display = 'none';
             }
         });
-    });
+    }
+
+    nameInput.addEventListener('input', filterTable);
+    ageInput.addEventListener('input', filterTable);
 });
 </script>
 </body>

@@ -2,20 +2,35 @@
 {% block body%}
 <div class="container my-5">
 
-<table class="table table-striped">
-    <tr>
-      
+<table class="table table-bordered">
+  
+    <tr class="table-active">
+      <th>Campanha</th>
       <th>Pergunta</th>
       <th>Conteudo</th>
-      <th>Idioma</th>
+      <th>Audio</th>
 
     </tr>
-    {% for column in columns_list %}
-      <tr>
-        <td>{{ column[0] }}</td>
-        <td>{{ column[1] }}</td>
-        <td>
-          <a href="#" onclick="carregarAudio('{{campanha}}_{{column[0]}}','{{ column[3] }}')" > Audios </a>
-          {% endfor %}      
+    {% for questao in questoes %}
+        {% set partes = questao[0].split("_") %}
+        {% set primeira_palavra = "_".join(partes[:2]) %}
+        {% set segunda_palavra = questao[0].rsplit('_', 1)[-1] %} 
+    <tr>
+      <td>{{ primeira_palavra }}</td>
+      <td>{{ segunda_palavra }}</td>
+      <td>{{ questao[1] }}</td>
+      <td>
+     <ul class="list-group">
+      {% for audio in audios %}
+        {% if audio[0] == questao[0] %}
+         <li class="list-group">{{audio[1]}}</li>
+        {% endif %} 
+      {% endfor %}
+    </ul>
+    </td>
+    </tr>  
+    {% endfor %}
+</table>   
+                
 
 {% endblock %}
