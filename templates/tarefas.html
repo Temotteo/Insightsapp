@@ -4,24 +4,28 @@
 {% block body%}
 
 <div class="container">
-    <h1 class="my-4">Desempenho Diário dos Funcionários</h1>
-    
+    <div class="d-flex flex-row">
+    <h1 class="my-4 clo-md-10 me-5">Desempenho Diário dos Funcionários</h1>
+    <div class="form-group mx-4">
+        <label for="data" class="form-label">Data</label>
+         <select class="form-control" id="Data"  name ="data" onchange="carragar_grafico()">
+          <option value="">selecione a data...</option>
+          {% for data in datas %}
+          <option>{{data}}</option>
+         {% endfor %}
+        </select>
+      </div>
+</div>
     <!-- Gráfico do Funcionário 1 -->
     <div class="card mb-4">
         <div class="card-body">
-            <h5 class="card-title">Marta</h5>
+            <h5 class="card-title"></h5>
             <canvas id="chartEmployee1"></canvas>
         </div>
     </div>
 
     <!-- Gráfico do Funcionário 2 -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">Sara</h5>
-            <canvas id="chartEmployee2"></canvas>
-        </div>
-    </div>
-
+  
     <!-- Adicione mais gráficos conforme necessário -->
 </div>
 

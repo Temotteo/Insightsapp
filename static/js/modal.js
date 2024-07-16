@@ -68,6 +68,23 @@ function carregarDados() {
           });
   }
 
+
+  function carragar_grafico() {
+    var data = document.getElementById("Data").value;
+    fetch(`/tarefas_diarias/${data}`, {
+            method: 'GET'
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao enviar dados:', error);
+        });
+}
+
+
   function enviar_sms_grupo() {
     var grupoId = $('#country').val();
     var smsData = {
@@ -98,6 +115,7 @@ function carregarDados() {
             console.error('Erro ao enviar dados:', error);
         });
 }
+
 
 function carregarAudio(id, modal) {
     $.get(`/carragar_Audio/${id}`, function(data) {

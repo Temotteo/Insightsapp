@@ -781,6 +781,7 @@ def add_contact():
          cursor = conn.cursor()
    
          #verifica se o contacto ja existe!
+         
          for field, values in dados.items():
              cursor.execute(f"SELECT * FROM contacts WHERE phone = '{values[-1]}';")
              cont = cursor.fetchone()
@@ -2727,17 +2728,30 @@ def add_call(id):
     return render_template('/task.html', client=client, calendar_data=calendar_data, form=form)
 
 
-@app.route('/tarefas_diarias', methods=['GET', 'POST'])
+@app.route('/tarefas_diarias/<string:data>', methods=['GET', 'POST'])
 @is_logged_in
-def tarefas_diarias():
+def tarefas_diarias(data):
+
+    if data == 'today':
+       data = datetime.now().date()
+   
+    datas=[]
+    today = datetime.now().date()
+    for i in range(0,5):
+        dat = today-timedelta(days=i)
+        datas.append(dat)
+
+    print(data)     
+   
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
     today = datetime.now().date()
     yesterday = today - timedelta(days=2)
-    cursor.execute(F"SELECT * FROM Action_rel where data ='{today}'")
+    cursor.execute(F"SELECT * FROM Action_rel where data ='{data}'")
     calendar_data = cursor.fetchall()
-    print(yesterday)
+    print(F"SELECT * FROM Action_rel where data ='{data}'")
     conn.close()
+
     Marta ={}
     call = 0
     meeting =0
@@ -2764,7 +2778,7 @@ def tarefas_diarias():
     Sara = [calls, meetings, proposals]
     print(Marta)
     print(Sara)
-    return render_template('tarefas.html',categorias=categorias, Marta=Marta ,Sara=Sara)
+    return render_template('tarefas.html',datas=datas ,categorias=categorias, Marta=Marta ,Sara=Sara)
 
     
 @app.route('/pagamento/<string:id>', methods=['GET', 'POST'])
