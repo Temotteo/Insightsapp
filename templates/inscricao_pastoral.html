@@ -9,8 +9,8 @@
 <body>
     <div class="container mt-5">
         <h1 class="text-center">Igreja Ministério Divina Esperança</h1>
-        <p class="text-center">Bem-vindo!</p>
-        <h2 class="text-center">Formulário de Inscrição para a Conferência de Pastores</h2>
+        <h1 class="text-center">Bem-vindo!</h1>
+        <p class="text-center">Formulário de Inscrição para a Conferência de Pastores</p>
         <p class="text-center"><em>"Entregue o seu caminho ao Senhor; confie nele, e ele agirá." - Salmo 37:5</em></p>
         
         <form action="/submit_inscricao" method="POST">
@@ -31,21 +31,23 @@
                 <label for="cargo">Cargo/Função:</label>
                 <input type="text" class="form-control" id="cargo" name="cargo" required>
             </div>
-            <div class="form-group">
-                <label for="endereco">Endereço:</label>
-                <input type="text" class="form-control" id="endereco" name="endereco" required>
-            </div>
-            <div class="form-group">
-                <label for="cidade">Cidade:</label>
-                <input type="text" class="form-control" id="cidade" name="cidade" required>
-            </div>
-            <div class="form-group">
-                <label for="estado">Estado/Província:</label>
-                <input type="text" class="form-control" id="estado" name="estado" required>
-            </div>
-            <div class="form-group">
-                <label for="codigoPostal">Código Postal:</label>
-                <input type="text" class="form-control" id="codigoPostal" name="codigoPostal" required>
+            <div class="row">
+                <div class="from-row col-md-4">
+                    <label for="endereco">Endereço:</label>
+                    <input type="text" class="form-control" id="endereco" name="endereco" required>
+                </div>
+                <div class="from-row col-md-3">
+                    <label for="cidade">Cidade:</label>
+                    <input type="text" class="form-control" id="cidade" name="cidade" required>
+                </div>
+                <div class="from-row col-md-3">
+                    <label for="estado">Estado/Província:</label>
+                    <input type="text" class="form-control" id="estado" name="estado" required>
+                </div>
+                <div class="from-row col-md-2">
+                    <label for="codigoPostal">Código Postal:</label>
+                    <input type="text" class="form-control" id="codigoPostal" name="codigoPostal" required>
+                </div>
             </div>
             <div class="form-group">
                 <label for="pais">País:</label>

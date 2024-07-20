@@ -2728,12 +2728,21 @@ def add_call(id):
     return render_template('/task.html', client=client, calendar_data=calendar_data, form=form)
 
 
+@app.route('/tarefas_diarias_data/<string:data>', methods=['GET', 'POST'])
+@is_logged_in
+def tarefas_diarias_data(data):
+     print(data)
+     return redirect(url_for('tarefas_diarias', data=data))    
+
+
 @app.route('/tarefas_diarias/<string:data>', methods=['GET', 'POST'])
 @is_logged_in
 def tarefas_diarias(data):
 
     if data == 'today':
        data = datetime.now().date()
+      
+
    
     datas=[]
     today = datetime.now().date()
@@ -4553,7 +4562,55 @@ def concluir_ticket(ticket_id):
      error_msg = f"Erro ao fazer a transação: {e}"
      return render_template('erro.html', error=error_msg)      
         
+
+@app.route('/submit_inscricao', methods=['POST','GET'])
+def submit_inscricao():
+
+    if request.method == 'POST': 
+        nome = request.form['nome']
+        titulo = request.form['titulo']
+        igreja = request.form['igreja']
+        cargo = request.form['cargo']
+        endereco = request.form['endereco']
+        cidade = request.form['cidade']
+        estado = request.form['estado']
+        codigoPostal = request.form['codigoPostal']
+        pais = request.form['pais']
+        telefone = request.form['telefone']
+        email = request.form['email']
+        acomodacao = request.form['acomodacao']
+        restricoesAlimentares = request.form.get('restricoesAlimentares', '')
+        contatoEmergencia = request.form['contatoEmergencia']
+        telefoneContatoEmergencia = request.form['telefoneContatoEmergencia']
+        sessao = ', '.join(request.form.getlist('sessao'))
+        outroSessao = request.form.get('outroSessao', '')
+        jantarNetworking = request.form['jantarNetworking']
+        oficina = ', '.join(request.form.getlist('oficina'))
+        outraOficina = request.form.get('outraOficina', '')
+        solicitacoesEspeciais = request.form.get('solicitacoesEspeciais', '')
+        taxaInscricao = request.form['taxaInscricao']
+        metodoPagamento = request.form['metodoPagamento']
+        numeroCartao = request.form.get('numeroCartao', '')
+        validadeCartao = request.form.get('validadeCartao', '')
+        cvvCartao = request.form.get('cvvCartao', '')
+        nomeCartao = request.form.get('nomeCartao', '')
+        comentariosAdicionais = request.form.get('comentariosAdicionais', '')
     
+        # Conectando ao banco de dados e inserindo os dados
+        conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
+        cur = conn.cursor()
+        cur.execute('''
+            INSERT INTO inscricoes (nome, titulo, igreja, cargo, endereco, cidade, estado, codigo_postal, pais, telefone, email, acomodacao, restricoes_alimentares, contato_emergencia, telefone_contato_emergencia, sessao, outro_sessao, jantar_networking, oficina, outra_oficina, solicitacoes_especiais, taxa_inscricao, metodo_pagamento, numero_cartao, validade_cartao, cvv_cartao, nome_cartao, comentarios_adicionais)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ''', (nome, titulo, igreja, cargo, endereco, cidade, estado, codigoPostal, pais, telefone, email, acomodacao, restricoesAlimentares, contatoEmergencia, telefoneContatoEmergencia, sessao, outroSessao, jantarNetworking, oficina, outraOficina, solicitacoesEspeciais, taxaInscricao, metodoPagamento, numeroCartao, validadeCartao, cvvCartao, nomeCartao, comentariosAdicionais))
+        conn.commit()
+        cur.close()
+        conn.close()
+    
+        return redirect(url_for('submit_inscricao'))
+    
+    return render_template('inscricao_pastoral.html')
+   
 
     
 if __name__ == '__main__':

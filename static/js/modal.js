@@ -71,7 +71,7 @@ function carregarDados() {
 
   function carragar_grafico() {
     var data = document.getElementById("Data").value;
-    fetch(`/tarefas_diarias/${data}`, {
+    fetch(`/tarefas_diarias_data/${data}`, {
             method: 'GET'
         })
         .then(response => {
