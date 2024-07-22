@@ -1,0 +1,40 @@
+{% extends 'layout.html'%}
+
+
+{% block body%}
+<h1>Manage User Privileges</h1>
+<form method="POST">
+    <div class="form-group">
+        <label for="user_id">User</label>
+        <select class="form-control" id="user_id" name="user_id">
+            {% for user in users %}
+            <option value="{{ user[1] }}">{{ user[1] }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Privileges</label>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="privileges" value="Automação" id="health">
+            <label class="form-check-label" for="health">Automação</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="privileges" value="Testes" id="sports">
+            <label class="form-check-label" for="sports">Testes</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="privileges" value="Campanhas" id="transport">
+            <label class="form-check-label" for="transport">Campanhas</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="privileges" value="CRM" id="telecom">
+            <label class="form-check-label" for="telecom">CRM</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="privileges" value="Contactos" id="religion">
+            <label class="form-check-label" for="religion">Contactos</label>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Save Privileges</button>
+</form>
+{% endblock %}

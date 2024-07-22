@@ -1155,6 +1155,10 @@ def tasks():
     # Get today's date
     today = datetime.now().date()
 
+    cursor.execute('SELECT privileges FROM usuarios WHERE "user" = %s', (session['username'],))
+    user = cursor.fetchone()
+    session['privileges'] = user[0].split(',')
+    print(session['privileges'])
     
     return render_template('tasks.html', tasks=tasks, today=today)
 
@@ -1952,6 +1956,27 @@ def status_sms(message_sid):
     return  status_msg
 
 
+@app.route('/manage_privileges', methods=['GET', 'POST'])
+def manage_privileges():
+    if request.method == 'POST':
+        user_id = request.form['user_id']
+        privileges = request.form.getlist('privileges')
+        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        cursor = conn.cursor()
+        cursor.execute('UPDATE usuarios SET privileges = %s WHERE "user" = %s', (','.join(privileges), user_id))
+        conn.commit()
+        return redirect(url_for('manage_privileges'))
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+    cursor.execute('SELECT id_usuarios, "user" FROM usuarios')
+    users = cursor.fetchall()
+    cursor.execute('SELECT privileges FROM usuarios where "user" = %s',(session['username'],))
+    user = cursor.fetchone()
+    session['privileges'] = user[0].split(',')
+    return render_template('manage_privileges.html', users=users)
+
+
+
 def check_referer():
     return '/tarefas' in request.headers.get('Referer', '')
 # User login
@@ -2042,15 +2067,13 @@ def login():
              # Upadate session parameters
              session['logged_in'] = True
              session['username'] = username
-
-             session['last_org'] = str(result[8])
-             session['saldo'] = str(result[9])
+             session['last_org'] = str(result[9])
+             session['saldo'] = str(result[10])
              dados = str(result[6])
 
             else: 
              session['logged_in'] = True
              session['username'] = username
-
              session['last_org'] = str(resulte[6])
              if username == "Temoteo" or username == "Shelton" or username == "Marta":
                 session['saldo'] = "Ilimitado"
@@ -4615,6 +4638,6 @@ def submit_inscricao():
     
 if __name__ == '__main__':
     app.secret_key='secret123'
-    #app.run(debug=True)
+    app.run(debug=True)
     http_server = WSGIServer(('', 5000), app)
     http_server.serve_forever()

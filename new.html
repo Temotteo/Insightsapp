@@ -1,36 +1,134 @@
-<html dir="ltr" lang="en"><head>
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="edge://resources/css/md_colors.css">
-  <link rel="stylesheet" href="edge://resources/css/text_defaults_md.css">
-  <link rel="stylesheet" href="index.css">
-  <!-- Enable error-reporting -->
-  <script src="pdf-error-reporting.js"></script>
-<style>/** Copyright (C) Microsoft Corporation. All rights reserved.
- * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file.
- */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página com Sidebar</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            top: 12%;
+            left: 0;
+            padding-top: 20px;
+            background-color: #1d0208;
+        }
+        .content {
+            top: 15%;
+            margin-left: 17%;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body class="text-light" style="background-color: rgb(17, 17, 34);">
 
-</style><title>Formulário de inscrição para a Conferência de Pastores._3.pdf</title></head>
-<body>
+  <nav class="nav navbar-expand-lg bg-dark py-2 bg-none fixed-top shadow" >
+    <a class="navbar-brand d-flex align-items-lg-center mr-2 text-dark " href="#" >
+        __ <img src="/static/assets/brand/kmt1.png" alt="exames" >
+     </a>  
+   <div class="collapse navbar-collapse justify-content-end " style="margin-bottom: 10px;">
+   <a class="nav-link active " aria-current="page" href="#">Home</a>
+   <a class="nav-link " href="#">Help-Space</a>
+   <a class="nav-link  " href="#">Login</a>
+   <a class="nav-link " aria-disabled="true">Sign-in</a>
+   </div>
+ </nav>
 
-  <!-- the contents of ui-container are react-based PDF UI components -->
-  <div id="ui-container"><div style="background-color: rgb(247, 247, 247);"><div id="toolbar"><div class="c012" style="position: relative; width: 100%; height: auto; transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) 0s;"><div style="background-color: rgb(255, 255, 255);"><div class="c0154 c0160 c0137 c0144" role="toolbar" aria-label="PDF bar" style="background-color: rgb(247, 247, 247);"><div class="c0157 c0161"><div style="visibility: visible;"><div class="c0138"><div class="c0140"><div class="c0138"><div style="position: relative;"><button id="contents" aria-expanded="false" aria-controls="contents-flyout" class="c0174 c0189 c0179 c0188 c0163 c0166" data-element-focusable="true" title="Contents"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169"><svg width="20" height="20" viewBox="0 0 20 20" class=""><path d="M3 6.5a1 1 0 100-2 1 1 0 000 2z"></path><path d="M6 5.5c0-.28.22-.5.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5z"></path><path d="M6 9.5c0-.28.22-.5.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5z"></path><path d="M10.5 13a.5.5 0 000 1h7a.5.5 0 000-1h-7z"></path><path d="M8 13.5a1 1 0 11-2 0 1 1 0 012 0z"></path><path d="M3 10.5a1 1 0 100-2 1 1 0 000 2z"></path></svg></div></div></span></button></div></div><div class="c0142"></div><div class="c0138"><div style="position: relative;"><button id="highlight" aria-pressed="false" class="c0174 c0189 c0179 c0188 c0163 c0191 c0166" data-element-focusable="true" title="Highlight"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M3.5 2c.28 0 .5.22.5.5v4c0 .28.22.5.5.5h11a.5.5 0 00.5-.5v-4a.5.5 0 011 0v4c0 .65-.42 1.2-1 1.41V9a2 2 0 01-2 2v2.07a2 2 0 01-1.1 1.8l-6.18 3.08A.5.5 0 016 17.5V11a2 2 0 01-2-2V7.91c-.58-.2-1-.76-1-1.41v-4c0-.28.22-.5.5-.5zM5 8v1a1 1 0 001 1h8a1 1 0 001-1V8H5zm2 3v5.7l5.45-2.73a1 1 0 00.55-.9V11H7z"></path><path d="M16 3h-2v4h1.5a.5.5 0 00.5-.5V3zm-3 4V3H4v3.5c0 .28.22.5.5.5H13zm-6 9.7V11h6v2.07a1 1 0 01-.55.9L7 16.69z" class="accent" fill="none"></path></svg></div></div></span></button></div><div style="position: relative;"><button id="highlight-button-split" aria-expanded="false" aria-controls="highlight-flyout" class="c0174 c0189 c0179 c0188 c0163 c0194" data-element-focusable="true" title="Select a highlight color"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169 c0195"><svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M15.85 7.65c.2.2.2.5 0 .7l-5.46 5.49a.55.55 0 01-.78 0L4.15 8.35a.5.5 0 01.7-.7L10 12.8l5.15-5.16c.2-.2.5-.2.7 0z"></path></svg></div></div></span></button></div></div><div class="c0138"><div style="position: relative;"><button id="ink" aria-pressed="false" class="c0174 c0189 c0179 c0188 c0163 c0197 c0164 c0198" data-element-focusable="true" title="Draw"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169"><svg width="20" height="20" viewBox="0 0 20 20"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 2c.28 0 .5.22.5.5v3c0 .28.22.5.5.5h12a.5.5 0 00.5-.5v-3a.5.5 0 011 0v3c0 .83-.67 1.5-1.5 1.5h-.2l-3.58 7.17a1.5 1.5 0 01-.75.71c.02.2.03.4.03.62 0 .58-.07 1.16-.27 1.62-.21.47-.6.88-1.23.88s-1.02-.41-1.23-.88a4.12 4.12 0 01-.27-1.62c0-.21.01-.42.03-.62a1.5 1.5 0 01-.75-.7L4.19 7H4a1.5 1.5 0 01-1.5-1.5v-3c0-.28.22-.5.5-.5zm6.12 12h1.76a.5.5 0 00.45-.28L14.69 7H5.31l3.36 6.72a.5.5 0 00.45.28zm.4 1l-.02.5c0 .52.07.94.19 1.21.11.26.22.29.31.29.1 0 .2-.03.31-.29.12-.27.19-.69.19-1.21 0-.18 0-.35-.02-.5h-.96z"></path><path d="M16.5 3H14v3h2a.5.5 0 00.5-.5V3zM13 6V3H3.5v2.5c0 .28.22.5.5.5h9zm-.55 1l-2.4 4.78a.5.5 0 10.9.44L13.56 7h-1.11zM9.5 15.5c0-.18 0-.35.02-.5h.96l.02.5c0 .52-.07.94-.19 1.21-.11.26-.22.29-.31.29-.1 0-.2-.03-.31-.29a3.17 3.17 0 01-.19-1.21z" class="accent" fill="none"></path></svg></div><div class="c0171">Draw</div></div></span></button></div><div style="position: relative;"><button id="ink-button-split" aria-expanded="false" aria-controls="ink-customisation-flyout" class="c0174 c0189 c0179 c0188 c0163 c01100" data-element-focusable="true" title="Select ink properties"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169 c01101"><svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M15.85 7.65c.2.2.2.5 0 .7l-5.46 5.49a.55.55 0 01-.78 0L4.15 8.35a.5.5 0 01.7-.7L10 12.8l5.15-5.16c.2-.2.5-.2.7 0z"></path></svg></div></div></span></button></div></div><div class="c0138"><div style="position: relative;"><button id="erase" aria-pressed="false" class="c0174 c0189 c0179 c0188 c0163 c0166" data-element-focusable="true" title="Erase"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169"><svg width="20" height="20" viewBox="0 0 20 20" class=""><path d="M11.2 2.44a1.5 1.5 0 012.12 0l4.24 4.24a1.5 1.5 0 010 2.12L9.36 17h5.14a.5.5 0 010 1H7.82a1.5 1.5 0 01-1.14-.44l-4.24-4.24a1.5 1.5 0 010-2.12l8.76-8.76zm1.41.7a.5.5 0 00-.7 0L5.53 9.52l4.95 4.95 6.36-6.36a.5.5 0 000-.71l-4.24-4.24zM9.78 15.18l-4.95-4.95-1.69 1.69a.5.5 0 000 .7l4.25 4.25c.2.2.5.2.7 0l1.7-1.7z"></path></svg></div></div></span></button></div></div><div class="c0142"></div><div class="c0138"><div style="position: relative;"><button id="add-text" aria-pressed="false" class="c0174 c0189 c0179 c0188 c0163 c0166" data-element-focusable="true" title="Add text"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M10.5 6H13V6.5C13 6.77614 13.2239 7 13.5 7C13.7761 7 14 6.77614 14 6.5V5.5C14 5.22386 13.7761 5 13.5 5H6.5C6.22386 5 6 5.22386 6 5.5V6.5C6 6.77614 6.22386 7 6.5 7C6.77614 7 7 6.77614 7 6.5V6H9.5V14H9C8.72386 14 8.5 14.2239 8.5 14.5C8.5 14.7761 8.72386 15 9 15H11C11.2761 15 11.5 14.7761 11.5 14.5C11.5 14.2239 11.2761 14 11 14H10.5V6ZM2 6C2 4.34315 3.34315 3 5 3H15C16.6569 3 18 4.34315 18 6V14C18 15.6569 16.6569 17 15 17H5C3.34315 17 2 15.6569 2 14V6ZM5 4C3.89543 4 3 4.89543 3 6V14C3 15.1046 3.89543 16 5 16H15C16.1046 16 17 15.1046 17 14V6C17 4.89543 16.1046 4 15 4H5Z"></path></svg></div></div></span></button></div></div><div class="c0142"></div><div class="c0138"><div style="position: relative;"><button id="read-aloud" class="c0174 c0189 c0179 c0188 c0163 c0166" data-element-focusable="true" title="Read aloud"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169"><svg width="20" height="20" viewBox="0 0 20 20" class=""><path d="M7.5 4c.18 0 .34.1.43.25l.04.08 4 11a.5.5 0 01-.9.42l-.04-.08L9.7 12H5.3l-1.33 3.67a.5.5 0 01-.96-.25l.02-.1 4-11A.5.5 0 017.5 4zm0 1.96L5.67 11h3.66L7.5 5.96zm5.24-3.9l.39.22a9.5 9.5 0 014.84 7.36l.03.31a.5.5 0 01-1 .1l-.03-.32a8.5 8.5 0 00-4.33-6.58l-.38-.21a.5.5 0 01.48-.88zm-1.17 2.68a.5.5 0 01.6-.2l.09.03.12.08a6.5 6.5 0 013.02 4.23l.05.27.04.27a.5.5 0 01-.96.25l-.02-.09-.05-.26a5.5 5.5 0 00-2.37-3.67l-.22-.15-.13-.07a.5.5 0 01-.17-.69z" fill-rule="nonzero"></path></svg></div></div></span></button></div></div><div class="c0142"></div><div class="c0138"><div><div style="position: relative;"><button id="translate" aria-pressed="false" class="c0174 c0189 c0179 c0188 c0163 c0166" data-element-focusable="true" title="Translate"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169"><svg width="24" height="24" viewBox="0 0 24 24" class="c0153" xmlns="http://www.w3.org/2000/svg"><path d="M16.7708 4.83722C17.1068 4.95616 17.2828 5.325 17.1639 5.66103C17.0081 6.10126 16.8378 6.70696 16.7081 7.20185C17.4438 7.09264 18.191 6.93859 18.9916 6.75315C19.3389 6.67272 19.6856 6.88904 19.766 7.23631C19.8464 7.58359 19.6301 7.93031 19.2829 8.01074C18.2846 8.24196 17.3436 8.43131 16.3904 8.54741C16.2668 9.13308 16.1707 9.66789 16.0979 10.1576C16.7113 10.0231 17.2967 9.97086 17.8464 9.99049L17.8465 9.96371C17.8465 9.60725 18.1354 9.31828 18.4919 9.31828C18.8484 9.31828 19.1374 9.60725 19.1374 9.96371C19.1374 10.0367 19.1366 10.1093 19.1352 10.1815C20.6084 10.5812 21.6914 11.5642 22.163 12.8376C22.9562 14.9792 21.8858 17.5523 18.7541 18.9442C18.4283 19.089 18.0469 18.9423 17.9021 18.6165C17.7573 18.2908 17.904 17.9094 18.2298 17.7646C20.907 16.5747 21.4502 14.6298 20.9525 13.286C20.6706 12.5248 20.0125 11.8344 19.0254 11.4951C18.7285 13.4797 17.8741 15.0583 16.8517 16.1503C16.9596 16.3736 17.067 16.6035 17.1551 16.8249C17.2869 17.1561 17.1253 17.5314 16.7941 17.6633C16.4629 17.7951 16.0875 17.6334 15.9557 17.3022C15.9192 17.2104 15.8819 17.1233 15.8435 17.038C15.3013 17.4242 14.7366 17.692 14.1945 17.8168C13.4505 17.9879 12.6357 17.9048 12.0819 17.3142C11.2495 16.4249 11.1907 14.9479 11.7611 13.6313C12.2513 12.5 13.2239 11.4067 14.7292 10.6612C14.7988 10.0584 14.9037 9.39436 15.0499 8.65852C14.4811 8.68258 13.8973 8.67704 13.2849 8.63575C12.9292 8.61177 12.6603 8.30401 12.6843 7.94835C12.7083 7.59269 13.016 7.32381 13.3717 7.3478C14.056 7.39393 14.7026 7.39192 15.3383 7.35037C15.4724 6.80679 15.7186 5.87563 15.947 5.23029C16.0659 4.89426 16.4348 4.71827 16.7708 4.83722ZM14.6211 12.2112C13.7724 12.7806 13.2346 13.4774 12.9456 14.1445C12.4953 15.1839 12.6681 16.0514 13.024 16.4316C13.0239 16.4315 13.0241 16.4317 13.024 16.4316C13.1447 16.56 13.4094 16.6728 13.905 16.5587C14.3071 16.4662 14.789 16.2337 15.2809 15.8471C15.092 15.4112 14.913 14.9108 14.7892 14.2921C14.672 13.7067 14.6068 13.0287 14.6211 12.2112ZM16.2732 14.8428C16.9639 13.9598 17.5359 12.7604 17.7529 11.2757C17.2519 11.2634 16.6995 11.3269 16.0987 11.4851C16.0461 11.5034 15.9942 11.5221 15.9429 11.5413C15.8672 12.6158 15.9294 13.4117 16.055 14.0387C16.1144 14.3356 16.1889 14.5996 16.2732 14.8428ZM7.41703 6.36979C5.94432 5.94132 4.65947 6.10194 3.74562 6.3696C3.28926 6.50326 2.92312 6.66414 2.6678 6.7937C2.53993 6.85859 2.43918 6.91597 2.36808 6.95871C2.33251 6.98009 2.3043 6.99785 2.28375 7.0111L2.25869 7.02751L2.25053 7.03299L2.24756 7.03501L2.24532 7.03654C2.24521 7.03664 2.24588 7.03762 2.29091 7.10309C2.66234 7.64305 2.57626 7.51813 2.24532 7.03654C1.95154 7.23843 1.87704 7.64025 2.07892 7.93403C2.28071 8.22767 2.68182 8.30252 2.97557 8.10101L2.97449 8.10175L2.98348 8.09588C2.99306 8.0897 3.00972 8.07916 3.03315 8.06508C3.08005 8.03688 3.15381 7.99465 3.25195 7.94485C3.44866 7.84503 3.7406 7.71617 4.10846 7.60843C4.84291 7.39332 5.87074 7.26447 7.05577 7.60909C7.97568 7.87917 8.38156 8.37489 8.58739 8.88082C8.78723 9.37202 8.81417 9.90887 8.81767 10.3928C8.11631 10.2013 7.25318 10.0112 6.3373 9.97332C5.00025 9.91797 3.50195 10.1844 2.19814 11.2688C1.05105 12.2229 0.786015 13.6838 1.15609 14.9375C1.52657 16.1925 2.54909 17.3113 4.05785 17.6248C5.22671 17.8677 6.46163 17.5332 7.46818 17.0909C7.95922 16.8751 8.41803 16.6238 8.81817 16.3748V17.0635C8.81817 17.42 9.10714 17.7089 9.46361 17.7089C9.82008 17.7089 10.109 17.4191 10.109 17.0626L10.1091 10.5393C10.1092 10.0335 10.1094 9.19633 9.7831 8.39437C9.43227 7.53202 8.72487 6.75348 7.41842 6.37019L7.41703 6.36979ZM6.2839 11.2631C7.21485 11.3016 8.09784 11.5244 8.81817 11.7349V14.8135C8.36951 15.1507 7.69972 15.5791 6.94881 15.9091C6.03884 16.309 5.1025 16.5235 4.32048 16.361C3.32622 16.1544 2.64458 15.4203 2.39415 14.572C2.14332 13.7223 2.34065 12.8293 3.0236 12.2613C4.00822 11.4423 5.15656 11.2164 6.2839 11.2631Z"></path></svg></div></div></span></button></div></div></div><div class="c0142"></div><div class="c0138"><div><div style="position: relative;"><button id="underside" aria-pressed="false" class="c0174 c0189 c0179 c0188 c0163 c0165" data-element-focusable="true" title="Ask Copilot about this file"><span class="c0180"><div class="c0168"><div class="c0171">Ask Copilot</div></div></span></button></div></div></div></div></div></div></div><div class="c0158"><div style="visibility: visible;"><div class="c0138"><div class="c0139"><div class="c0138"><div style="position: relative;"><button id="zoom-out" class="c0174 c0189 c0179 c0188 c0163 c0166" data-element-focusable="true" title="Zoom out (Ctrl+Minus key)"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0170"><svg width="16" height="16" viewBox="0 0 16 16" class=""><path d="M3 8c0-.28.22-.5.5-.5h9a.5.5 0 010 1h-9A.5.5 0 013 8z"></path></svg></div></div></span></button></div></div><div class="c0138"><div style="position: relative;"><button id="zoom-in" class="c0174 c0189 c0179 c0188 c0163 c0166" data-element-focusable="true" title="Zoom in (Ctrl+Plus key)"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0170"><svg width="16" height="16" viewBox="0 0 16 16" class=""><path d="M8 2.5a.5.5 0 00-1 0V7H2.5a.5.5 0 000 1H7v4.5a.5.5 0 001 0V8h4.5a.5.5 0 000-1H8V2.5z"></path></svg></div></div></span></button></div></div><div class="c0138"><div style="position: relative;"><button id="pagefit" class="c0174 c0189 c0179 c0188 c0163 c0166" data-element-focusable="true" title="Fit to width (Ctrl+\)"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169"><svg id="fit-to-width-icon" width="21" height="20" viewBox="0 0 21 20" class=""><path d="M7.38 7.92a.5.5 0 01-.04.7l-1 .88H9a.5.5 0 010 1H6.34l1 .87a.5.5 0 11-.66.76l-2-1.75a.5.5 0 010-.76l2-1.75a.5.5 0 01.7.05z"></path><path d="M14.68 10.5l-1 .87a.5.5 0 00.66.76l2-1.75a.5.5 0 000-.76l-2-1.75a.5.5 0 00-.66.76l1 .87H12a.5.5 0 000 1h2.67z"></path><path d="M2.5 6c0-1.1.9-2 2-2h12a2 2 0 012 2v8a2 2 0 01-2 2h-12a2 2 0 01-2-2V6zm2-1a1 1 0 00-1 1v8a1 1 0 001 1h12a1 1 0 001-1V6a1 1 0 00-1-1h-12z"></path></svg></div></div></span></button></div></div><div class="c0142"></div><div class="c0138"><div id="pageselector-component-container" class="c01138 c01139"><input data-element-focusable="true" id="pageselector" class="c01142 c01140" type="text" value="1" title="Go to any page between 1 and 4. (Ctrl+Alt+G)" aria-label="Page number"><p class="c01144 c01152 c01141" id="pagelength" aria-hidden="true" title="Number of pages">of 4</p></div></div><div class="c0142"></div><div class="c0138"><div style="position: relative;"><button id="rotate" class="c0174 c0189 c0179 c0188 c0163 c0166" data-element-focusable="true" title="Rotate (Ctrl+])"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169"><svg width="20" height="20" viewBox="0 0 20 20" class=""><path d="M3 10a7 7 0 1110 6.33V14.5a.5.5 0 00-1 0v3c0 .28.22.5.5.5h3a.5.5 0 000-1h-1.62A8 8 0 102 10a.5.5 0 001 0z"></path><path d="M10 12a2 2 0 100-4 2 2 0 000 4zm0-1a1 1 0 110-2 1 1 0 010 2z"></path></svg></div></div></span></button></div></div><div class="c0142"></div><div class="c0138"><div style="position: relative;"><button id="layouts" aria-expanded="false" aria-controls="layouts-flyout" class="c0174 c0189 c0179 c0188 c0163 c0166" data-element-focusable="true" title="Page view"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169"><svg id="page-layout-icon" class="c0152" width="16" height="12" viewBox="0 0 16 12" xmlns="https://www.w3.org/2000/svg"><path d="M1 2C1 1.44772 1.44772 1 2 1H2.5C2.77614 1 3 0.776142 3 0.5C3 0.223858 2.77614 0 2.5 0H2C0.895431 0 0 0.895431 0 2V2.5C0 2.77614 0.223858 3 0.5 3C0.776142 3 1 2.77614 1 2.5V2Z"></path><path d="M7.5 0.00012207C7.2239 0.00012207 7.00007 0.223914 7 0.5L7 11.5C7 11.7761 7.22386 12.0001 7.5 12.0001H14C15.1046 12.0001 16 11.1047 16 10.0001V5.41434C16 5.01651 15.842 4.63498 15.5607 4.35368L11.6464 0.439462C11.3651 0.158157 10.9836 0.00012207 10.5858 0.00012207H7.5ZM8 11.0001L8 1.00012L10 1.00012V4.50012C10 5.32855 10.6716 6.00012 11.5 6.00012H15V10.0001C15 10.5524 14.5523 11.0001 14 11.0001H8ZM11.5 5.00012C11.2239 5.00012 11 4.77626 11 4.50012V1.20723L14.7929 5.00012H11.5Z"></path><path d="M1 10C1 10.5523 1.44772 11 2 11H2.5C2.77614 11 3 11.2239 3 11.5C3 11.7761 2.77614 12 2.5 12H2C0.895431 12 0 11.1046 0 10V9.5C0 9.22386 0.223858 9 0.5 9C0.776143 9 1 9.22386 1 9.5V10Z"></path><path d="M1 4.5C1 4.22386 0.776142 4 0.5 4C0.223858 4 0 4.22386 0 4.5V7.5C0 7.77614 0.223858 8 0.5 8C0.776142 8 1 7.77614 1 7.5L1 4.5Z"></path><path d="M4 0.5C4 0.223858 4.22386 0 4.5 0H5.5C5.77614 0 6 0.223858 6 0.5C6 0.776142 5.77614 1 5.5 1H4.5C4.22386 1 4 0.776142 4 0.5Z"></path><path d="M4.5 11C4.22386 11 4 11.2239 4 11.5C4 11.7761 4.22386 12 4.5 12H5.5C5.77614 12 6 11.7761 6 11.5C6 11.2239 5.77614 11 5.5 11H4.5Z"></path></svg></div></div></span></button></div></div></div></div></div></div><div class="c0159 c0162"><div style="visibility: visible;"><div class="c0138"><div class="c0141"><div class="c0138"><div style="position: relative;"><button id="find" class="c0174 c0189 c0179 c0188 c0163 c0166" data-element-focusable="true" title="Find (Ctrl + F)"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169"><svg width="20" height="20" viewBox="0 0 20 20" class=""><path d="M8.5 3a5.5 5.5 0 014.23 9.02l4.12 4.13a.5.5 0 01-.63.76l-.07-.06-4.13-4.12A5.5 5.5 0 118.5 3zm0 1a4.5 4.5 0 100 9 4.5 4.5 0 000-9z" fill-rule="nonzero"></path></svg></div></div></span></button></div></div><div class="c0142"></div><div class="c0138"><div style="position: relative;"><button id="print" class="c0174 c0189 c0179 c0188 c0163 c0166" data-element-focusable="true" title="Print (Ctrl+P)"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169"><svg width="20" height="20" viewBox="0 0 20 20" class=""><path d="M5 4.5C5 3.67 5.67 3 6.5 3h7c.83 0 1.5.67 1.5 1.5V5h.5A2.5 2.5 0 0118 7.5v5c0 .83-.67 1.5-1.5 1.5H15v1.5c0 .83-.67 1.5-1.5 1.5h-7A1.5 1.5 0 015 15.5V14H3.5A1.5 1.5 0 012 12.5v-5A2.5 2.5 0 014.5 5H5v-.5zM6 5h8v-.5a.5.5 0 00-.5-.5h-7a.5.5 0 00-.5.5V5zm-1 8v-1.5c0-.83.67-1.5 1.5-1.5h7c.83 0 1.5.67 1.5 1.5V13h1.5a.5.5 0 00.5-.5v-5c0-.83-.67-1.5-1.5-1.5h-11C3.67 6 3 6.67 3 7.5v5c0 .28.22.5.5.5H5zm1.5-2a.5.5 0 00-.5.5v4c0 .28.22.5.5.5h7a.5.5 0 00.5-.5v-4a.5.5 0 00-.5-.5h-7z" fill-rule="nonzero"></path></svg></div></div></span></button></div></div><div class="c0138"><div style="position: relative;"><button id="save" class="c0174 c0189 c0181 c0179 c0188 c0163 c0166" data-element-focusable="false" disabled="" title="Save (Ctrl+S)"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169"><svg width="20" height="20" viewBox="0 0 20 20" class=""><path d="M3 5c0-1.1.9-2 2-2h8.38a2 2 0 011.41.59l1.62 1.62A2 2 0 0117 6.62V15a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm2-1a1 1 0 00-1 1v10a1 1 0 001 1v-4.5c0-.83.67-1.5 1.5-1.5h7c.83 0 1.5.67 1.5 1.5V16a1 1 0 001-1V6.62a1 1 0 00-.3-.7L14.1 4.28a1 1 0 00-.71-.29H13v2.5c0 .83-.67 1.5-1.5 1.5h-4A1.5 1.5 0 016 6.5V4H5zm2 0v2.5c0 .28.22.5.5.5h4a.5.5 0 00.5-.5V4H7zm7 12v-4.5a.5.5 0 00-.5-.5h-7a.5.5 0 00-.5.5V16h8z"></path></svg></div></div></span></button></div></div><div class="c0138"><div style="position: relative;"><button id="saveAs" class="c0174 c0189 c0179 c0188 c0163 c0166" data-element-focusable="true" title="Save as"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169"><svg width="20" height="20" viewBox="0 0 20 20" class=""><path d="M5 3a2 2 0 00-2 2v10c0 1.1.9 2 2 2h3l.06-.35.16-.65H6v-4.5c0-.28.22-.5.5-.5h5.44l1-1H6.5c-.83 0-1.5.67-1.5 1.5V16a1 1 0 01-1-1V5a1 1 0 011-1h1v2.5C6 7.33 6.67 8 7.5 8h4c.83 0 1.5-.67 1.5-1.5V4h.38a1 1 0 01.7.3l1.63 1.61a1 1 0 01.29.71V8c.34-.01.68.03 1 .13v-1.5a2 2 0 00-.59-1.42L14.8 3.59A2 2 0 0013.38 3H5zm2 3.5V4h5v2.5a.5.5 0 01-.5.5h-4a.5.5 0 01-.5-.5z"></path><path d="M14.8 9.55l-4.82 4.83a2.2 2.2 0 00-.58 1.02l-.37 1.5a.89.89 0 001.08 1.07l1.5-.37c.38-.1.73-.3 1.01-.58l4.83-4.83a1.87 1.87 0 00-2.64-2.64z"></path></svg></div></div></span></button></div></div><div class="c0142"></div><div class="c0138"><div style="position: relative;"><button id="full-screen" class="c0174 c0189 c0179 c0188 c0163 c0166" data-element-focusable="true" title="Enter PDF full screen"><span class="c0180"><div class="c0168"><div aria-hidden="true" class="c0169"><svg width="20" height="20" viewBox="0 0 20 20" class=""><path d="M10.5 3h6.04l.09.02.06.02.08.04.05.04.06.06.03.04.04.07.03.08.02.08V9.5a.5.5 0 01-1 .09V4.7L4.7 16h4.8a.5.5 0 01.5.41v.09a.5.5 0 01-.41.5H3.41l-.1-.04-.08-.04-.05-.04-.06-.06-.03-.04-.04-.07-.03-.08v-.03a.5.5 0 01-.02-.1v.07-6.07a.5.5 0 011-.09v4.89L15.3 4h-4.8a.5.5 0 01-.5-.41V3.5c0-.28.22-.5.5-.5z" fill-rule="nonzero"></path></svg></div></div></span></button></div></div><div class="c0138"><button id="settings" data-element-focusable="true" aria-haspopup="true" aria-expanded="false" class="c01162" title="Settings and more" style="width: 36px;"><span class="c01154"><span aria-hidden="true"><svg width="20" height="20" viewBox="0 0 20 20" class=""><path d="M1.91 7.38A8.5 8.5 0 013.7 4.3a.5.5 0 01.54-.13l1.92.68a1 1 0 001.32-.76l.36-2a.5.5 0 01.4-.4 8.53 8.53 0 013.55 0c.2.04.35.2.38.4l.37 2a1 1 0 001.32.76l1.92-.68a.5.5 0 01.54.13 8.5 8.5 0 011.78 3.08c.06.2 0 .4-.15.54l-1.56 1.32a1 1 0 000 1.52l1.56 1.32a.5.5 0 01.15.54 8.5 8.5 0 01-1.78 3.08.5.5 0 01-.54.13l-1.92-.68a1 1 0 00-1.32.76l-.37 2a.5.5 0 01-.38.4 8.53 8.53 0 01-3.56 0 .5.5 0 01-.39-.4l-.36-2a1 1 0 00-1.32-.76l-1.92.68a.5.5 0 01-.54-.13 8.5 8.5 0 01-1.78-3.08.5.5 0 01.15-.54l1.56-1.32a1 1 0 000-1.52L2.06 7.92a.5.5 0 01-.15-.54zm1.06 0l1.3 1.1a2 2 0 010 3.04l-1.3 1.1c.3.79.71 1.51 1.25 2.16l1.6-.58a2 2 0 012.63 1.53l.3 1.67a7.55 7.55 0 002.5 0l.3-1.67a2 2 0 012.64-1.53l1.6.58a7.5 7.5 0 001.24-2.16l-1.3-1.1a2 2 0 010-3.04l1.3-1.1a7.5 7.5 0 00-1.25-2.16l-1.6.58a2 2 0 01-2.63-1.53l-.3-1.67a7.55 7.55 0 00-2.5 0l-.3 1.67A2 2 0 015.81 5.8l-1.6-.58a7.5 7.5 0 00-1.24 2.16zM7.5 10a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0zm1 0a1.5 1.5 0 103 0 1.5 1.5 0 00-3 0z" fill-rule="nonzero"></path></svg></span></span></button></div></div></div></div></div></div></div></div></div><div class="c01166 c01168" id="infobar-list" style="top: 41px;"></div><div id="page-indicator" class="c01172" style="opacity: 0; top: -0.678078px;"><div id="page-indicator-page-num" class="c01170">0</div><div id="page-indicator-triangle" class="c01171"></div></div></div><div class="announcement" style="top: 0px; position: fixed; opacity: 0;"><div role="status"></div><div role="alert"></div></div></div>
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-2 d-none d-md-block sidebar">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active " href="#" onclick="showContent('exame')">Exame</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showContent('suporte')">Suporte</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showContent('exames_disponiveis')">Exames Disponíveis</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showContent('creditos')">Créditos</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
 
-  <!-- This is container div for the currently open modal if exists -->
-  <div id="modal-root"><div id="reading_bar_modal"></div></div>
+        <main class="col-md-9 ml-sm-auto col-lg-10 content">
+            <div id="exame" class="content-section p-4 mt-5" style="text-align: justify;">
+           
+              <h2 class="text-danger">Exame</h2>
+                <p>A plataforma oferece uma variedade de serviços projetados para ajudar os alunos a se prepararem para os exames de admissão ao ensino universitário. Os principais serviços incluem:</p>
+                <ul class="list-group">
+                    <li class="list-group"><strong class="text-info">Baixar Exames Nacionais:</strong> A plataforma fornece acesso a uma ampla gama de exames nacionais que os usuários podem baixar. Isso inclui exames anteriores e materiais de prática que são essenciais para os alunos que desejam revisar e entender o formato e o conteúdo dos exames oficiais.</li>
+                    <li class="list-group"><strong class="text-info">Treinamento de Habilidades em Forma de Quiz:</strong> Para ajudar os usuários a aprimorar suas habilidades de resolução de problemas, a plataforma oferece quizzes interativos. Esses quizzes são projetados para simular perguntas de exames reais, permitindo que os usuários pratiquem e testem seus conhecimentos em um ambiente de aprendizado envolvente e dinâmico.</li>
+                    <li class="list-group"><strong class="text-info">Serviço de Simulação de Exame:</strong> Um dos recursos mais valiosos da plataforma é a simulação de exames. Este serviço permite que os usuários realizem um exame simulado completo, replicando as condições de um exame real. Isso ajuda os alunos a se familiarizarem com a pressão do tempo e a estrutura do exame, melhorando suas habilidades de gerenciamento de tempo e reduzindo a ansiedade do exame.</li>
+                </ul>
+                <br>
+                <p>Esses serviços têm como objetivo preparar e aprimorar as habilidades dos usuários para enfrentar os exames de admissão ao ensino universitário. A combinação de materiais de estudo acessíveis, prática interativa e simulações realistas cria uma experiência de preparação abrangente e eficaz.</p>
+            </div>
+         
+            <div id="suporte" class="content-section p-5" style="display:none;">
+              <div class="" style="text-align: justify;"></div>
+                <h2 class="text-danger">Suporte</h2>
+                <form>
+                    <div class="form-group">
+                        <label for="name">Nome:</label>
+                        <input type="text" class="form-control" id="name" placeholder="Digite seu nome">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" class="form-control" id="email" placeholder="Digite seu email">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Mensagem:</label>
+                        <textarea class="form-control" id="message" rows="4" placeholder="Digite sua mensagem"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </form>
+            </div>
+            <div id="exames_disponiveis" class="content-section p-5" style="display:none;">
+                <h2 class="text-danger">Exames Disponíveis</h2>
+                <ul class="list-group text-success">
+                    <li class="list-group"><a href="/baixar_exame/">Exame 1</a></li>
+                    <li class="list-group"><a href="#">Exame 2</a></li>
+                    <li class="list-group"><a href="#">Exame 3</a></li>
+                </ul>
+            </div>
+            <div id="creditos" class="content-section p-5 me-5" style="display:none;">
+                <h2 class="text-danger">Créditos</h2>
+                <p>Este site foi criado por [Seu Nome].</p>
+                <p>Objetivos da criação do site:</p>
+                <ul class="list-group">
+                    <li class="list-group text-warning">Facilitar o acesso a exames e suporte</li>
+                    <li class="list-group text-warning">Prover uma plataforma intuitiva para os usuários</li>
+                </ul>
+                <br>
+                <hr>
+                <p>Linguagens e frameworks usados:</p>
+                <ul>
+                    <li class="text-success">Python</li>
+                    <li class="text-success">HTML</li>
+                    <li class="text-success">JavaScript</li>
+                    <li class="text-success">Bootstrap</li>
+                    <li class="text-success">Flask</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+</div>
 
-  <div id="sizer"></div>
+<script>
+    function showContent(section) {
+        $('.content-section').hide();
+        $('#' + section).show();
+    }
+</script>
 
-  <div id="layout-container" style="opacity: 1; display: block; width: 826px; height: 4276px; top: 45px; transform: scale(1) translate(258px, 0px);"><div id="pagediv_0" class="pagerect" style="left: 5px; top: 3px; width: 816px; height: 1056px; --shadow-clip-rect: -3px -5px -7px -5px; background-image: url(&quot;blob:chrome-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai/68118fa9-b351-4fac-9536-f47fe5c57543&quot;);"></div><div id="pagediv_1" class="pagerect" style="left: 5px; top: 1073px; width: 816px; height: 1056px; --shadow-clip-rect: -3px -5px -7px -5px; background-image: url(&quot;blob:chrome-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai/eb4ef3b0-80c8-4c96-8527-2870935d72e6&quot;);"></div><div id="pagediv_2" class="pagerect" style="left: 5px; top: 2143px; width: 816px; height: 1056px; --shadow-clip-rect: -3px -5px -7px -5px; background-image: url(&quot;blob:chrome-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai/9de3d075-a91b-4c35-a2e8-281fb0119e90&quot;);"></div><div id="pagediv_3" class="pagerect" style="left: 5px; top: 3213px; width: 816px; height: 1056px; --shadow-clip-rect: -3px -5px -7px -5px; background-image: url(&quot;blob:chrome-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai/4d2531b0-4684-4815-b195-87006620a53f&quot;);"></div></div><div id="document-container">
-    <div id="embed-border"></div>
-    <embed id="plugin" type="application/x-google-chrome-pdf" original-url="file:///C:/Users/Mael/Downloads/Documents/Formul%C3%A1rio%20de%20inscri%C3%A7%C3%A3o%20para%20a%20Confer%C3%AAncia%20de%20Pastores._3.pdf" src="chrome-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai/df3ddc5e-2f05-42bd-badc-575e278d7bc4" background-color="0xFFE6E6E6" first-page-separator="4" style="position: relative !important; top: 41px; min-height: calc(100% - 41px);" javascript="allow" stream_timestamp="61181812854" embed-top-offset="41" width="826" height="4280" full-frame="" pdfviewrecoveryenabled="" pdffreetextenabled="" data-docheight="4276" data-docwidth="826">
-      </div>
-
-<script src="../setup.js"></script>
-<script src="dist/lib_fast_deprecated.chunk.js"></script>
-<script src="dist/lib_fast_web_components.chunk.js"></script>
-<script src="dist/lib_react.chunk.js"></script>
-<script src="dist/pdfui_component.chunk.js"></script>
-<script src="dist/pdf.bundle.js"></script>
-
-</body></html>
+</body>
+</html>
