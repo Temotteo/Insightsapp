@@ -887,8 +887,7 @@ def grupos():
                print(grupo_id)
    
                # Atualizando o campo específico com o valor do formulário
-               insert_query = f"UPDATE contact_org SET grupo_id = {grupo_id} WHERE id_cont = {contact[0]};"
-               cur.execute(insert_query) 
+               cursor.execute("Updade contact_org set grupo_ip = %s where id_cont = %s and org_id =%s;",(','.join(grupo_id), contact[0], org_id,))
                conn.commit()
       conn.close()
       redirect(url_for('grupos'))
@@ -1000,9 +999,8 @@ def add_group(id):
    try:
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
-    insert_query = f"insert into contact_org values( {id},'{org_id}',{grupo_id});"
+    cursor.execute("Updade contact_org set grupo_ip = %s where id_cont = %s and org_id =%s;",(','.join(grupo_id), id, org_id,))
 
-    cursor.execute(insert_query)
     conn.commit()
     conn.close()
     return redirect(url_for('detalhes_contact',id=int(id)))
@@ -1966,6 +1964,7 @@ def manage_privileges():
         cursor.execute('UPDATE usuarios SET privileges = %s WHERE "user" = %s', (','.join(privileges), user_id))
         conn.commit()
         return redirect(url_for('manage_privileges'))
+    
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
     cursor.execute('SELECT id_usuarios, "user" FROM usuarios')
@@ -4638,6 +4637,6 @@ def submit_inscricao():
     
 if __name__ == '__main__':
     app.secret_key='secret123'
-    app.run(debug=True)
+    #app.run(debug=True)
     http_server = WSGIServer(('', 5000), app)
     http_server.serve_forever()
