@@ -1408,14 +1408,82 @@ def formacao_remota():
 
     cursor = conn.cursor()
 
-    cursor.execute(f"SELECT * FROM campanhas where orgid='{org_id}' and status = 'activo' and tipo ='formacao';")
+    cursor.execute(f"SELECT * FROM campanhas where orgid='{org_id}'  and tipo ='formacao';")
 
     dados=cursor.fetchall()
 
     # Close connection
     conn.close()
 
-    return render_template('campanhas.html', formacao = dados)
+    return render_template('formacao_remota.html', formacao = dados)
+
+
+@app.route('/ivr_formacao/<string:campaign>', methods=['POST'])
+def ivr_formacao(campaign):
+    QUESTION_AUDIO = buscar_Audio()
+    response = VoiceResponse()
+    response.play(QUESTION_AUDIO[0])
+
+    current_question_index = request.args.get('current_question_index', default=1, type=int)
+    with response.gather(num_digits=1, action=url_for('handle_question_form', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
+        gather.play(QUESTION_AUDIO[current_question_index])
+
+    return str(response), 200, {'Content-Type': 'application/xml'}
+
+
+# Handle question route
+@app.route('/handle_question_form', methods=['POST'])
+def handle_question_form():
+    selected_option = request.form.get('Digits')
+    phone_number = request.form.get('To')
+    current_question_index = int(request.args.get('current_question_index'))
+    campaign=request.args.get('campaign')
+    QUESTION_AUDIO = buscar_Audio()
+    response = VoiceResponse()
+
+    if current_question_index < len(QUESTION_AUDIO) - 1:  # Not the concluding message
+        if current_question_index == 2:
+          try:
+              selected_option = int(selected_option)
+              if selected_option < 1 or selected_option > 5:
+                  raise ValueError()
+          except ValueError:
+            # Handle invalid input by redirecting back to /ivr with current_question_index
+            return redirect(url_for('ivr_formacao', current_question_index=current_question_index))
+
+        # Save the survey response to the database
+        save_survey_response(phone_number, current_question_index, selected_option, campaign)
+
+        # Continue with the next question
+        next_question_index = current_question_index + 1
+        with response.gather(num_digits=1, action=url_for('handle_question_form', current_question_index=next_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
+            gather.play(QUESTION_AUDIO[next_question_index])
+
+    else:  # Concluding message
+        response.play(QUESTION_AUDIO[-1])
+
+    return str(response), 200, {'Content-Type': 'application/xml'}
+
+
+# Start IVR campaign route
+@app.route('/start_ivr_formacao', methods=['POST'])
+def start_ivr_formacao():
+    # Extract phone numbers from the HTML form
+    phone_numbers = request.form.getlist('numero')
+    campaign = request.form.get('campanha')
+    
+    url='https://insightsap.com/ivr_formacao/'+campaign
+
+    for number in phone_numbers:
+        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        call = client.calls.create(
+            url=url,  # URL for handling IVR logic
+            to=number,
+            from_=TWILIO_PHONE_NUMBER
+        )
+
+    return render_template('campaign_status.html')
+
 
 
 @app.route('/pendentes')
@@ -2290,6 +2358,22 @@ def carragar_Audio(id):
     return jsonify(data)
 
 
+def buscar_Audio():
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+    
+    data = []
+    cursor.execute(f"SELECT * FROM  display_ref_linguas  where  id like 'campanha_3_pergunta_%' ;")
+    audios = cursor.fetchall()
+    conn.close()
+
+    for audio in audios:
+        data.append(audio)
+    
+    
+    return data
+
+
 
 @app.route('/deletar_audio/<string:id>', methods=['GET'])
 @is_logged_in
@@ -3071,19 +3155,7 @@ def assign_camp(id):
     
     # Create cursor
     cursor = conn.cursor()
-    print(id)
-    if id =='inquerito' or id =='formacao':
-        org_id = session['last_org']
-        form = CampForm(request.form)
-        cursor.execute(f"SELECT * FROM campanhas WHERE orgid = '{org_id}' and projecto IS NULL")
-        orgs = cursor.fetchall()
-        print(orgs)
-        if orgs:
-          print(f"SELECT * FROM campanhas WHERE orgid = '{org_id}' ")
-          return render_template('assign_camp.html', orgs=orgs, form=form)
-        else:
-          return render_template('assign_camp.html',form=form, null=True)
-  
+    
 
 
     # Get article by id
@@ -3114,10 +3186,10 @@ def assign_camp(id):
             result = cursor.fetchone()
             print(campanha)
             if id == 'inquerito':            
-               cursor.execute("UPDATE campanhas SET projecto=%s, tipo=%s WHERE id_campanha=%s",(projecto,campanha, id))
+               cursor.execute("UPDATE campanhas SET projecto=%s, tipo=%s WHERE id_campanha=%s",(projecto, id,campanha,))
                cursor.execute("INSERT INTO display_ref(id, ref) VALUES (%s,%s)",(result[3],projecto))
             else:  
-               cursor.execute("UPDATE campanhas SET projecto=%s, , tipo=%s WHERE id_campanha=%s",(projecto,campanha,id))
+               cursor.execute("UPDATE campanhas SET projecto=%s, tipo=%s WHERE id_campanha=%s",(projecto,id,campanha),)
                cursor.execute("INSERT INTO display_ref(id, ref) VALUES (%s,%s)",(result[3],projecto))
             
             conn.commit()
@@ -3130,12 +3202,29 @@ def assign_camp(id):
           # Commit to DB
           conn.commit()
 
-        #Close connection
-        conn.close()
-
         flash('Campanha atualizada', 'success')
 
         return redirect(url_for('campanhas'))
+
+
+
+    print(id)
+    if id =='inquerito' or id =='formacao':
+        org_id = session['last_org']
+        form = CampForm(request.form)
+        cursor.execute(f"SELECT * FROM campanhas WHERE orgid = '{org_id}' and projecto IS NULL")
+        orgs = cursor.fetchall()
+        print(orgs)
+        if orgs:
+          print(f"SELECT * FROM campanhas WHERE orgid = '{org_id}' ")
+          return render_template('assign_camp.html', orgs=orgs, form=form, id=id)
+        else:
+          return render_template('assign_camp.html',form=form, null=True)
+  
+    #Close connection
+    conn.close()
+
+       
 
     return render_template('assign_camp.html', form=form)
 

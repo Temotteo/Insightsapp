@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<h1>FORMACAO REMOTA</h1>
+  {% from "includes/_formhelpers.html" import render_field %}
+  
+  {% if null %}
+   <div class="container">
+    <p>Nenhum projecto de Formacao Remota ativa! </p>
+    <p>Deseja criar um novo projecto ? <a class="link-dark"  href="/create_camp" onclick="return confirm('Você está prestes a criar uma campanha, clique ok para comfirmar')">(sim)</a></p>
+
+   </div>
+  {% else %}
+  <form method="POST" action="/start_ivr_formacao">
+  <div class="form-group">
+    <label for="campanha" class="form-label">Campanha</label>
+     <select class="form-control" id="campanha"  name ="campanha" >
+      <option value="">selecione...</option>
+      {% for org in formacao %}
+      <option value="{{org[0]}}">{{org[2]}}</option>
+     {% endfor %}
+    </select>
+</div>
+    <div class="form-group">
+        <input type="number" class="form-control" id="numero" name="numero" placeholder="insira o numero">
+    </div>
+    <input type="submit" class="btn btn-success" value="Iniciar Formacao">
+  </form>
+
+  {% endif %}
+  {% endblock %}
