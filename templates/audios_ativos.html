@@ -1,36 +1,44 @@
 {% extends 'layout.html'%}
 {% block body%}
 <div class="container my-5">
+  <div class="col-md-8 offset-md-2">
 
-<table class="table table-bordered">
-  
-    <tr class="table-active">
-      <th>Campanha</th>
-      <th>Pergunta</th>
-      <th>Conteudo</th>
-      <th>Audio</th>
-
-    </tr>
-    {% for questao in questoes %}
-        {% set partes = questao[0].split("_") %}
-        {% set primeira_palavra = "_".join(partes[:2]) %}
-        {% set segunda_palavra = questao[0].rsplit('_', 1)[-1] %} 
-    <tr>
-      <td>{{ primeira_palavra }}</td>
-      <td>{{ segunda_palavra }}</td>
-      <td>{{ questao[1] }}</td>
-      <td>
+    <!-- Recent Videos -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Audios Ativos</h4>
+        </div>
+        <div class="card-body">
+    {% for dado in dados %}
+     <h2>{{dado[3]}}</h2>
      <ul class="list-group">
       {% for audio in audios %}
-        {% if audio[0] == questao[0] %}
-         <li class="list-group">{{audio[1]}}</li>
+      {% set partes = audio[0].split("_") %}
+        {% set primeira_palavra = "_".join(partes[:2]) %}
+        {% if primeira_palavra == dado[3] %}
+        <li class="list-group-item">
+        {% if dado[3] == 'campanha_32' %}  
+        <audio id="audio"  controls>
+          <source src="/audio/{{audio[1]}}" type="audio/mpeg">
+          Your browser does not support the audio element.
+      </audio> 
+      {% else %}
+      <audio id="audio"  controls>
+        <source src="{{ url_for('static', filename='audios/' + audio[1]) }}" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+     {% endif %}
         {% endif %} 
       {% endfor %}
+    </li>
     </ul>
-    </td>
-    </tr>  
+    
     {% endfor %}
-</table>   
+ 
+        </div>
+    </div>
+  </div> 
+</div>  
                 
 
 {% endblock %}

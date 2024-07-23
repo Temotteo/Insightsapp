@@ -116,6 +116,28 @@ function carregarDados() {
         });
 }
 
+function selected_Idioma() {
+    const selectElement = document.getElementById('idioma');
+    const selectedIdioma = selectElement.value;
+    fetch(`/idioma_inscricao/${selectedIdioma}`, {
+            method: 'GET',
+            
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                return response.json();
+            }
+        })
+        .then(data => {
+            console.log('Resposta do servidor:', data);
+        })
+        .catch(error => {
+            console.error('Erro ao enviar dados:', error);
+        });
+}
+
 
 function carregarAudio(id, modal) {
     $.get(`/carragar_Audio/${id}`, function(data) {
@@ -171,4 +193,29 @@ function carragar_questoes() {
         $('#questoes').hide();
     });
 }
+
+function getAllOptions() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Os meses são baseados em zero
+    const day = String(today.getDate()).padStart(2, '0');
+    
+    const formattedDate = `${year}-${month}-${day}`;
+    let select = document.getElementById('action');
+    let options = Array.from(select.options).map(option => option.value);
+
+    fetch(`/tarefas_diarias/${formattedDate}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ allOptions: options })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('All options:', data);
+        alert('All options: ' + data);
+    });
+}
+
         

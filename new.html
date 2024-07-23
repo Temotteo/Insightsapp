@@ -3,132 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página com Sidebar</title>
+    <title>App de Campanhas</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <style>
-        .sidebar {
-            height: 100vh;
-            position: fixed;
-            top: 12%;
-            left: 0;
-            padding-top: 20px;
-            background-color: #1d0208;
-        }
-        .content {
-            top: 15%;
-            margin-left: 17%;
-            padding: 20px;
-        }
-    </style>
 </head>
-<body class="text-light" style="background-color: rgb(17, 17, 34);">
+<body>
+    <div class="container mt-5">
+        <ul class="nav nav-tabs">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Campanhas</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#criarCampanha">Criar</a>
+                    <a class="dropdown-item" href="#verCampanhas">Ver</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Mensagem de voz</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#criarMensagem">Criar</a>
+                    <a class="dropdown-item" href="#verMensagens">Ativas</a>
+                </div>
+            </li>
+        </ul>
 
-  <nav class="nav navbar-expand-lg bg-dark py-2 bg-none fixed-top shadow" >
-    <a class="navbar-brand d-flex align-items-lg-center mr-2 text-dark " href="#" >
-        __ <img src="/static/assets/brand/kmt1.png" alt="exames" >
-     </a>  
-   <div class="collapse navbar-collapse justify-content-end " style="margin-bottom: 10px;">
-   <a class="nav-link active " aria-current="page" href="#">Home</a>
-   <a class="nav-link " href="#">Help-Space</a>
-   <a class="nav-link  " href="#">Login</a>
-   <a class="nav-link " aria-disabled="true">Sign-in</a>
-   </div>
- </nav>
+        <!-- Seção de criação de campanha -->
+        <div id="criarCampanha" class="mt-4">
+            <h2>Criar Campanha</h2>
+            <form action="{{ url_for('criar_campanha') }}" method="post">
+                <div class="form-group">
+                    <label for="nome">Nome da Campanha</label>
+                    <input type="text" class="form-control" id="nome" name="nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select class="form-control" id="status" name="status" required>
+                        <option value="Ativa">Ativa</option>
+                        <option value="Inativa">Inativa</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Criar</button>
+            </form>
+        </div>
 
-<div class="container-fluid">
-    <div class="row">
-        <nav class="col-md-2 d-none d-md-block sidebar">
-            <div class="sidebar-sticky">
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active " href="#" onclick="showContent('exame')">Exame</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showContent('suporte')">Suporte</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showContent('exames_disponiveis')">Exames Disponíveis</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showContent('creditos')">Créditos</a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+        <!-- Seção de visualização de campanhas -->
+        <div id="verCampanhas" class="mt-4">
+            <h2>Ver Campanhas</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for campanha in campanhas %}
+                    <tr>
+                        <td>{{ campanha.id }}</td>
+                        <td>{{ campanha.nome }}</td>
+                        <td>
+                            {% if campanha.status == 'Ativa' %}
+                            <span class="badge badge-success">Ativa</span>
+                            {% else %}
+                            <span class="badge badge-secondary">Inativa</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-        <main class="col-md-9 ml-sm-auto col-lg-10 content">
-            <div id="exame" class="content-section p-4 mt-5" style="text-align: justify;">
-           
-              <h2 class="text-danger">Exame</h2>
-                <p>A plataforma oferece uma variedade de serviços projetados para ajudar os alunos a se prepararem para os exames de admissão ao ensino universitário. Os principais serviços incluem:</p>
-                <ul class="list-group">
-                    <li class="list-group"><strong class="text-info">Baixar Exames Nacionais:</strong> A plataforma fornece acesso a uma ampla gama de exames nacionais que os usuários podem baixar. Isso inclui exames anteriores e materiais de prática que são essenciais para os alunos que desejam revisar e entender o formato e o conteúdo dos exames oficiais.</li>
-                    <li class="list-group"><strong class="text-info">Treinamento de Habilidades em Forma de Quiz:</strong> Para ajudar os usuários a aprimorar suas habilidades de resolução de problemas, a plataforma oferece quizzes interativos. Esses quizzes são projetados para simular perguntas de exames reais, permitindo que os usuários pratiquem e testem seus conhecimentos em um ambiente de aprendizado envolvente e dinâmico.</li>
-                    <li class="list-group"><strong class="text-info">Serviço de Simulação de Exame:</strong> Um dos recursos mais valiosos da plataforma é a simulação de exames. Este serviço permite que os usuários realizem um exame simulado completo, replicando as condições de um exame real. Isso ajuda os alunos a se familiarizarem com a pressão do tempo e a estrutura do exame, melhorando suas habilidades de gerenciamento de tempo e reduzindo a ansiedade do exame.</li>
-                </ul>
-                <br>
-                <p>Esses serviços têm como objetivo preparar e aprimorar as habilidades dos usuários para enfrentar os exames de admissão ao ensino universitário. A combinação de materiais de estudo acessíveis, prática interativa e simulações realistas cria uma experiência de preparação abrangente e eficaz.</p>
-            </div>
-         
-            <div id="suporte" class="content-section p-5" style="display:none;">
-              <div class="" style="text-align: justify;"></div>
-                <h2 class="text-danger">Suporte</h2>
-                <form>
-                    <div class="form-group">
-                        <label for="name">Nome:</label>
-                        <input type="text" class="form-control" id="name" placeholder="Digite seu nome">
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email:</label>
-                        <input type="email" class="form-control" id="email" placeholder="Digite seu email">
-                    </div>
-                    <div class="form-group">
-                        <label for="message">Mensagem:</label>
-                        <textarea class="form-control" id="message" rows="4" placeholder="Digite sua mensagem"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Enviar</button>
-                </form>
-            </div>
-            <div id="exames_disponiveis" class="content-section p-5" style="display:none;">
-                <h2 class="text-danger">Exames Disponíveis</h2>
-                <ul class="list-group text-success">
-                    <li class="list-group"><a href="/baixar_exame/">Exame 1</a></li>
-                    <li class="list-group"><a href="#">Exame 2</a></li>
-                    <li class="list-group"><a href="#">Exame 3</a></li>
-                </ul>
-            </div>
-            <div id="creditos" class="content-section p-5 me-5" style="display:none;">
-                <h2 class="text-danger">Créditos</h2>
-                <p>Este site foi criado por [Seu Nome].</p>
-                <p>Objetivos da criação do site:</p>
-                <ul class="list-group">
-                    <li class="list-group text-warning">Facilitar o acesso a exames e suporte</li>
-                    <li class="list-group text-warning">Prover uma plataforma intuitiva para os usuários</li>
-                </ul>
-                <br>
-                <hr>
-                <p>Linguagens e frameworks usados:</p>
-                <ul>
-                    <li class="text-success">Python</li>
-                    <li class="text-success">HTML</li>
-                    <li class="text-success">JavaScript</li>
-                    <li class="text-success">Bootstrap</li>
-                    <li class="text-success">Flask</li>
-                </ul>
-            </div>
-        </main>
+        <!-- Seção de criação de mensagem de voz -->
+        <div id="criarMensagem" class="mt-4">
+            <h2>Criar Mensagem de Voz</h2>
+            <form action="{{ url_for('criar_mensagem') }}" method="post">
+                <div class="form-group">
+                    <label for="arquivo">Arquivo de Áudio</label>
+                    <input type="text" class="form-control" id="arquivo" name="arquivo" required>
+                </div>
+                <div class="form-group">
+                    <label for="campanha_id">Campanha</label>
+                    <select class="form-control" id="campanha_id" name="campanha_id" required>
+                        {% for campanha in campanhas %}
+                        <option value="{{ campanha.id }}">{{ campanha.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Criar</button>
+            </form>
+        </div>
+
+        <!-- Seção de visualização de mensagens de voz ativas -->
+        <div id="verMensagens" class="mt-4">
+            <h2>Mensagens de Voz Ativas</h2>
+            <ul class="list-group">
+                {% for mensagem in mensagens %}
+                <li class="list-group-item">
+                    <audio controls>
+                        <source src="{{ url_for('static', filename='audio/' ~ mensagem.arquivo) }}" type="audio/mpeg">
+                        Seu navegador não suporta o elemento de áudio.
+                    </audio>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
-</div>
 
-<script>
-    function showContent(section) {
-        $('.content-section').hide();
-        $('#' + section).show();
-    }
-</script>
-
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

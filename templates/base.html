@@ -1,0 +1,51 @@
+{% extends 'layout.html'%}
+
+
+{% block body%}
+    <style>
+        .video-thumbnail {
+            width: 30%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg  rounded" aria-label="Thirteenth navbar example">
+        <div class="container-fluid">
+            <a class="navbar-brand col-lg-3 me-0" href="#">IMDV</a>
+            <ul class="navbar-nav col-lg-6 justify-content-lg-center text-dark">
+              <li class="nav-item">
+                <a class="nav-link active text-dark" aria-current="page" href="/videos/null">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-dark" href="/formulario_videos">Upload</a>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle"  id="navbarDropdownVideo" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Testes <span class="caret-down"></span></a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdownVideo">   <li><a class="dropdown-item" href="/videos/Testemunhos">Testemunhos</a></li>
+                  <li class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="/videos/Profecia">Profecia Individual</a></li>
+                  <li class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="/videos/Profecia">Profecias Internacional</a></li>
+                  <li class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="/videos/Profecia">Profecias Nacional</a></li>
+                  <li class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="/videos/Atendimento Pastoral">Atendimento Pastoral</a></li>
+                  <li class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="/videos/Accao Social">Accao Social</a></li>
+                  <li><a class="dropdown-item" href="/videos/Rell">Reel</a></li>
+                </ul>
+              </li>
+            </ul>
+            <div class="d-lg-flex col-lg-3 justify-content-lg-end">
+              <button class="btn btn-primary">Button</button>
+            </div>
+          
+        </div>
+      </nav>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+</html>
+{% endblock %}

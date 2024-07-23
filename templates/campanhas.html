@@ -17,6 +17,7 @@
       <th></th>
       <th></th>
       <th></th>
+      <th></th>
 
     </tr>
     {% if campanhas %}
@@ -28,7 +29,11 @@
        
         
         <td><a href="campanha_n/{{pendente[3]}}" class="btn btn-default pull-right">Perguntas</a></td>
+       
         <td><a href="assign_camp/{{pendente[0]}}" class="btn btn-default pull-right">Assign Camp</a></td>
+       
+        <th> {% if pendente[5] == 'activo' %}<span class="badge badge-success">Ativa</span>{% endif %}</th>
+        
         <td>
           <form action="{{url_for('del_tiket', id=pendente[0])}}" method="post">
             <input type="hidden" name="_method" value="DELETE">
@@ -54,7 +59,27 @@
       </form>
     </td>
   </tr>
+  
 {% endfor %}
+
+{% elif formacao %}
+{% for pendente in formacao %}
+  <tr>
+    <td>{{pendente[0]}}</td>
+    <td>{{pendente[3]}}</td>
+    <td>{{pendente[2]}}</td>
+   
+    
+    <td><a href="campanha_n/{{pendente[3]}}" class="btn btn-default pull-right">Perguntas</a></td>
+    <td><a href="assign_camp/{{pendente[0]}}" class="btn btn-default pull-right">Assign Camp</a></td>
+    <td>
+      <form action="{{url_for('del_tiket', id=pendente[0])}}" method="post">
+        <input type="hidden" name="_method" value="DELETE">
+        <input type="submit" value="Delete" class="btn btn-danger">
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
   </table>
   <a class="btn btn-success" href="/create_camp">Add Camp</a>
 

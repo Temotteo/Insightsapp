@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de Inscrição - Conferência de Pastores</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<script>
+    function selected_Idioma() {
+    const selectElement = document.getElementById('idioma');
+    const selectedIdioma = selectElement.value;
+    fetch(`/idioma_inscricao/${selectedIdioma}`, {
+            method: 'GET',
+            
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                return response.json();
+            }
+        })
+        .then(data => {
+            console.log('Resposta do servidor:', data);
+        })
+        .catch(error => {
+            console.error('Erro ao enviar dados:', error);
+        });
+}
+
+</script>
+<body>
+   
+    <div class="container mt-5">
+        <div class="d-flex flex-row-reverse">
+            <div class="from-row">
+             <label for="idioma"><i class="fa fa-globe" ></i></label>
+             <select name="idioma" id="idioma" onchange="selected_Idioma()">
+                 <option value="pt">pt</option>
+                 <option value="en">en</option>
+             </select>
+         </div> 
+         </div>
+        <h1 class="text-center">Igreja Ministério Divina Esperança</h1>
+        <h1 class="text-center">Bem-vindo!</h1>
+        <p class="text-center">Formulário de Inscrição para a Conferência de Pastores</p>
+        <p class="text-center"><em>"Entregue o seu caminho ao Senhor; confie nele, e ele agirá." - Salmo 37:5</em></p>
+
+        <form action="/submit_inscricao" method="POST">
+            <h4>1. Informações Pessoais</h4>
+            <div class="form-group">
+                <label for="nome">Nome Completo:</label>
+                <input type="text" class="form-control" id="nome" name="nome" required>
+            </div>
+            <div class="form-group">
+                <label for="titulo">Título (ex.: Pastor, Reverendo, etc.):</label>
+                <input type="text" class="form-control" id="titulo" name="titulo" required>
+            </div>
+            <div class="form-group">
+                <label for="igreja">Igreja/Organização:</label>
+                <input type="text" class="form-control" id="igreja" name="igreja" required>
+            </div>
+            <div class="form-group">
+                <label for="cargo">Cargo/Função:</label>
+                <input type="text" class="form-control" id="cargo" name="cargo" required>
+            </div>
+            <div class="row">
+                <div class="from-row col-md-4">
+                    <label for="endereco">Endereço:</label>
+                    <input type="text" class="form-control" id="endereco" name="endereco" required>
+                </div>
+                <div class="from-row col-md-3">
+                    <label for="cidade">Cidade:</label>
+                    <input type="text" class="form-control" id="cidade" name="cidade" required>
+                </div>
+                <div class="from-row col-md-3">
+                    <label for="estado">Estado/Província:</label>
+                    <input type="text" class="form-control" id="estado" name="estado" required>
+                </div>
+                <div class="from-row col-md-2">
+                    <label for="codigoPostal">Código Postal:</label>
+                    <input type="text" class="form-control" id="codigoPostal" name="codigoPostal" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="pais">País:</label>
+                <input type="text" class="form-control" id="pais" name="pais" required>
+            </div>
+            <div class="form-group">
+                <label for="telefone">Número de Telefone:</label>
+                <input type="text" class="form-control" id="telefone" name="telefone" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Endereço de Email:</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+
+            <h4>2. Detalhes da Conferência</h4>
+            <div class="form-group">
+                <label for="acomodacao">Você precisará de acomodação? (Sim/Não):</label>
+                <input type="text" class="form-control" id="acomodacao" name="acomodacao" required>
+            </div>
+            <div class="form-group">
+                <label for="restricoesAlimentares">Restrições Alimentares (se houver):</label>
+                <input type="text" class="form-control" id="restricoesAlimentares" name="restricoesAlimentares">
+            </div>
+            <div class="form-group">
+                <label for="contatoEmergencia">Nome do Contato de Emergência:</label>
+                <input type="text" class="form-control" id="contatoEmergencia" name="contatoEmergencia" required>
+            </div>
+            <div class="form-group">
+                <label for="telefoneContatoEmergencia">Número de Telefone do Contato de Emergência:</label>
+                <input type="text" class="form-control" id="telefoneContatoEmergencia" name="telefoneContatoEmergencia" required>
+            </div>
+
+            <h4>3. Preferências de Sessão</h4>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="lideranca" name="sessao[]" value="Desenvolvimento de Liderança">
+                <label class="form-check-label" for="lideranca">Desenvolvimento de Liderança</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="crescimentoIgreja" name="sessao[]" value="Estratégias de Crescimento da Igreja">
+                <label class="form-check-label" for="crescimentoIgreja">Estratégias de Crescimento da Igreja</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="alcanceComunitario" name="sessao[]" value="Programas de Alcance Comunitário">
+                <label class="form-check-label" for="alcanceComunitario">Programas de Alcance Comunitário</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="ministerioJovens" name="sessao[]" value="Ministério com Jovens">
+                <label class="form-check-label" for="ministerioJovens">Ministério com Jovens</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="adoracaoMusica" name="sessao[]" value="Adoração e Música">
+                <label class="form-check-label" for="adoracaoMusica">Adoração e Música</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="aconselhamentoPastoral" name="sessao[]" value="Aconselhamento e Cuidado Pastoral">
+                <label class="form-check-label" for="aconselhamentoPastoral">Aconselhamento e Cuidado Pastoral</label>
+            </div>
+            <div class="form-group">
+                <label for="outroSessao">Outro (especifique):</label>
+                <input type="text" class="form-control" id="outroSessao" name="outroSessao">
+            </div>
+
+            <h4>4. Oficinas e Atividades</h4>
+            <div class="form-group">
+                <label for="jantarNetworking">Você participará do jantar de networking? (Sim/Não):</label>
+                <input type="text" class="form-control" id="jantarNetworking" name="jantarNetworking" required>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="resolucaoConflitos" name="oficina[]" value="Resolução de Conflitos nas Igrejas">
+                <label class="form-check-label" for="resolucaoConflitos">Resolução de Conflitos nas Igrejas</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="ministerioDigital" name="oficina[]" value="Ministério Digital e Mídias Sociais">
+                <label class="form-check-label" for="ministerioDigital">Ministério Digital e Mídias Sociais</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="administracaoFinanceira" name="oficina[]" value="Administração Financeira para Igrejas">
+                <label class="form-check-label" for="administracaoFinanceira">Administração Financeira para Igrejas</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="gestaoVoluntarios" name="oficina[]" value="Gestão de Voluntários">
+                <label class="form-check-label" for="gestaoVoluntarios">Gestão de Voluntários</label>
+            </div>
+            <div class="form-group">
+                <label for="outraOficina">Outro (especifique):</label>
+                <input type="text" class="form-control" id="outraOficina" name="outraOficina">
+            </div>
+
+            <h4>5. Solicitações Especiais</h4>
+            <div class="form-group">
+                <label for="solicitacoesEspeciais">Você tem alguma necessidade ou solicitação especial?</label>
+                <textarea class="form-control" id="solicitacoesEspeciais" name="solicitacoesEspeciais"></textarea>
+            </div>
+
+            <h4>6. Informações de Pagamento</h4>
+            <div class="form-group">
+                <label for="taxaInscricao">Taxa de Inscrição: $</label>
+                <input type="text" class="form-control" id="taxaInscricao" name="taxaInscricao" required>
+            </div>
+            <div class="form-group">
+                <label>Método de Pagamento:</label>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="metodoPagamento" id="cartaoCredito" value="Cartão de Crédito">
+                    <label class="form-check-label" for="cartaoCredito">Cartão de Crédito</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="metodoPagamento" id="cartaoDebito" value="Cartão de Débito">
+                    <label class="form-check-label" for="cartaoDebito">Cartão de Débito</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="metodoPagamento" id="transferenciaBancaria" value="Transferência Bancária">
+                    <label class="form-check-label" for="transferenciaBancaria">Transferência Bancária</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="metodoPagamento" id="cheque" value="Cheque">
+                    <label class="form-check-label" for="cheque">Cheque</label>
+                </div>
+            </div>
+            <div id="detalhesCartao" style="display:none;">
+                <div class="form-group">
+                    <label for="numeroCartao">Número do Cartão:</label>
+                    <input type="text" class="form-control" id="numeroCartao" name="numeroCartao">
+                </div>
+                <div class="form-group">
+                    <label for="validadeCartao">Data de Validade:</label>
+                    <input type="text" class="form-control" id="validadeCartao" name="validadeCartao">
+                </div>
+                <div class="form-group">
+                    <label for="cvvCartao">CVV:</label>
+                    <input type="text" class="form-control" id="cvvCartao" name="cvvCartao">
+                </div>
+                <div class="form-group">
+                    <label for="nomeCartao">Nome no Cartão:</label>
+                    <input type="text" class="form-control" id="nomeCartao" name="nomeCartao">
+                </div>
+            </div>
+
+            <h4>Comentários Adicionais</h4>
+            <div class="form-group">
+                <textarea class="form-control" id="comentariosAdicionais" name="comentariosAdicionais"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Enviar Inscrição</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('input[name="metodoPagamento"]').on('change', function(){
+                if($('#cartaoCredito').is(':checked') || $('#cartaoDebito').is(':checked')){
+                    $('#detalhesCartao').show();
+                } else {
+                    $('#detalhesCartao').hide();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

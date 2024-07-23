@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <div class="mx-4 mt-4">
+    <form action="/buscar_testemunho" method="post">
+        <div class="input-group">
+          <input type="text" class="form-control" name="nome" placeholder="insira o nome">
+          <button type="submit" id="but" class="btn btn-secondary ml-2">Pesquisar</button>
+        </div>
+      </form>   
+    </div>
+   
+    <div class="pb-5 mx-2">
+        <h2 class="mt-2">Lista de Testemunhos</h2>
+        {% if erro %}
+          <div class="alert-danger my-2">{{ erro }}</div>
+        {% endif %}
+        
+    <table class="table table-striped">
+        <thead style="background-color: rgb(228, 164, 87); ">
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Descricao</th>
+                <th>Vídeo</th>
+                <th>Data</th>
+            </tr>
+        </thead>
+        <tbody style="background-color: rgb(252, 251, 251);">
+            {% for testemunho in testemunhos %}
+            <tr>
+                <td>{{ testemunho[0] }}</td>
+                <td>{{ testemunho[1] }}</td>
+                <td> <button type="button" class="btn btn-default" data-toggle="modal" data-target="#editar{{ testemunho[0] }}">
+                     Descricao do Video
+                  </button>
+                  <!-- Modal para editar ticket -->
+                  <div class="modal fade" id="editar{{ testemunho[0] }}" tabindex="-1" role="dialog" aria-labelledby="editarModalLabel{{  testemunho[0] }}" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                          <div class="modal-content">
+                              <div class="modal-header">
+                                <h4 class="modal-title" id="editarModalLabel{{ testemunho[0] }}">Descricao do video</h4>
+                                  <button type="button" class="close" data-dismiss="modal" aria-label="Fechar"><span aria-hidden="true">&times;</span></button>
+                              </div> 
+                              <form method="post" action="{{ url_for('atualizar', id=testemunho[0]) }}">
+                              <div class="modal-body">
+                                <textarea type="text" id="descricao" name="descricao" class="form-control" rows="5" aria-valuemax="">{{ testemunho[2] }}</textarea>
+                                </div>
+                                <div class="modal-footer"> 
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                                    <button type="submit" class="btn btn-primary" id="salvar">Salvar</button>
+                                </div>
+                                </form>
+                              </div>
+                          </div>
+                      </div>
+                </td>
+                <td><a href="{{ url_for('Link_video', testemunho_id=testemunho[0]) }}" target="_blank">link do video</a></td>
+                <td>{{ testemunho[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('formulario_videos') }}" class="btn-info ml-2 p-2 " title="formulario">
+        <i class="fas fa-plus-square"></i>
+      </a>
+      <br><br>
+</div>
+
+{% endblock %}
+

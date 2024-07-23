@@ -887,7 +887,8 @@ def grupos():
                print(grupo_id)
    
                # Atualizando o campo específico com o valor do formulário
-               cursor.execute("Updade contact_org set grupo_ip = %s where id_cont = %s and org_id =%s;",(','.join(grupo_id), contact[0], org_id,))
+               insert_query = f"UPDATE contact_org SET grupo_id = {grupo_id} WHERE id_cont = {contact[0]};"
+               cur.execute(insert_query) 
                conn.commit()
       conn.close()
       redirect(url_for('grupos'))
@@ -999,8 +1000,9 @@ def add_group(id):
    try:
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
-    cursor.execute("Updade contact_org set grupo_ip = %s where id_cont = %s and org_id =%s;",(','.join(grupo_id), id, org_id,))
+    insert_query = f"insert into contact_org values( {id},'{org_id}',{grupo_id});"
 
+    cursor.execute(insert_query)
     conn.commit()
     conn.close()
     return redirect(url_for('detalhes_contact',id=int(id)))
@@ -1365,12 +1367,12 @@ def db():
 @app.route('/campanhas')
 @is_logged_in
 def campanhas():
-
+    org_id = session['last_org']
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM campanhas")
+    cursor.execute(f"SELECT * FROM campanhas where orgid='{org_id}'")
 
     dados=cursor.fetchall()
 
@@ -1383,12 +1385,12 @@ def campanhas():
 @app.route('/surveys')
 @is_logged_in
 def surveys():
-
+    org_id = session['last_org']
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM campanhas WHERE projecto IS NOT NULL")
+    cursor.execute(f"SELECT * FROM campanhas where orgid='{org_id}' and status = 'activo' and tipo ='inquerito';")
 
     dados=cursor.fetchall()
 
@@ -1397,6 +1399,23 @@ def surveys():
 
     return render_template('campanhas.html', surveys = dados)
    
+
+@app.route('/formacao_remota', methods=['GET'])
+@is_logged_in
+def formacao_remota():
+    org_id = session['last_org']
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+
+    cursor = conn.cursor()
+
+    cursor.execute(f"SELECT * FROM campanhas where orgid='{org_id}' and status = 'activo' and tipo ='formacao';")
+
+    dados=cursor.fetchall()
+
+    # Close connection
+    conn.close()
+
+    return render_template('campanhas.html', formacao = dados)
 
 
 @app.route('/pendentes')
@@ -1964,7 +1983,6 @@ def manage_privileges():
         cursor.execute('UPDATE usuarios SET privileges = %s WHERE "user" = %s', (','.join(privileges), user_id))
         conn.commit()
         return redirect(url_for('manage_privileges'))
-    
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
     cursor.execute('SELECT id_usuarios, "user" FROM usuarios')
@@ -2320,11 +2338,15 @@ def audios_ativos():
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
     
+    audios = []
     print(org_id)
+
+    cursor.execute(f"SELECT * FROM campanhas where orgid='{org_id}' and status = 'activo';")
+        
+    dados=cursor.fetchall()
     
-    cursor.execute("SELECT * FROM display_ref WHERE audio_ref = %s", (org_id,))
-    questoes = cursor.fetchall()
     
+        
    
     print(' ')
 
@@ -2334,7 +2356,7 @@ def audios_ativos():
     print(audios) 
     conn.close()
     
-    return render_template('audios_ativos.html',questoes=questoes, audios=audios)
+    return render_template('audios_ativos.html', audios=audios, dados=dados)
 
 
 
@@ -2761,11 +2783,6 @@ def tarefas_diarias_data(data):
 @is_logged_in
 def tarefas_diarias(data):
 
-    if data == 'today':
-       data = datetime.now().date()
-      
-
-   
     datas=[]
     today = datetime.now().date()
     for i in range(0,5):
@@ -3055,7 +3072,7 @@ def assign_camp(id):
     # Create cursor
     cursor = conn.cursor()
     print(id)
-    if id =='org_id':
+    if id =='inquerito' or id =='formacao':
         org_id = session['last_org']
         form = CampForm(request.form)
         cursor.execute(f"SELECT * FROM campanhas WHERE orgid = '{org_id}' and projecto IS NULL")
@@ -3095,9 +3112,14 @@ def assign_camp(id):
             cursor.execute("SELECT * FROM campanhas WHERE id_campanha = %s", [campanha])
             form.projecto.data = campanha[2]
             result = cursor.fetchone()
-            print(campanha)            
-            cursor.execute("UPDATE campanhas SET projecto=%s WHERE id_campanha=%s",(projecto,campanha))
-            cursor.execute("INSERT INTO display_ref(id, ref) VALUES (%s,%s)",(result[3],projecto))
+            print(campanha)
+            if id == 'inquerito':            
+               cursor.execute("UPDATE campanhas SET projecto=%s, tipo=%s WHERE id_campanha=%s",(projecto,campanha, id))
+               cursor.execute("INSERT INTO display_ref(id, ref) VALUES (%s,%s)",(result[3],projecto))
+            else:  
+               cursor.execute("UPDATE campanhas SET projecto=%s, , tipo=%s WHERE id_campanha=%s",(projecto,campanha,id))
+               cursor.execute("INSERT INTO display_ref(id, ref) VALUES (%s,%s)",(result[3],projecto))
+            
             conn.commit()
 
         else:
@@ -4096,8 +4118,8 @@ def audios():
 
 
 
-@app.route('/videos', methods=['GET','POST'])
-def videos():
+@app.route('/videos/<type>', methods=['GET','POST'])
+def videos(type):
     if request.method == 'POST':
         nome = request.form['nome']
         descricao = request.form['descricao']
@@ -4118,17 +4140,26 @@ def videos():
              cur.execute('SELECT * FROM testemunho;')
              testemunhos = cur.fetchall()
              conn.close()        
-             return render_template('Testemunhos.html', testemunhos=testemunhos)
+             return render_template('tabela_videos.html', testemunhos=testemunhos)
             except psycopg2.Error as e:
              error_msg = f"Erro ao fazer a transação: {e}"
              return render_template('erro.html', error=error_msg)
-            
+    
+
+    if type !='null':
+        conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM testemunho where assunto = '{type}';")
+        testemunhos = cur.fetchall()
+        conn.close()        
+        return render_template('videos.html', testemunhos=testemunhos)
+
     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
     cur = conn.cursor()
     cur.execute('SELECT * FROM testemunho;')
     testemunhos = cur.fetchall()
     conn.close()        
-    return render_template('Testemunhos.html', testemunhos=testemunhos)
+    return render_template('home_video.html', testemunhos=testemunhos)
         
 
 
@@ -4585,8 +4616,15 @@ def concluir_ticket(ticket_id):
      return render_template('erro.html', error=error_msg)      
         
 
-@app.route('/submit_inscricao', methods=['POST','GET'])
-def submit_inscricao():
+
+@app.route('/idioma_inscricao/<idioma>', methods=['GET'])
+def idioma_inscricao(idioma):
+    print('idioma')
+    return redirect(url_for('submit_inscricao', idioma= idioma))
+
+
+@app.route('/submit_inscricao/<idioma>', methods=['POST','GET'])
+def submit_inscricao(idioma):
 
     if request.method == 'POST': 
         nome = request.form['nome']
@@ -4630,8 +4668,12 @@ def submit_inscricao():
         conn.close()
     
         return redirect(url_for('submit_inscricao'))
+
     
-    return render_template('inscricao_pastoral.html')
+    if idioma == 'en':
+      return render_template('inscricao_pastoral_EN.html')
+    else:
+      return render_template('inscricao_pastoral_PT.html')
    
 
     

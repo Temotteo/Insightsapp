@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pastors' Conference Registration Form</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <script>
+        function selected_Idioma() {
+        const selectElement = document.getElementById('idioma');
+        const selectedIdioma = selectElement.value;
+        fetch(`/idioma_inscricao/${selectedIdioma}`, {
+                method: 'GET',
+                
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                console.log('Resposta do servidor:', data);
+            })
+            .catch(error => {
+                console.error('Erro ao enviar dados:', error);
+            });
+    }
+    
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="d-flex flex-row-reverse">
+           <div class="from-row">
+            <label for="idioma"><i class="fa fa-globe" ></i></label>
+            <select name="idioma" id="idioma" onchange="selected_Idioma()">
+                <option value="en">en</option>
+                <option value="pt">pt</option>
+            </select>
+        </div> 
+        </div>
+        <h1 class="text-center">Divine Hope Ministry Church</h1>
+        <h1 class="text-center">WELCOME!</h1>
+        <p class="text-center">Pastors' Conference Registration Form</p>
+        <p class="text-center"><em>"Commit your way to the Lord; trust in Him, and He will act." - Psalm 37:5"</em></p>
+        <form action="/submit" method="post">
+            <h4>1. Personal Information</h4>
+            <div class="form-group">
+                <label for="nome">Full Name:</label>
+                <input type="text" class="form-control" id="nome" name="nome" required>
+            </div>
+            <div class="form-group">
+                <label for="titulo">Title (e.g., Pastor, Reverend, etc.):</label>
+                <input type="text" class="form-control" id="titulo" name="titulo" required>
+            </div>
+            <div class="form-group">
+                <label for="igreja">Church/Organization:</label>
+                <input type="text" class="form-control" id="igreja" name="igreja" required>
+            </div>
+            <div class="form-group">
+                <label for="cargo">Position/Role:</label>
+                <input type="text" class="form-control" id="cargo" name="cargo" required>
+            </div>
+            <div class="row">
+            <div class="form-group col-md-4">
+                <label for="endereco">Address:</label>
+                <input type="text" class="form-control" id="endereco" name="endereco" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="cidade">City:</label>
+                <input type="text" class="form-control" id="cidade" name="cidade" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="estado">State/Province:</label>
+                <input type="text" class="form-control" id="estado" name="estado" required>
+            </div>
+            <div class="form-group col-md-2">
+                <label for="codigoPostal">Postal Code:</label>
+                <input type="text" class="form-control" id="codigoPostal" name="codigoPostal" required>
+            </div>
+        </div>
+            <div class="form-group">
+                <label for="pais">Country:</label>
+                <input type="text" class="form-control" id="pais" name="pais" required>
+            </div>
+            <div class="form-group">
+                <label for="telefone">Phone Number:</label>
+                <input type="text" class="form-control" id="telefone" name="telefone" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address:</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+
+            <h4>2. Conference Details</h4>
+            <div class="form-group">
+                <label for="acomodacao">Do you need accommodation? (Yes/No):</label>
+                <input type="text" class="form-control" id="acomodacao" name="acomodacao" required>
+            </div>
+            <div class="form-group">
+                <label for="restricoesAlimentares">Dietary Restrictions (if any):</label>
+                <input type="text" class="form-control" id="restricoesAlimentares" name="restricoesAlimentares">
+            </div>
+            <div class="form-group">
+                <label for="contatoEmergencia">Emergency Contact Name:</label>
+                <input type="text" class="form-control" id="contatoEmergencia" name="contatoEmergencia" required>
+            </div>
+            <div class="form-group">
+                <label for="telefoneContatoEmergencia">Emergency Contact Phone Number:</label>
+                <input type="text" class="form-control" id="telefoneContatoEmergencia" name="telefoneContatoEmergencia" required>
+            </div>
+
+            <h4>3. Session Preferences</h4>
+            <div class="form-group">
+                <label>Which sessions are you most interested in attending? (Check all that apply)</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Leadership Development" id="sessao1" name="sessao">
+                    <label class="form-check-label" for="sessao1">
+                        Leadership Development
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Church Growth Strategies" id="sessao2" name="sessao">
+                    <label class="form-check-label" for="sessao2">
+                        Church Growth Strategies
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Community Outreach Programs" id="sessao3" name="sessao">
+                    <label class="form-check-label" for="sessao3">
+                        Community Outreach Programs
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Youth Ministry" id="sessao4" name="sessao">
+                    <label class="form-check-label" for="sessao4">
+                        Youth Ministry
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Worship and Music" id="sessao5" name="sessao">
+                    <label class="form-check-label" for="sessao5">
+                        Worship and Music
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Counseling and Pastoral Care" id="sessao6" name="sessao">
+                    <label class="form-check-label" for="sessao6">
+                        Counseling and Pastoral Care
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="outroSessao">Other (specify):</label>
+                    <input type="text" class="form-control" id="outroSessao" name="outroSessao">
+                </div>
+            </div>
+
+            <h4>4. Workshops and Activities</h4>
+            <div class="form-group">
+                <label for="jantarNetworking">Will you attend the networking dinner? (Yes/No):</label>
+                <input type="text" class="form-control" id="jantarNetworking" name="jantarNetworking" required>
+            </div>
+            <div class="form-group">
+                <label>Are you interested in any of the following workshops? (Check all that apply)</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Conflict Resolution in Churches" id="oficina1" name="oficina">
+                    <label class="form-check-label" for="oficina1">
+                        Conflict Resolution in Churches
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Digital Ministry and Social Media" id="oficina2" name="oficina">
+                    <label class="form-check-label" for="oficina2">
+                        Digital Ministry and Social Media
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Financial Management for Churches" id="oficina3" name="oficina">
+                    <label class="form-check-label" for="oficina3">
+                        Financial Management for Churches
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Volunteer Management" id="oficina4" name="oficina">
+                    <label class="form-check-label" for="oficina4">
+                        Volunteer Management
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="outraOficina">Other (specify):</label>
+                    <input type="text" class="form-control" id="outraOficina" name="outraOficina">
+                </div>
+            </div>
+
+            <h4>5. Special Requests</h4>
+            <div class="form-group">
+                <label for="solicitacoesEspeciais">Do you have any special needs or requests?</label>
+                <textarea class="form-control" id="solicitacoesEspeciais" name="solicitacoesEspeciais" rows="3"></textarea>
+            </div>
+
+            
+            <h4>Additional Comments</h4>
+            <div class="form-group">
+                <label for="comentariosAdicionais">Please provide any additional comments or information here:</label>
+                <textarea class="form-control" id="comentariosAdicionais" name="comentariosAdicionais" rows="3"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit Registration</button>
+        </form>
+        <br>
+    </div>
+</body>
+</html>

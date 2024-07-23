@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+<style>
+    .video-thumbnail {
+        width: 30%;
+        height: auto;
+    }
+
+</style>
+    <!-- Navbar -->
+   
+    <!-- Container -->
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+
+                <!-- Recent Videos -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Recent Videos</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <!-- Example video items -->
+                        {% for testemunho in testemunhos %}
+                          <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Video </h5>
+                                    <small>{{ testemunho[4] }}</small>
+                                </div>
+                                <div class="mb-1">
+                                    <img src="https://via.placeholder.com/640x360.png?text=Video+1" alt="Video 1 Thumbnail" class="video-thumbnail">
+                                </div>
+                                <p class="mb-1">{{ testemunho[2] }}</p>
+                                <small>{{ testemunho[1] }}</small>
+                            </a>
+                         {% endfor %}   
+                        </div>
+                    </div>
+                </div>
+
+               
+    <!-- Footer -->
+    {% endblock %}
