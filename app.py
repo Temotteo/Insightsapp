@@ -1403,6 +1403,8 @@ def surveys():
 @app.route('/formacao_remota', methods=['GET'])
 @is_logged_in
 def formacao_remota():
+    audio = buscar_Audio()
+    print(audio)
     org_id = session['last_org']
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
@@ -1415,12 +1417,17 @@ def formacao_remota():
     # Close connection
     conn.close()
 
-    return render_template('formacao_remota.html', formacao = dados)
+    return render_template('campanhas.html', formacao = dados)
 
 
 @app.route('/ivr_formacao/<string:campaign>', methods=['POST'])
 def ivr_formacao(campaign):
-    QUESTION_AUDIO = buscar_Audio()
+    audios = buscar_Audio()
+    QUESTION_AUDIO = []
+    for audio in audios:
+        QUESTION_AUDIO.append(f"https://insightsap.com/audio/{audio[1]}")
+
+    
     response = VoiceResponse()
     response.play(QUESTION_AUDIO[0])
 
@@ -1438,7 +1445,11 @@ def handle_question_form():
     phone_number = request.form.get('To')
     current_question_index = int(request.args.get('current_question_index'))
     campaign=request.args.get('campaign')
-    QUESTION_AUDIO = buscar_Audio()
+    audios = buscar_Audio()
+    QUESTION_AUDIO = []
+    for audio in audios:
+        QUESTION_AUDIO.append(f"https://insightsap.com/audio/{audio[1]}")
+
     response = VoiceResponse()
 
     if current_question_index < len(QUESTION_AUDIO) - 1:  # Not the concluding message
@@ -2368,7 +2379,7 @@ def buscar_Audio():
     conn.close()
 
     for audio in audios:
-        data.append(audio)
+        data.append(audio[1])
     
     
     return data

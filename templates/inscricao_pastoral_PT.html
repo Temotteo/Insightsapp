@@ -31,6 +31,11 @@
 }
 
 </script>
+<style>
+    .tabl{
+        height: 100px;
+    }
+</style>
 <body>
    
     <div class="container mt-5">
@@ -43,55 +48,34 @@
             </select>
         </div> 
         </div>
-        <table class="mt-0" style="background-color:cornflowerblue;  border-color: white;">
-         <thead><tr>
-            <th colspan="2">
-                <img src="/static/C_PASTORES/IGREJA.png" class="img-fluid img-responsive " alt="">
 
-         </th>
-        </tr>
-    </thead> 
-    <tbody>
-        <tr>
-            <td>
-                <img src="/static/C_PASTORES/Layer 1.png" class="img-fluid img-responsive " alt="">
-            </td>
-            <td>
-                <table>
-                    <tr>
-                        <th>
-                            <img src="/static/C_PASTORES/tema.png" class="img-fluid img-responsive " alt="">
-                        </th>
-                        </tr>
-                        <tr>  
-                        <th>
-                            <img src="/static/C_PASTORES/horas.png" class="img-fluid img-responsive " alt="">
-                        </th>
-                    </tr>
-                    <tr>
-                        <th class="d-flex justify-content-center">
-                            <img src="/static/C_PASTORES/Location.png" class="img-fluid img-responsive " width="80%" height="auto" alt=""> 
-                        </th>
-                    </tr>
-                    <tr>
-                        <th class="">
-                            <img src="/static/C_PASTORES/info.png" class="img-fluid img-responsive "  width="80%" height="auto" alt=""> 
-                        </th>
-                    </tr>
-                    <tr>
-                        <th class="p-2">
-                            <img src="/static/C_PASTORES/Convidado Especial_ Profeta BM Samuel.png" class="img-fluid img-responsive "  width="80%" height="auto" alt=""> 
-                        </th>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </tbody>  
-       
-</table>
-        <h1 class="text-center">Igreja Ministério Divina Esperança</h1>
-        <h1 class="text-center">Bem-vindo!</h1>
-        <p class="text-center">Formulário de Inscrição para a Conferência de Pastores</p>
+        <div class="card mb-3" >
+            <img src="/static/C_PASTORES/Layer 1.png" class="card-img-overlay" width="auto" height="90%" alt="...">
+            <div class="card-body"  style=" margin-left: 17%;">
+            <div class="card-title"><img src="/static/C_PASTORES/IGREJA.png" width="100%" height="auto" alt=""></div>
+              <img src="/static/C_PASTORES/tema.png" width="100%" height="auto" alt="">
+              
+              <div class="d-flex justify-content-center">
+                <img src="/static/C_PASTORES/horas.png" width="50%" height="50%" alt="">
+
+            </div>
+            </div>
+            <div class="card-footer  bg-info" >
+                <div class="d-flex justify-content-start" style=" margin-left: 2%;">
+                <img src="/static/C_PASTORES/Location.png" class="mx-4" width="50%" height="30%" alt="">
+                <div class="d-flex flex-column">
+                <img src="/static/C_PASTORES/Convidado Especial_ Profeta BM Samuel.png" class="mx-4" width="70%" height="45%" alt="">
+                <img src="/static/C_PASTORES/Com o Apóstolo Lourenço Fole.png" class="mx-4" width="80%" height="80%" alt="">
+                </div>
+            </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Formulário de Inscrição para a Conferência de Pastores</h5>
+                 
+
+        <p class="text-center"></p>
         <p class="text-center"><em>"Entregue o seu caminho ao Senhor; confie nele, e ele agirá." - Salmo 37:5</em></p>
 
         <form action="/submit_inscricao" method="POST">
@@ -273,6 +257,9 @@
 
             <button type="submit" class="btn btn-primary">Enviar Inscrição</button>
         </form>
+    </div>
+    <img src="..." class="card-img-bottom" alt="...">
+  </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
