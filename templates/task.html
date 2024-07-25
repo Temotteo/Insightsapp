@@ -11,14 +11,49 @@
 
 {% block body %}
  
-<h1>{{client[0]}}</h1>
+<h1>{{client[0]}}-{{client[4]}}</h1>
 <hr>
   <h3></h3>
-  {% from "includes/_formhelpers.html" import render_field %}
 
-  <form id="task-form" method="POST" action="">
     <div class="container mt-5">
+      <form  method="POST" action="/depedencias/{{client[4]}}">
+      <input type="hidden" name="cont" id="cont" value="1">
+      <input type="hidden" name="id_cli" id="id_cli" value ="{{client[4]}}">  
+      <div id="contactos">
+      <div class="form-row">
+        <div class="form-group col-md-3">
+        <label for="cont${cont}">Contacto 1:</label>
+        <input type="tel" class="form-control" name="cont1" id="cont1" required>
+      </div>
+      <div class="form-group col-md-3">
+        <label for="nome1">Nome:</label>
+        <input type="text" class="form-control" name="nome1" id="nome1" required>
+      </div>
+      <div class="form-group col-md-2">
+        <label for="cargo1">Cargo:</label>
+        <input type="text" class="form-control" name="cargo1" id="cargo1"  required>
+      </div>
+      
+      <div class="form-group col-md-2">
+        <label for="email">email:</label>
+        <input type="email" class="form-control" name="email1" id="email1" required>
+      </div>
+      <div class="form-group col-md-2">
+        <label for="whatsapp1">Whatsapp(Y/N):</label>
+        <select class="form-control" name="whatsapp1" id="whatsapp1">
+          <option value="sim">Sim</option>
+          <option value="nao">Nao</option>
+        </select>
+      </div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-info" onclick="adicionarCont()"><i class="fas fa-plus"></i></button>
+      <input type="submit" class="btn btn-info" >
+    </form>
+    {% from "includes/_formhelpers.html" import render_field %}
+
       <div class="left-container">
+        <form id="task-form" method="POST" action="">
         <div class="form-group">
         {{ render_field(form.text, class_="form-control") }}
         </div>
@@ -79,6 +114,44 @@
   Initialize the Timepicker-->
 
   <script>
+   var cont = 1;
+   function adicionarCont(){
+    cont = cont +1
+    let divCont = document.getElementById('contactos');
+    document.getElementById('cont').value = cont;
+    let new_cont = `
+     <div class="form-row">
+        <div class="form-group col-md-3">
+        <label for="cont${cont}">Contacto ${cont}:</label>
+        <input type="tel" class="form-control" name="cont${cont}" id="cont${cont}" required>
+      </div>
+      <div class="form-group col-md-3">
+        <label for="nome${cont}">Nome:</label>
+        <input type="text" class="form-control" name="nome${cont}" id="nome${cont}" required>
+      </div>
+      <div class="form-group col-md-2">
+        <label for="cargo${cont}">Cargo:</label>
+        <input type="text" class="form-control" name="cargo${cont}" id="cargo${cont}" required>
+      </div>
+      
+      <div class="form-group col-md-2">
+        <label for="email${cont}">email:</label>
+        <input type="email" class="form-control" name="email${cont}" id="email${cont}" required>
+      </div>
+      <div class="form-group col-md-2">
+        <label for="whatsapp${cont}">whatsapp:</label>
+          <select class="form-control" name="whatsapp${cont}" id="whatsapp${cont}">
+          <option value="sim">Sim</option>
+          <option value="nao">Nao</option>
+        </select>      </div>
+        </div>
+      
+    `
+    divCont.innerHTML += new_cont 
+
+   }
+
+
     $(document).ready(function() {
       $('.timepicker').timepicker({
         timeFormat: 'HH:mm',

@@ -85,7 +85,6 @@ def handle_exception(e):
     #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
     return render_template('erro.html'), 500    
 
-
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
 # Dummy survey data for demonstration
@@ -2795,22 +2794,30 @@ def cadastro ():
     return render_template('crm.html', form = form)
 
 
-@app.route('/add_call_Now/<string:id>', methods=['GET', 'POST'])
+@app.route('/depedencias/<int:id>', methods=['GET', 'POST'])
 @is_logged_in
-def add_call_Now(id):
+def depedencias(id):
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
-    form = TaskForm(request.form)
-    current_dateTime = datetime.now()
-    cursor.execute('SELECT * FROM cliente_vendas WHERE id_vendas = %s', (id,))
-    client = cursor.fetchone()
-    if request.method == 'POST':
-            cursor.execute("INSERT INTO Action_rel(usuario, descricao, action, data, cliente, cliente_id) VALUES (%s,%s,%s,%s,%s,%s)",
-                       (session['username'], form.text.data,  form.actionNow.data, current_dateTime, client[0], client[4]))
+    cont = request.form['cont']
+    print(cont)
+    print(id)
+ 
+    for i in range(int(cont)):
+        i = i+1
+        contacto = request.form[f'cont{i}']
+        nome = request.form[f'nome{i}']
+        cargo = request.form[f'cargo{i}']
+        whatsapp = request.form[f'whatsapp{i}']
+        email = request.form[f'email{i}']
+        
+        current_dateTime = datetime.now()
+        cursor.execute("INSERT INTO depedencias(ong, nome, cargo, whatsapp, email,contacto, data) VALUES (%s,%s,%s,%s,%s,%s,%s)",
+                           (id,nome, cargo,  whatsapp, email,contacto, current_dateTime))
     
     conn.commit()
     conn.close()  
-    return redirect(url_for('clientecad'))
+    return redirect(url_for('add_call', id = id))
 
 
 
