@@ -106,10 +106,19 @@
             </div>
 
             <h4>2. Detalhes da Conferência</h4>
-            <div class="form-group">
-                <label for="acomodacao">Você precisará de acomodação? (Sim/Não):</label>
-                <input type="text" class="form-control" id="acomodacao" name="acomodacao" required>
-            </div>
+             <div class="container">
+        <div class="form-group">
+            <label for="acomodacao">Você precisará de acomodação?</label>
+            <select class="form-control" id="acomodacao" name="acomodacao" required onchange="checkSelection()">
+                <option value="">Selecione uma opção</option>
+                <option value="Sim">Sim</option>
+                <option value="Nao">Não</option>
+            </select>
+        </div>
+        <div id="contactInfo" style="display: none;">
+            <p>Para assistência para a escolha de acomodação, entre em contato: <strong class="text-info">878030030</strong></p>
+        </div>
+        
             <div class="form-group">
                 <label for="restricoesAlimentares">Restrições Alimentares (se houver):</label>
                 <input type="text" class="form-control" id="restricoesAlimentares" name="restricoesAlimentares">
@@ -185,49 +194,7 @@
                 <textarea class="form-control" id="solicitacoesEspeciais" name="solicitacoesEspeciais"></textarea>
             </div>
 
-            <h4>6. Informações de Pagamento</h4>
-            <div class="form-group">
-                <label for="taxaInscricao">Taxa de Inscrição: $</label>
-                <input type="text" class="form-control" id="taxaInscricao" name="taxaInscricao" required>
-            </div>
-            <div class="form-group">
-                <label>Método de Pagamento:</label>
-                <div class="form-check">
-                    <input type="radio" class="form-check-input" name="metodoPagamento" id="cartaoCredito" value="Cartão de Crédito">
-                    <label class="form-check-label" for="cartaoCredito">Cartão de Crédito</label>
-                </div>
-                <div class="form-check">
-                    <input type="radio" class="form-check-input" name="metodoPagamento" id="cartaoDebito" value="Cartão de Débito">
-                    <label class="form-check-label" for="cartaoDebito">Cartão de Débito</label>
-                </div>
-                <div class="form-check">
-                    <input type="radio" class="form-check-input" name="metodoPagamento" id="transferenciaBancaria" value="Transferência Bancária">
-                    <label class="form-check-label" for="transferenciaBancaria">Transferência Bancária</label>
-                </div>
-                <div class="form-check">
-                    <input type="radio" class="form-check-input" name="metodoPagamento" id="cheque" value="Cheque">
-                    <label class="form-check-label" for="cheque">Cheque</label>
-                </div>
-            </div>
-            <div id="detalhesCartao" style="display:none;">
-                <div class="form-group">
-                    <label for="numeroCartao">Número do Cartão:</label>
-                    <input type="text" class="form-control" id="numeroCartao" name="numeroCartao">
-                </div>
-                <div class="form-group">
-                    <label for="validadeCartao">Data de Validade:</label>
-                    <input type="text" class="form-control" id="validadeCartao" name="validadeCartao">
-                </div>
-                <div class="form-group">
-                    <label for="cvvCartao">CVV:</label>
-                    <input type="text" class="form-control" id="cvvCartao" name="cvvCartao">
-                </div>
-                <div class="form-group">
-                    <label for="nomeCartao">Nome no Cartão:</label>
-                    <input type="text" class="form-control" id="nomeCartao" name="nomeCartao">
-                </div>
-            </div>
-
+          
             <h4>Comentários Adicionais</h4>
             <div class="form-group">
                 <textarea class="form-control" id="comentariosAdicionais" name="comentariosAdicionais"></textarea>
@@ -253,6 +220,16 @@
                 }
             });
         });
+
+        function checkSelection() {
+            var selectBox = document.getElementById('acomodacao');
+            var contactInfo = document.getElementById('contactInfo');
+            if (selectBox.value === 'Sim') {
+                contactInfo.style.display = 'block';
+            } else {
+                contactInfo.style.display = 'none';
+            }
+        }
     </script>
 </body>
 </html>

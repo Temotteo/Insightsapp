@@ -29,7 +29,15 @@
                 console.error('Erro ao enviar dados:', error);
             });
     }
-    
+    function checkSelection() {
+            var selectBox = document.getElementById('acomodacao');
+            var contactInfo = document.getElementById('contactInfo');
+            if (selectBox.value === 'Yes') {
+                contactInfo.style.display = 'block';
+            } else {
+                contactInfo.style.display = 'none';
+            }
+        }
     </script>
 </head>
 <body>
@@ -99,8 +107,16 @@
 
             <h4>2. Conference Details</h4>
             <div class="form-group">
-                <label for="acomodacao">Do you need accommodation? (Yes/No):</label>
-                <input type="text" class="form-control" id="acomodacao" name="acomodacao" required>
+                <label for="acomodacao">Do you need accommodation?</label>
+                <select  class="form-control" id="acomodacao" name="acomodacao" onchange="checkSelection()" required>
+                <option value="">Select an option</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+        </div>
+        <div id="contactInfo" style="display: none;">
+            <p>For assistance with choosing accommodation, please contact: <strong class="text-info">878030030</strong></p>
+        </div>
             </div>
             <div class="form-group">
                 <label for="restricoesAlimentares">Dietary Restrictions (if any):</label>
