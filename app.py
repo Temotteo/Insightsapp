@@ -1418,6 +1418,52 @@ def formacao_remota():
 
     return render_template('campanhas.html', formacao = dados)
 
+@app.route('/create_formacao', methods=['GET', 'POST'])
+def create_formacao():
+    if request.method == 'POST':
+        audio_lingua = request.form['idiomas']
+        # Alterando o nome do arquivo adicionando audio_lingua no meio
+
+        tema = request.form['tema']
+        audio_introducao = request.files['audioIntroducao']
+        audio_aula = request.files['audioAula']
+        audio_questao = request.files['audioQuestao']
+        audio_conclusao = request.files['audioConclusao']
+
+        audio_intro_filename = secure_filename(audio_introducao.filename)
+        audio_aula_filename = secure_filename(audio_aula.filename)
+        audio_questao_filename = secure_filename(audio_questao.filename)
+        audio_conclusao_filename = secure_filename(audio_conclusao.filename)
+
+        intro, ext = os.path.splitext(audio_intro_filename)
+        aula, ext = os.path.splitext(audio_aula_filename)
+        questao, ext = os.path.splitext(audio_questao_filename)
+        conclusao, ext = os.path.splitext(audio_conclusao_filename)
+
+        new_intro_filename = f"{intro}_{audio_lingua}{ext}"
+        new_aula_filename = f"{aula}_{audio_lingua}{ext}"
+        new_questao_filename = f"{questao}_{audio_lingua}{ext}"
+        new_conclusao_filename = f"{conclusao}_{audio_lingua}{ext}"
+        
+        audio_introducao.save(os.path.join(app.config['UPLOAD_FOLDER'], new_intro_filename))
+        audio_aula.save(os.path.join(app.config['UPLOAD_FOLDER'], new_aula_filename))
+        audio_questao.save(os.path.join(app.config['UPLOAD_FOLDER'], new_questao_filename))
+        audio_conclusao.save(os.path.join(app.config['UPLOAD_FOLDER'], new_conclusao_filename))
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO formacoes (tema, audio_introducao, audio_aula, audio_questao, audio_conclusao)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (tema, audio_intro_filename, audio_aula_filename, audio_questao_filename, audio_conclusao_filename))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return redirect(url_for('create_formacao'))
+
+    return render_template('formacao.html')
+
 
 @app.route('/ivr_formacao/<string:campaign>', methods=['POST'])
 def ivr_formacao(campaign):
@@ -2408,6 +2454,13 @@ def deletar_audio(id):
 @app.route('/carragar_questoes/<string:id>', methods=['GET'])
 @is_logged_in
 def carragar_questoes(id):
+   
+    data = questoes(id)
+
+    return jsonify(data)
+
+
+def questoes(id):
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
   
@@ -2421,8 +2474,7 @@ def carragar_questoes(id):
     data = [{'id': questao[0], 'questao': questao[1]} for questao in questoes]
 
     print(data)
-    return jsonify(data)
-
+    return data
 
 
 @app.route('/audios_ativos', methods=['GET'])
@@ -2439,9 +2491,6 @@ def audios_ativos():
         
     dados=cursor.fetchall()
     
-    
-        
-   
     print(' ')
 
     cursor.execute("SELECT * FROM display_ref_linguas")
