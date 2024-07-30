@@ -50,11 +50,10 @@
         </div>
 
         <div class="card">
-            <img src="/static/C_PASTORES/conferencia661.png" class="card-img-top"  alt="...">
+            <img src="/static/C_PASTORES/Imagem WhatsApp 2024-07-30 às 15.50.02_53a6e237.jpg" class="card-img-top"  alt="...">
             
             <div class="card-body">
-              <h5 class="card-title">Formulário de Inscrição para a Conferência de Pastores</h5>
-        <p class="text-center"><em>"Entregue o seu caminho ao Senhor; confie nele, e ele agirá." - Salmo 37:5</em></p>
+              <h5 class="card-title ">Formulário de Inscrição para a Conferência de Pastores</h5>
 
         <form action="/submit_inscricao" method="POST">
             <h4>1. Informações Pessoais</h4>
@@ -74,29 +73,7 @@
                 <label for="cargo">Cargo/Função:</label>
                 <input type="text" class="form-control" id="cargo" name="cargo" required>
             </div>
-            <div class="row">
-                <div class="from-row col-md-4">
-                    <label for="endereco">Endereço:</label>
-                    <input type="text" class="form-control" id="endereco" name="endereco" required>
-                </div>
-                <div class="from-row col-md-3">
-                    <label for="cidade">Cidade:</label>
-                    <input type="text" class="form-control" id="cidade" name="cidade" required>
-                </div>
-                <div class="from-row col-md-3">
-                    <label for="estado">Estado/Província:</label>
-                    <input type="text" class="form-control" id="estado" name="estado" required>
-                </div>
-                <div class="from-row col-md-2">
-                    <label for="codigoPostal">Código Postal:</label>
-                    <input type="text" class="form-control" id="codigoPostal" name="codigoPostal" required>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="pais">País:</label>
-                <input type="text" class="form-control" id="pais" name="pais" required>
-            </div>
-            <div class="form-group">
+                       <div class="form-group">
                 <label for="telefone">Número de Telefone:</label>
                 <input type="text" class="form-control" id="telefone" name="telefone" required>
             </div>
@@ -105,21 +82,16 @@
                 <input type="email" class="form-control" id="email" name="email" required>
             </div>
 
-            <h4>2. Detalhes da Conferência</h4>
-             <div class="container">
+           
         <div class="form-group">
-            <label for="acomodacao">Você precisará de acomodação?</label>
-            <select class="form-control" id="acomodacao" name="acomodacao" required onchange="checkSelection()">
-                <option value="">Selecione uma opção</option>
-                <option value="Sim">Sim</option>
-                <option value="Nao">Não</option>
-            </select>
+            <label for="acomodacao">Você precisará de assistência para acomodação? (<a class="text-primary" onclick="checkSelection('Sim')">Sim</a>/<a class="text-primary" onclick="checkSelection('Nao')">Não</a>)</label>
+           
         </div>
         <div id="contactInfo" style="display: none;">
             <p>Para assistência para a escolha de acomodação, entre em contato: <strong class="text-info">878030030</strong></p>
         </div>
         
-            <div class="form-group">
+          <!--  <div class="form-group">
                 <label for="restricoesAlimentares">Restrições Alimentares (se houver):</label>
                 <input type="text" class="form-control" id="restricoesAlimentares" name="restricoesAlimentares">
             </div>
@@ -198,12 +170,16 @@
             <h4>Comentários Adicionais</h4>
             <div class="form-group">
                 <textarea class="form-control" id="comentariosAdicionais" name="comentariosAdicionais"></textarea>
-            </div>
+            </div>-->
 
             <button type="submit" class="btn btn-primary">Enviar Inscrição</button>
         </form>
+
+        <div class="d-flex flex-row-reverse">
+            <p ><em>"Entregue o seu caminho ao Senhor; confie nele, e ele agirá." - Salmo 37:5</em></p>
+
+        </div>
     </div>
-    <img src="..." class="card-img-bottom" alt="...">
   </div>
     </div>
 
@@ -221,10 +197,9 @@
             });
         });
 
-        function checkSelection() {
-            var selectBox = document.getElementById('acomodacao');
+        function checkSelection(select) {
             var contactInfo = document.getElementById('contactInfo');
-            if (selectBox.value === 'Sim') {
+            if (select === 'Sim') {
                 contactInfo.style.display = 'block';
             } else {
                 contactInfo.style.display = 'none';
