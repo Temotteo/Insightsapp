@@ -1,0 +1,25 @@
+.file-upload {
+    position: relative;
+    display: inline-block;
+    width: 300px;
+    text-align: center;
+}
+
+.custom-file-upload {
+    display: inline-block;
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.custom-file-upload i {
+    margin-right: 8px;
+}
+
+.file-upload input[type="file"] {
+    display: none;
+}

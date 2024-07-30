@@ -163,6 +163,20 @@
 
 
    <div class="container-fluid">
+      <ul class="nav nav-tabs">
+          <li class="nav-item">
+              <a class="nav-link active" data-toggle="tab" href="#timeline">Timeline</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#associados">Associados</a>
+          </li>
+          
+      </ul>
+
+      <div class="tab-content mt-3">
+        <!-- Aba Ver Org -->
+   <div class="tab-pane fade show active" id="timeline">
+        
     <h4>Timeline</h4>
       <hr>
       <table class="table table-striped">
@@ -187,6 +201,36 @@
             </tr>
         {% endfor %}
       </table>
+    </div>
+    <div class="tab-pane fade" id="associados">
+      <h2>Contactos</h2>
+      <hr>
+      <table class="table table-striped">
+        <tr>
+          
+          <th>Nome</th>
+          <th>Cargo</th>
+          <th>Whatsapp</th>
+          <th>Email</th>
+          <th>Contacto</th>
+          <th></th>
+        </tr>
+        {% for line in depedencias %}
+          <tr>
+            
+            <td>{{ line[2] }}</td>
+            <td>{{ line[3] }}</td>
+            <td>{{ line[4] }}</td>
+            <td>{{ line[5] }}</td>
+            <td>{{ line[6] }}</td>
+            
+            </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+
+
     </div>
   
 {% endblock %}

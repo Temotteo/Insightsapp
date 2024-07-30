@@ -2,7 +2,7 @@
 
 {% block body %}
 
-  {% if type == 'question' %}
+  {% if type == 'questao' %}
   <h1>Assign Quastion</h1>
   {% from "includes/_formhelpers.html" import render_field %}
   <form method="POST" action="/assign_question/{{id}}/question">
@@ -13,19 +13,15 @@
     <p><input class="btn btn-success" type="submit" value="Gravar">
   </form>
   {% else %}
-  <h1 class="mb-4">Upload Audio</h1>
+  <h1 class="mb-4"><i class="fas fa-cloud-upload-alt"></i> Upload Audio</h1>
   <form method="POST" action="/assign_question/{{id}}/audio" enctype="multipart/form-data">
-      {{ form.hidden_tag() }}
-      <div class="form-group">
-        {{ form.organization.label(class="form-control-label") }}
-        {{ form.organization(class="form-control") }}
-    </div>
-      <div class="form-group">
-          {{ form.audio_file.label(class="form-control-label") }}
-          {{ form.audio_file(class="form-control-file") }}
+      
+      <div class="input-group col-md-4">
+          <label for="audio" class="form-input-text"></label>
+          <input type="file" name="audio" id="audio" class="form-control">
       </div>
-      <div class="form-group">
-          {{ form.submit(class="btn btn-primary") }}
+      <div class="form-group mt-3">
+        <button type="submit" class="btn btn-success mx-2"><i class="fas fa-paper-plane mx-2"></i>Send file</button>
       </div>
   </form>
   {% endif %}

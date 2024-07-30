@@ -680,6 +680,10 @@ class AudioForm(FlaskForm):
 
 @app.before_request
 def before_request():
+    choices = request_languge()
+    AudioForm.organization.kwargs['choices'] = choices
+
+def request_languge():
     org_id = session.get('last_org')
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cur = conn.cursor()
@@ -688,8 +692,7 @@ def before_request():
     cur.close()
     conn.close()
     choices = [(org[2], org[1]) for org in organizations]
-    AudioForm.organization.kwargs['choices'] = choices
-
+    return choices
 
 class ProformaInvoiceForm(FlaskForm):
     invoice_number = StringField('Invoice Number')
@@ -1399,7 +1402,7 @@ def surveys():
     return render_template('campanhas.html', surveys = dados)
    
 
-@app.route('/formacao_remota', methods=['GET'])
+@app.route('/formacao_remota', methods=['GET','POST'])
 @is_logged_in
 def formacao_remota():
     audio = buscar_Audio()
@@ -1409,60 +1412,18 @@ def formacao_remota():
 
     cursor = conn.cursor()
 
-    cursor.execute(f"SELECT * FROM campanhas where orgid='{org_id}'  and tipo ='formacao';")
+    cursor.execute('INSERT INTO public.campanhas (orgid, campanha_ref) VALUES (%s, %s) RETURNING id_campanha',(session['last_org']))
+    id = cursor.fetchone()[0]
+    conn.commit()
 
-    dados=cursor.fetchall()
+    flash('Campanha criada: '+id, 'success')
 
+
+           
     # Close connection
     conn.close()
 
-    return render_template('campanhas.html', formacao = dados)
-
-@app.route('/create_formacao', methods=['GET', 'POST'])
-def create_formacao():
-    if request.method == 'POST':
-        audio_lingua = request.form['idiomas']
-        # Alterando o nome do arquivo adicionando audio_lingua no meio
-
-        tema = request.form['tema']
-        audio_introducao = request.files['audioIntroducao']
-        audio_aula = request.files['audioAula']
-        audio_questao = request.files['audioQuestao']
-        audio_conclusao = request.files['audioConclusao']
-
-        audio_intro_filename = secure_filename(audio_introducao.filename)
-        audio_aula_filename = secure_filename(audio_aula.filename)
-        audio_questao_filename = secure_filename(audio_questao.filename)
-        audio_conclusao_filename = secure_filename(audio_conclusao.filename)
-
-        intro, ext = os.path.splitext(audio_intro_filename)
-        aula, ext = os.path.splitext(audio_aula_filename)
-        questao, ext = os.path.splitext(audio_questao_filename)
-        conclusao, ext = os.path.splitext(audio_conclusao_filename)
-
-        new_intro_filename = f"{intro}_{audio_lingua}{ext}"
-        new_aula_filename = f"{aula}_{audio_lingua}{ext}"
-        new_questao_filename = f"{questao}_{audio_lingua}{ext}"
-        new_conclusao_filename = f"{conclusao}_{audio_lingua}{ext}"
-        
-        audio_introducao.save(os.path.join(app.config['UPLOAD_FOLDER'], new_intro_filename))
-        audio_aula.save(os.path.join(app.config['UPLOAD_FOLDER'], new_aula_filename))
-        audio_questao.save(os.path.join(app.config['UPLOAD_FOLDER'], new_questao_filename))
-        audio_conclusao.save(os.path.join(app.config['UPLOAD_FOLDER'], new_conclusao_filename))
-
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO formacoes (tema, audio_introducao, audio_aula, audio_questao, audio_conclusao)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (tema, audio_intro_filename, audio_aula_filename, audio_questao_filename, audio_conclusao_filename))
-        conn.commit()
-        cur.close()
-        conn.close()
-
-        return redirect(url_for('create_formacao'))
-
-    return render_template('formacao.html')
+    return render_template('teste2.html', formacao = dados)
 
 
 @app.route('/ivr_formacao/<string:campaign>', methods=['POST'])
@@ -2685,7 +2646,7 @@ def perguntas(id):
     partes = id.split("_")
     resultado = "_".join(partes[:2])
 
-    return render_template('perguntas.html', dados = dados, pergunta = pergunta, pergunta_ref = id, campang = resultado)
+    return render_template('perguntas.html', dados = dados, pergunta = pergunta, pergunta_ref = id, campang = id)
 
 
 @app.route('/survey_dashboard')
@@ -2915,12 +2876,15 @@ def add_call(id):
         return redirect(url_for('clientecad'))
 
     if request.method == 'GET':
-        cursor.execute('SELECT * FROM calendar WHERE id_cliente = %s ORDER BY data DESC', (id,))
+        cursor.execute('SELECT * FROM calendar WHERE id_cliente = %s ORDER BY data DESC;', (id,))
         calendar_data = cursor.fetchall()
+
+        cursor.execute('SELECT * FROM depedencias WHERE ong = %s ORDER BY data DESC;', (id,))
+        depedencias = cursor.fetchall()
         print(calendar_data)
         conn.close()
 
-    return render_template('/task.html', client=client, calendar_data=calendar_data, form=form)
+    return render_template('/task.html', client=client, calendar_data=calendar_data, depedencias=depedencias, form=form)
 
 
 @app.route('/tarefas_diarias_data/<string:data>', methods=['GET', 'POST'])

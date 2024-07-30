@@ -3,114 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App de Campanhas</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Upload e Pré-visualização de Áudio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+<style>
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+}
+
+h1 {
+    color: #333;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+input[type="file"] {
+    margin-bottom: 10px;
+}
+
+input[type="submit"] {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+#audioPlayer {
+    display: none;
+    width: 100%;
+    margin-top: 20px;
+    border-radius: 0; /* Remove rounded border */
+    overflow: hidden; /* Ensure it looks rectangular */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: add some shadow for better visibility */
+}
+
+#audioPlayer::-webkit-media-controls-panel {
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 0; /* Ensure panel has no rounded corners */
+}
+
+#audioPlayer::-webkit-media-controls-play-button,
+#audioPlayer::-webkit-media-controls-current-time-display,
+#audioPlayer::-webkit-media-controls-time-remaining-display,
+#audioPlayer::-webkit-media-controls-timeline,
+#audioPlayer::-webkit-media-controls-volume-slider {
+    color: white;
+    border-radius: 0; /* Ensure controls have no rounded corners */
+}
+</style>
+
 </head>
 <body>
-    <div class="container mt-5">
-        <ul class="nav nav-tabs">
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Campanhas</a>
-                <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#criarCampanha">Criar</a>
-                    <a class="dropdown-item" href="#verCampanhas">Ver</a>
-                </div>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Mensagem de voz</a>
-                <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#criarMensagem">Criar</a>
-                    <a class="dropdown-item" href="#verMensagens">Ativas</a>
-                </div>
-            </li>
-        </ul>
-
-        <!-- Seção de criação de campanha -->
-        <div id="criarCampanha" class="mt-4">
-            <h2>Criar Campanha</h2>
-            <form action="{{ url_for('criar_campanha') }}" method="post">
-                <div class="form-group">
-                    <label for="nome">Nome da Campanha</label>
-                    <input type="text" class="form-control" id="nome" name="nome" required>
-                </div>
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <select class="form-control" id="status" name="status" required>
-                        <option value="Ativa">Ativa</option>
-                        <option value="Inativa">Inativa</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Criar</button>
-            </form>
-        </div>
-
-        <!-- Seção de visualização de campanhas -->
-        <div id="verCampanhas" class="mt-4">
-            <h2>Ver Campanhas</h2>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nome</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for campanha in campanhas %}
-                    <tr>
-                        <td>{{ campanha.id }}</td>
-                        <td>{{ campanha.nome }}</td>
-                        <td>
-                            {% if campanha.status == 'Ativa' %}
-                            <span class="badge badge-success">Ativa</span>
-                            {% else %}
-                            <span class="badge badge-secondary">Inativa</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Seção de criação de mensagem de voz -->
-        <div id="criarMensagem" class="mt-4">
-            <h2>Criar Mensagem de Voz</h2>
-            <form action="{{ url_for('criar_mensagem') }}" method="post">
-                <div class="form-group">
-                    <label for="arquivo">Arquivo de Áudio</label>
-                    <input type="text" class="form-control" id="arquivo" name="arquivo" required>
-                </div>
-                <div class="form-group">
-                    <label for="campanha_id">Campanha</label>
-                    <select class="form-control" id="campanha_id" name="campanha_id" required>
-                        {% for campanha in campanhas %}
-                        <option value="{{ campanha.id }}">{{ campanha.nome }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Criar</button>
-            </form>
-        </div>
-
-        <!-- Seção de visualização de mensagens de voz ativas -->
-        <div id="verMensagens" class="mt-4">
-            <h2>Mensagens de Voz Ativas</h2>
-            <ul class="list-group">
-                {% for mensagem in mensagens %}
-                <li class="list-group-item">
-                    <audio controls>
-                        <source src="{{ url_for('static', filename='audio/' ~ mensagem.arquivo) }}" type="audio/mpeg">
-                        Seu navegador não suporta o elemento de áudio.
-                    </audio>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
+    <h1>Upload e Pré-visualização de Áudio</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="audioInput" name="audio" accept="audio/*">
+        <input type="submit" value="Upload">
+    </form>
+    <div id="preview">
+        <audio id="audioPlayer" controls></audio>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('audioInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const audioPlayer = document.getElementById('audioPlayer');
+                audioPlayer.src = URL.createObjectURL(file);
+                audioPlayer.style.display = 'block';
+            }
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Áudio enviado com sucesso!');
+                } else {
+                    alert('Erro ao enviar áudio.');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao enviar áudio.');
+            });
+        });
+    </script>
 </body>
 </html>
