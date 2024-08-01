@@ -5,7 +5,6 @@
 
   {% if type == 'questao' %}
   
-  <div class="d-flex justify-content-center">
  
   <h1>Assign Quastion</h1>
   {% from "includes/_formhelpers.html" import render_field %}
@@ -27,7 +26,7 @@
           <label for="Idioma"><i class="fa fa-language" aria-hidden="true"></i> Idiomas</label>
          <select name="idioma" id="idioma">
           {% for option in options %}
-                      <option value="{{option[1]}}">{{option[1]}}</option>
+                      <option value="{{option}}">{{option}}</option>
                       {% endfor %}
          </select>
         </div>
@@ -54,7 +53,7 @@
   
   </div>
 
-</div>
+
 
 <script>
 

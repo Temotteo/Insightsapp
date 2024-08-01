@@ -162,7 +162,24 @@ def save_survey_response(phone_number, question_index, selected_option, campaign
     # Update count_
     cur.execute(f"UPDATE {ref} SET count_=count_+1 where id='{selected_option}'")
     
+    cur.execute(f"SELECT questao_nr FROM campanha_questao  where campanha = (select id_campanha from campanhas where campanha_ref ='{campaign}') ;")
+    
+    id = cur.fetchone()[0]
+
+
+    if selected_option == 1:
+       # Update count
+       cur.execute(f"UPDATE campanha_opcao SET count= count + 1 where questao = {id} and opcao='Sim';")
+
+    elif selected_option == 2:
+       # Update count
+       cur.execute(f"UPDATE campanha_opcao SET count= count + 1 where questao = {id} and opcao='Nao';")
+
+    elif selected_option == 3:
+       # Update count
+       cur.execute(f"UPDATE campanha_opcao SET count= count + 1 where questao = {id} and opcao='Talvez';")
    
+    conn.close()
 
 
 
