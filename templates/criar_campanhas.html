@@ -58,7 +58,7 @@
       <input type="hidden" id="id" name="campanha" value="{{id}}">
 
       <fieldset>
-        <legend>Detalhes da {% if campanha == 'formacao' %}Aula {% else %}{{campanha}}{% endif %}</legend>
+        <legend>Detalhes da {% if campanha == 'formacao' %}{% set campanha = 'Aula' %}Aula {% else %}{{campanha}}{% endif %}</legend>
         
         <label for="name">Tema:</label>
         <input type="text" id="name" name="name" class="input-custom" placeholder="Insira o tema para a/o {{campanha}}" required>
@@ -72,7 +72,7 @@
       </fieldset>
 
       <fieldset>
-        <legend>Áudios da/o {% if campanha == 'formacao' %}Aula {% else %}{{campanha}}{% endif %}</legend>
+        <legend>Áudios da/o {{campanha}}</legend>
         
         <label for="question_audio" class="mt-4">URL do Áudio de Introdução:</label>
         <div class="input-group mb-3">
@@ -90,7 +90,7 @@
         </div>
 
         {% if campanha != 'inquerito' %}
-          {% if campanha == 'formacao' %}
+          {% if campanha == 'Aula' %}
             <label for="audio">URL do Áudio da Aula:</label>
           {% else %}
             <label for="audio">URL do Áudio da Campanha:</label>
@@ -127,7 +127,7 @@
         </div>
       </fieldset>
 
-      <button type="submit" class="custom-button mt-2">Criar Campanha</button>
+      <button type="submit" class="custom-button mt-2">Criar {{campanha}}</button>
     </form>
   </div>
 

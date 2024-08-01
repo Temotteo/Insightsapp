@@ -3417,27 +3417,6 @@ def assign_camp(id):
     return render_template('assign_camp.html', form=form)
 
 
-    print(id)
-    if id =='inquerito' or id =='formacao':
-        org_id = session['last_org']
-        form = CampForm(request.form)
-        cursor.execute(f"SELECT * FROM campanhas WHERE orgid = '{org_id}' and projecto IS NULL")
-        orgs = cursor.fetchall()
-        print(orgs)
-        if orgs:
-          print(f"SELECT * FROM campanhas WHERE orgid = '{org_id}' ")
-          return render_template('assign_camp.html', orgs=orgs, form=form, id=id)
-        else:
-          return render_template('assign_camp.html',form=form, null=True)
-  
-    #Close connection
-    conn.close()
-
-       
-
-    return render_template('assign_camp.html', form=form)
-
-
 AUDIO_FOLDER = 'static/audios'
 app.config['AUDIO_FOLDER'] = AUDIO_FOLDER
 # Criação do diretório de uploads se não existir
@@ -3445,7 +3424,7 @@ if not os.path.exists(app.config['AUDIO_FOLDER']):
     os.makedirs(app.config['AUDIO_FOLDER'])
 
 # Assign question
-@app.route('/assign_question/<string:id>/<string:type>', methods=['GET', 'POST'])
+@app.route('/assign_question/<int:id>/<string:type>', methods=['GET', 'POST'])
 @is_logged_in
 def assign_question(id,type):
 
@@ -3453,17 +3432,16 @@ def assign_question(id,type):
     
     # Create cursor
     cursor = conn.cursor()   
-    
-    id = int(id)
-
+   
     # Get article by id
-    cursor.execute("SELECT * FROM campanha_question WHERE campanha = %s", [id])
+    cursor.execute(f"SELECT * FROM campanha_question WHERE questao_nr = {id};")
 
     pergunta = cursor.fetchone()
     
     if request.method == 'POST':
         #verifica se o fromulario e da inserssao de audio
         if type == 'audio':
+          idioma = request.form['idioma']
           audio_file = request.files['audio']
           filename = secure_filename(audio_file.filename)          
 
@@ -3472,8 +3450,14 @@ def assign_question(id,type):
           
           cursor = conn.cursor()
            
+          cursor.execute(f"SELECT * FROM campanha_question WHERE questao_nr = {id};")
+
+          numero = cursor.fetchone() 
+
+          questao_nr = len(numero) + 1
+
           # Execute
-          cursor.execute(f"Update campanha_question set audio = '{filename}' where campanha = {id};")
+          cursor.execute(f"insert into questao_audio values({id},{questao_nr},'{filename}','{idioma}') ;")
            
           # Commit to DB
           conn.commit()
@@ -3496,7 +3480,7 @@ def assign_question(id,type):
            #app.logger.info(title)
            
            # Execute
-           cursor.execute("UPDATE campanha_question SET questao=%s WHERE campanha=%s",(pergunta,id))
+           cursor.execute("UPDATE campanha_question SET questao=%s WHERE questao_nr=%s",(pergunta,id))
            
            # Commit to DB
            conn.commit()
@@ -4978,8 +4962,8 @@ def submit_inscricao(idioma):
    
 
     
-if __name__ == '__main__':
-    app.secret_key='secret123'
-    app.run(debug=True)
+#if __name__ == '__main__':
+   # app.secret_key='secret123'
+   # app.run(debug=True)
     #http_server = WSGIServer(('', 5000), app)
     #http_server.serve_forever()
