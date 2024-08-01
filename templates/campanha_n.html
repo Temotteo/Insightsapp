@@ -22,27 +22,37 @@
       <tr>
         <td>pergunta {{loop.index}}</td>
         <td>{{ column[2] }}</td>
+       
+
+
+    {% if type == 'formacao' %} 
+    <td>
+      {% if column[3] !=0 %}
+      
+     <a href="/audios/{{column[0]}}/aula" class="link link-dark">ver audios</a>
+      {% else %}
+        nenhum audio
+      
+       {% endif %}
+     </td>
+        <td><a href="/perguntas/{{column[0]}}/{{type}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
+        <td><a href="/assign_question/{{id}}/{{column[0]}}/questao" class="btn btn-default pull-right">Editar Pergunta</a></td>
+        <td><a href="/add_audio/{{column[0]}}" class="btn btn-default pull-right" >Adicionar Audio</a></td>
+
+        {% else %}
         <td>
           {% if column[3] %}
-          ver audios
-          <!--<audio   controls>
-            <source src="{{ url_for('static', filename='audios/' + column[3]) }}" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio> -->
+          
+         <a href="/audios/{{column[1]}}/questoes" class="link link-dark">{{column[3]}} audios</a>
           {% else %}
           nenhum audio
           
         {% endif %}
     </td>
-
         <td><a href="/perguntas/{{column[1]}}/{{type}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
-        
-        <td><a href="/assign_question/{{column[0]}}/questao" class="btn btn-default pull-right">Editar Pergunta</a></td>
-       
-        {% if type == 'formacao' %} 
-        <td><a href="/add_audio/{{column[0]}}" class="btn btn-default pull-right" >Adicionar Audio</a></td>
-        {% else %}
-        <td><a href="/assign_question/{{column[0]}}/audio" class="btn btn-default pull-right" >Adicionar Audio</a></td>
+        <td><a href="/assign_question/{{column[1]}}/questao" class="btn btn-default pull-right">Editar Pergunta</a></td>
+        <td><a href="/assign_question/{{id}}/{{column[1]}}/audio" class="btn btn-default pull-right" >Adicionar Audio</a></td>
+
         {% endif %}
       </tr>
     {% endfor %}

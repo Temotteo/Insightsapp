@@ -2487,7 +2487,7 @@ def audios_ativos():
 
 @app.route('/campanha_n/<int:id>/<type>',methods=['GET'])
 @is_logged_in
-def campanha_n(id, type=type):
+def campanha_n(id, type):
         print(id)
         # Connect to the PostgreSQL database
         connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
@@ -2500,7 +2500,7 @@ def campanha_n(id, type=type):
         else:
             cursor.execute(f"SELECT * FROM aula_questao WHERE aula = {id};")
             result = cursor.fetchall()
-        
+            
         return render_template('campanha_n.html', columns_list = result, id=id, type=type)
 
 
@@ -2510,10 +2510,10 @@ def add_question(id, type):
       cursor = conn.cursor()
       id = int(id)
       if type == 'formacao':
-         cursor.execute(f"insert into aula_questao(aula,questao) values({id},'Inicialise a informacao da pergunta') ")
+         cursor.execute(f"insert into aula_questao(aula,questao) values({id},'Inicialise a informacao da pergunta') ;")
          conn.commit()
       else:
-          cursor.execute(f"insert into campanha_question(campanha,questao) values({id},'Inicialise a informacao da pergunta') ")
+          cursor.execute(f"insert into campanha_question(campanha,questao, audios) values({id},'Inicialise a informacao da pergunta', 0) ;")
           conn.commit()
       conn.close()
       return redirect(url_for('campanha_n', id= id, type=type))
@@ -2535,9 +2535,13 @@ def add_audio(id):
            cursor.execute(f"SELECT * FROM questao_audio where questao_id = {id}")
      
            dados=cursor.fetchall()
-     
-           numero = len(dados)
-           questao_nr = numero + 1
+           
+           if dados:
+              numero = len(dados)
+              questao_nr = numero + 1
+
+           else:
+               questao_nr = 1    
            
            cursor.execute(f"insert into questao_audio(questao_id, questao_nr, audio, idioma) values({id}, {questao_nr},'{audio_filename}','{audio_lingua}') ")
            conn.commit()
@@ -3424,9 +3428,9 @@ if not os.path.exists(app.config['AUDIO_FOLDER']):
     os.makedirs(app.config['AUDIO_FOLDER'])
 
 # Assign question
-@app.route('/assign_question/<int:id>/<string:type>', methods=['GET', 'POST'])
+@app.route('/assign_question/<int:camp>/<int:id>/<string:type>', methods=['GET', 'POST'])
 @is_logged_in
-def assign_question(id,type):
+def assign_question(camp,id,type):
 
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     
@@ -3450,14 +3454,18 @@ def assign_question(id,type):
           
           cursor = conn.cursor()
            
-          cursor.execute(f"SELECT * FROM campanha_question WHERE questao_nr = {id};")
+          cursor.execute(f"SELECT * FROM campanha_audio WHERE questao_id = {id};")
 
           numero = cursor.fetchone() 
 
-          questao_nr = len(numero) + 1
+          if numero:
+              questao_nr = len(numero) + 1
 
+          else:
+              questao_nr = 1    
+          
           # Execute
-          cursor.execute(f"insert into questao_audio values({id},{questao_nr},'{filename}','{idioma}') ;")
+          cursor.execute(f"insert into campanha_audio values({id},{questao_nr},'{filename}','{idioma}') ;")
            
           # Commit to DB
           conn.commit()
@@ -3466,8 +3474,9 @@ def assign_question(id,type):
           conn.close()
 
           flash('Audio inserido com sucesso', 'success')
-   
-          return redirect(url_for('campanha_n', id=id))
+          type ='inquerito'
+          print(type)
+          return redirect(url_for('campanha_n', id=camp, type=type))
 
         else:
          
@@ -3489,8 +3498,8 @@ def assign_question(id,type):
            conn.close()
    
            flash('Pergunta atualizada', 'success')
-   
-           return redirect(url_for('campanha_n', id=id))
+           type ='inquerito'
+           return redirect(url_for('campanha_n', id=camp, type =type))
         
      # Get form
     if type == 'audio':
@@ -3503,7 +3512,7 @@ def assign_question(id,type):
     print(choices)       
     
    
-    return render_template('assign_question.html', form=form, type = type, id=id, options = choices)
+    return render_template('assign_question.html', form=form, type = type,camp= camp, id=id, options = choices)
 
 
 @app.route('/addfunction', methods=['GET', 'POST'])
@@ -4359,7 +4368,7 @@ def uploaded_file(filename):
     return send_from_directory(app.config['AUDIO_FOLDER'], filename)
 
 #Funcao para inserco de Audios
-@app.route('/audios/<int:id>/<type>', methods=['GET', 'POST'])
+@app.route('/audios/<int:id>/<string:type>', methods=['GET', 'POST'])
 @is_logged_in
 def audios(id,type):
     form = AudioForm()
@@ -4396,9 +4405,26 @@ def audios(id,type):
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
     print(id)
-    cursor.execute(f"Select * from aula_intro where aula = {id};")
-    audios = cursor.fetchall()
-    print(audios)
+
+    if type == 'formacao':
+       cursor.execute(f"Select * from aula_intro where aula = {id};")
+       audios = cursor.fetchall()
+       print(audios)
+    elif type == 'inquerito':
+       cursor.execute(f"Select * from campanha_base where campanha = {id};")
+       audios = cursor.fetchall()
+       print(audios)   
+    if type == 'aula':
+       cursor.execute(f"Select * from questao_audio where questao_id = {id};")
+       audios = cursor.fetchall()
+       print(audios)
+
+    else:
+       cursor.execute(f"Select * from campanha_audio where questao_id = {id};")
+       audios = cursor.fetchall()
+       print(audios)   
+
+
     return render_template('audios.html', audios=audios, type=type, id = id)
 
 
@@ -4962,8 +4988,8 @@ def submit_inscricao(idioma):
    
 
     
-#if __name__ == '__main__':
-   # app.secret_key='secret123'
-   # app.run(debug=True)
+if __name__ == '__main__':
+    app.secret_key='secret123'
+    app.run(debug=True)
     #http_server = WSGIServer(('', 5000), app)
     #http_server.serve_forever()
