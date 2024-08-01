@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<h3 class="mx-3 mt-4">Add Modulo</h3>
+  
+
+   <div class="container">
+   
+  <form method="POST" action="/criar_modulo/{{id}}">
+    <div class="form-group">
+        <input type="text" class="form-control" name="modulo" value="Modulo 1" id="">
+      </div>
+      <p><input class="btn btn-success" type="submit" value="Salvar"></p>
+    </form>
+</div>
+{% endblock %}

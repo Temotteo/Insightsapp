@@ -1402,51 +1402,28 @@ def surveys():
     return render_template('campanhas.html', surveys = dados)
    
 
-@app.route('/insert_audio', methods=['GET', 'POST'])
-def create_formacao():
-    if request.method == 'POST':
-        audio_lingua = request.form['idiomas']
-        # Alterando o nome do arquivo adicionando audio_lingua no meio
+@app.route('/formacao_remota', methods=['GET','POST'])
+@is_logged_in
+def formacao_remota():
+    audio = buscar_Audio()
+    print(audio)
+    org_id = session['last_org']
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
-        tema = request.form['tema']
-        audio_introducao = request.files['audioIntroducao']
-        audio_aula = request.files['audioAula']
-        audio_questao = request.files['audioQuestao']
-        audio_conclusao = request.files['audioConclusao']
+    cursor = conn.cursor()
 
-        audio_intro_filename = secure_filename(audio_introducao.filename)
-        audio_aula_filename = secure_filename(audio_aula.filename)
-        audio_questao_filename = secure_filename(audio_questao.filename)
-        audio_conclusao_filename = secure_filename(audio_conclusao.filename)
+    cursor.execute('INSERT INTO public.campanhas (orgid, campanha_ref) VALUES (%s, %s) RETURNING id_campanha',(session['last_org']))
+    id = cursor.fetchone()[0]
+    conn.commit()
 
-        intro, ext = os.path.splitext(audio_intro_filename)
-        aula, ext = os.path.splitext(audio_aula_filename)
-        questao, ext = os.path.splitext(audio_questao_filename)
-        conclusao, ext = os.path.splitext(audio_conclusao_filename)
+    flash('Campanha criada: '+id, 'success')
 
-        new_intro_filename = f"{intro}_{audio_lingua}{ext}"
-        new_aula_filename = f"{aula}_{audio_lingua}{ext}"
-        new_questao_filename = f"{questao}_{audio_lingua}{ext}"
-        new_conclusao_filename = f"{conclusao}_{audio_lingua}{ext}"
-        
-        audio_introducao.save(os.path.join(app.config['UPLOAD_FOLDER'], new_intro_filename))
-        audio_aula.save(os.path.join(app.config['UPLOAD_FOLDER'], new_aula_filename))
-        audio_questao.save(os.path.join(app.config['UPLOAD_FOLDER'], new_questao_filename))
-        audio_conclusao.save(os.path.join(app.config['UPLOAD_FOLDER'], new_conclusao_filename))
 
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO formacoes (tema, audio_introducao, audio_aula, audio_questao, audio_conclusao)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (tema, audio_intro_filename, audio_aula_filename, audio_questao_filename, audio_conclusao_filename))
-        conn.commit()
-        cur.close()
-        conn.close()
+           
+    # Close connection
+    conn.close()
 
-        return redirect(url_for('create_formacao'))
-
-    return render_template('formacao.html')
+    return render_template('teste2.html', formacao = dados)
 
 
 @app.route('/ivr_formacao/<string:campaign>', methods=['POST'])
@@ -2349,16 +2326,18 @@ def del_tiket(id):
 @is_logged_in
 def addoption(id):
     form = OptionForm(request.form)
-    id = int(id)
+    
     if request.method == 'POST':
         conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
         cursor = conn.cursor()
-        opcao = form.opcao.data
+
         # Query
-        #query = sql.SQL("INSERT INTO {} (opcao) VALUES (%s)").format(sql.Identifier(id))
+        query = sql.SQL("INSERT INTO {} (opcao) VALUES (%s)").format(sql.Identifier(id))
 
         # Execute query with parameterized value
-        cursor.execute(f"Insert into campanha_option values({id},'{opcao}');")
+        cursor.execute(query, (form.opcao.data,))
+
+        pergunta = display_ref(cursor,id)
 
         # Commit to DB
         conn.commit()
@@ -2368,21 +2347,21 @@ def addoption(id):
 
         flash('Opcao adicionada com Successo', 'success')
 
-        return redirect(url_for('perguntas', id=id))
+        return redirect(url_for('perguntas', id=id, pergunta=pergunta))
 
     return render_template('addoption.html', form=form)
 
 # Funcao par carragar audios referentes a uma questao do inquerito
-@app.route('/carragar_Audio/<col>/<value>', methods=['GET'])
+@app.route('/carragar_Audio/<string:id>', methods=['GET'])
 @is_logged_in
-def carragar_Audio(col,value):
+def carragar_Audio(id):
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
   
     org_id = session['last_org']
     print(id)
     
-    cursor.execute(f"SELECT * FROM  campanha_base  where {col} = '{value}' ;")
+    cursor.execute(f"SELECT * FROM  display_ref_linguas  where  id = '{id}' ;")
     audios = cursor.fetchall()
     conn.close()
     print(audios)
@@ -2485,239 +2464,62 @@ def audios_ativos():
 
 
 
-@app.route('/campanha_n/<int:id>/<type>',methods=['GET'])
+@app.route('/campanha_n/<string:id>')
 @is_logged_in
-def campanha_n(id, type=type):
-        print(id)
+def campanha_n(id):
+    table_name_to_list = id
+    column_prefix_to_list = 'pergunta'
+
+    try:
+        
         # Connect to the PostgreSQL database
         connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
         cursor = connection.cursor()
-       
-        if type == 'inquerito':
-           cursor.execute(f"SELECT * FROM campanha_question WHERE campanha = {id};")
-           result = cursor.fetchall()
 
-        else:
-            cursor.execute(f"SELECT * FROM aula_questao WHERE aula = {id};")
-            result = cursor.fetchall()
+        # Get a list of columns for the specified table and column name prefix
+        columns_list = list_columns(cursor, table_name_to_list, column_prefix_to_list)
         
-        return render_template('campanha_n.html', columns_list = result, id=id, type=type)
+        couples = []
+
+        print(columns_list)
+        # Campanha
+        # table_name_to_list = display_ref(cursor,table_name_to_list)
+        for item in columns_list:
+            cursor.execute("SELECT  ref, audio_ref FROM display_ref WHERE id = %s", (id + "_" + item,))
+            result = cursor.fetchone()
+            if result is not None:
+                ref_value, audio_value = result
+                print(id + "_" + item)
+                print(ref_value, audio_value)
+                couples.append((item, ref_value, audio_value))
+                print(couples)
+            else:
+                print("Error: display_ref() returned None for", id + "_" + item)
 
 
-@app.route('/add_question/<id>/<type>', methods=['GET', 'POST'])
-def add_question(id, type):
-      conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-      cursor = conn.cursor()
-      id = int(id)
-      if type == 'formacao':
-         cursor.execute(f"insert into aula_questao(aula,questao) values({id},'Inicialise a informacao da pergunta') ")
-         conn.commit()
-      else:
-          cursor.execute(f"insert into campanha_question(campanha,questao) values({id},'Inicialise a informacao da pergunta') ")
-          conn.commit()
-      conn.close()
-      return redirect(url_for('campanha_n', id= id, type=type))
+        cursor.execute("SELECT * FROM display_ref WHERE id LIKE %s", (id + "_%",))
+        display_ref_data = cursor.fetchall()
 
+        for row in display_ref_data:
+            print(row)
+            # Processar os dados conforme necessário
+            ref_id = row[0]  # Supondo que o id está na primeira coluna
+            ref_value = row[1]  # Supondo que o ref está na segunda coluna
+            audio_value = row[2]  # Supondo que o audio está na terceira coluna        
 
+        campanha_ref = display_ref(cursor,table_name_to_list)
+    except Exception as e:
+        print(f"Error: {e}")
 
-@app.route('/add_audio/<id>', methods=['GET', 'POST'])
-def add_audio(id):
-     if request.method == 'POST':   
-           conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-           cursor = conn.cursor()
-           id = int(id)
-           audio = request.files['audio']
-           audio_lingua = request.form['idioma']
-     
-           audio_filename = secure_filename(audio.filename)
-           audio.save(os.path.join(app.config['AUDIO_FOLDER'], audio_filename))
-     
-           cursor.execute(f"SELECT * FROM questao_audio where questao_id = {id}")
-     
-           dados=cursor.fetchall()
-     
-           numero = len(dados)
-           questao_nr = numero + 1
-           
-           cursor.execute(f"insert into questao_audio(questao_id, questao_nr, audio, idioma) values({id}, {questao_nr},'{audio_filename}','{audio_lingua}') ")
-           conn.commit()
-           conn.close()
-           return redirect(url_for('campanha_n', id= id, type=type))
-     
-     choices = request_languge()
-     print(choices)
-     
-     return render_template('add_audio.html', id = id, options = choices)
-
-
-
-@app.route('/criar_campanhas/<type>/<int:id>', methods=['GET','POST'])
-@is_logged_in
-def criar_campanhas(type, id):
-    org_id = session['last_org']
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-    print(type)
-    cursor = conn.cursor()
-
-    if request.method == 'POST':
-      conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-      cursor = conn.cursor()
-      tema = request.form['name']
-      id = request.form['campanha']
-      audio_lingua = request.form['idioma']
-
-
-      introducao = request.files['intro']
-      audio_intro = secure_filename(introducao.filename)
-      
-      conclusao = request.files['conclusao']
-      audio_con = secure_filename(conclusao.filename)
-
-      introducao.save(os.path.join(app.config['AUDIO_FOLDER'], audio_intro))
-      conclusao.save(os.path.join(app.config['AUDIO_FOLDER'], audio_con))
-
-
-      if type !='inquerito':
-         audio = request.files['audio']
-         audio_base = secure_filename(audio.filename)
-         audio.save(os.path.join(app.config['AUDIO_FOLDER'], audio_base))
-  
-
-      if id == '0':
-        print(id)
-        cursor.execute(f"INSERT INTO campanhas (orgid, tipo) VALUES ('{org_id}','{type}') RETURNING id_campanha;")
-        id = int(cursor.fetchone()[0])
-        conn.commit()
-        
-      
-      if type == 'inquerito':
-          cursor.execute(f"Insert into inqueritos values ({id},'{audio_intro}','{audio_con}','{audio_lingua}');" )
-          conn.commit()
-
-      elif type == 'formacao':
-          cursor.execute(f"Insert into Aulas( tema, modulo) values ('{tema}',{id}) Returning id;" )
-          id = cursor.fetchone()[0]
-          conn.commit()
-
-          cursor.execute(f"Insert into aula_intro(introducao, conclusao, idioma, audio_base, tema, modulo) values ({id},'{audio_intro}','{audio_con}','{audio_base}','{audio_lingua}') ;" )
-          conn.commit()
+    finally:
+        # Close the database connection
+        cursor.close()
+        connection.close()
     
-      
-      flash('Dados inseridos com sucesso', 'success')
-      
-
-      return redirect(url_for('campanha_n', id= id, type=type))
-
-    #flash('Campanha criada: '+str(id), 'success')
-
-    choices = request_languge()
     
-    # Close connection
-    conn.close()
-
-    return render_template('criar_campanhas.html', options = choices, id=id, campanha= type)
-
-
-@app.route('/criar_modulo/<int:id>',methods=['GET','POST'])
-@is_logged_in
-def criar_modulo(id):
-     if request.method == 'POST':
-         conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-         org_id = session['last_org']
-         cursor = conn.cursor()
-         modulo = request.form['modulo']
-     
-         if id == 0 :
-            cursor.execute(f"INSERT INTO campanhas (orgid, tipo) VALUES ('{org_id}','formacao') RETURNING id_campanha;")
-            id = int(cursor.fetchone()[0])
-            conn.commit()
-     
-         cursor.execute(f"INSERT INTO modulos (campanha, nome) VALUES ('{id}','{modulo}') RETURNING modulo;")
-         conn.commit()
-         modulo = int(cursor.fetchone()[0])
-     
-         # Close connection
-         conn.close()
-     
-         return redirect(url_for('criar_campanhas', id = modulo, type='formacao'))
-     
-     return render_template('Modulos.html', id= id)
-
-@app.route('/ver_campanha/<type>',methods=['GET'])
-@is_logged_in
-def ver_campanha(type):
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-
-    cursor = conn.cursor()
-
-    cursor.execute(f"SELECT * FROM campanhas where tipo='{type}'")
-
-    dados=cursor.fetchall()
-
-    # Close connection
-    conn.close()
-
-    return render_template('campanhas.html', campanhas = dados, type=type)
-
-@app.route('/ver_formacao/<int:id>',methods=['GET'])
-@is_logged_in
-def ver_formacao(id):
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-
-    cursor = conn.cursor()
-
-    cursor.execute(f"SELECT * FROM modulos where campanha ={id}")
-
-    modulo=cursor.fetchall()
-
-    cursor.execute(f"SELECT * FROM modulos join aulas on modulos.modulo = aulas.modulo where modulos.campanha ={id}")
-
-    dados=cursor.fetchall()
-
-    # Close connection
-    conn.close()
-
-    return render_template('formacao.html',modulos = modulo, formacao = dados, id=id)
-
-  
-@app.route('/ativar_campanha/<int:id>',methods=['GET'])
-@is_logged_in
-def ativar_campanha(id):
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-
-    cursor = conn.cursor()
-
-    cursor.execute(f"update campanhas set status = 'ativo' where id_campanha={id};")
-    conn.commit()
     
-    cursor.execute(f"SELECT * FROM campanhas ;")
-    dados=cursor.fetchall()
 
-    # Close connection
-    conn.close()
-
-    flash('Campanha ativada com sucesso', 'success')
-
-    return render_template('campanhas.html', campanhas = dados, type=type)
-
-
-
-@app.route('/campanha/<int:id>/<type>',methods=['GET'])
-@is_logged_in
-def campanha(id, type):
-        print(id)
-        # Connect to the PostgreSQL database
-        connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-        cursor = connection.cursor()
-       
-        if type == 'formacao':
-            cursor.execute(f"SELECT * FROM aulas WHERE id = {id};")
-            result = cursor.fetchall()
-            return render_template('campanha.html', campanha = result, id=id, tipo = type)
- 
-        
-        return redirect(url_for('campanha_n', id=id, type = type ))
-
+    return render_template('campanha_n.html', columns_list = couples, campanha=table_name_to_list, campanha_ref=campanha_ref,audios=audios)
 
 
 @app.route('/create_camp')
@@ -2827,21 +2629,24 @@ def create_col(id):
 @app.route('/perguntas/<string:id>')
 @is_logged_in
 def perguntas(id):
-    id = int(id)
-    print(id)
+
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
     cursor = conn.cursor()
 
-    cursor.execute(f"SELECT * from campanha_option where questao = {id}")
+    pergunta = display_ref(cursor,id)
+
+    cursor.execute("SELECT * from "+id)
 
     dados=cursor.fetchall()
 
     conn.close()
 
-    
+    string = "campanha_36_pergunta_3"
+    partes = id.split("_")
+    resultado = "_".join(partes[:2])
 
-    return render_template('perguntas.html', dados = dados, pergunta_ref = id)
+    return render_template('perguntas.html', dados = dados, pergunta = pergunta, pergunta_ref = id, campang = id)
 
 
 @app.route('/survey_dashboard')
@@ -3373,7 +3178,6 @@ def serve_audio(filename):
 
 
 # Assign Campaign
-
 @app.route('/assign_camp/<string:id>', methods=['GET', 'POST'])
 @is_logged_in
 def assign_camp(id):
@@ -3382,37 +3186,57 @@ def assign_camp(id):
     
     # Create cursor
     cursor = conn.cursor()
+    
+
 
     # Get article by id
-    cursor.execute("SELECT * FROM campanhas WHERE id_campanha = %s", [id])
+    #result = cursor.execute("SELECT * FROM campanhas WHERE id_campanha = %s", [id])
 
-    campanha = cursor.fetchone()
+    #campanha = cursor.fetchone()
     
     form = CampForm(request.form)
 
     # Populate tikrts form fields
-    form.projecto.data = campanha[2]
     
-
+    
     if request.method == 'POST':
+        
         projecto = request.form['projecto']
+        print(projecto)
+        #current_dateTime = datetime.now()
 
         # Create Cursor
         cursor = conn.cursor()
+        #app.logger.info(title)
         
         # Execute
-        cursor.execute("UPDATE campanhas SET projecto=%s WHERE id_campanha=%s",(projecto,id))
-        # Commit to DB
-        conn.commit()
+        if request.form['campanha']:
+            campanha = request.form['campanha']
+            cursor.execute("SELECT * FROM campanhas WHERE id_campanha = %s", [campanha])
+            form.projecto.data = campanha[2]
+            result = cursor.fetchone()
+            print(campanha)
+            if id == 'inquerito':            
+               cursor.execute("UPDATE campanhas SET projecto=%s, tipo=%s WHERE id_campanha=%s",(projecto, id,campanha,))
+               cursor.execute("INSERT INTO display_ref(id, ref) VALUES (%s,%s)",(result[3],projecto))
+            else:  
+               cursor.execute("UPDATE campanhas SET projecto=%s, tipo=%s WHERE id_campanha=%s",(projecto,id,campanha),)
+               cursor.execute("INSERT INTO display_ref(id, ref) VALUES (%s,%s)",(result[3],projecto))
+            
+            conn.commit()
 
-        #Close connection
-        conn.close()
+        else:
+          cursor.execute("SELECT * FROM campanhas WHERE id_campanha = %s", [id])
+          campanha = cursor.fetchone()
+          cursor.execute("UPDATE campanhas SET projecto=%s WHERE id_campanha=%s",(projecto,id))
+          cursor.execute("INSERT INTO display_ref(id, ref) VALUES (%s,%s)",(campanha[3],projecto))
+          # Commit to DB
+          conn.commit()
 
         flash('Campanha atualizada', 'success')
 
         return redirect(url_for('campanhas'))
 
-    return render_template('assign_camp.html', form=form)
 
 
     print(id)
@@ -3441,7 +3265,6 @@ app.config['AUDIO_FOLDER'] = AUDIO_FOLDER
 # Criação do diretório de uploads se não existir
 if not os.path.exists(app.config['AUDIO_FOLDER']):
     os.makedirs(app.config['AUDIO_FOLDER'])
-
 # Assign question
 @app.route('/assign_question/<string:id>/<string:type>', methods=['GET', 'POST'])
 @is_logged_in
@@ -3450,28 +3273,42 @@ def assign_question(id,type):
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     
     # Create cursor
-    cursor = conn.cursor()   
-    
-    id = int(id)
+    cursor = conn.cursor()
 
     # Get article by id
-    cursor.execute("SELECT * FROM campanha_question WHERE campanha = %s", [id])
+    result = cursor.execute("SELECT * FROM display_ref WHERE id = %s", [id])
 
     pergunta = cursor.fetchone()
+    
+    #conn.close()
+    
+    # Get form
+    if type == 'audio':
+       form = AudioForm()
+    else:   
+       form = PerguntaForm(request.form)
+       form.pergunta.data = pergunta[1]     
     
     if request.method == 'POST':
         #verifica se o fromulario e da inserssao de audio
         if type == 'audio':
-          audio_file = request.files['audio']
-          filename = secure_filename(audio_file.filename)          
+          audio_file = form.audio_file.data
+          audio_lingua = form.organization.data
+          filename = secure_filename(audio_file.filename)
 
-          filepath = os.path.join(app.config['AUDIO_FOLDER'], filename)
+          # Separando o nome do arquivo e a extensão
+          name, ext = os.path.splitext(filename)
+          
+          # Alterando o nome do arquivo adicionando audio_lingua no meio
+          new_filename = f"{name}_{audio_lingua}{ext}"
+
+          filepath = os.path.join(app.config['AUDIO_FOLDER'], new_filename)
           audio_file.save(filepath)
           
           cursor = conn.cursor()
            
           # Execute
-          cursor.execute(f"Update campanha_question set audio = '{filename}' where campanha = {id};")
+          cursor.execute("INSERT INTO display_ref_linguas VALUES (%s,%s)",(id,new_filename,))
            
           # Commit to DB
           conn.commit()
@@ -3480,8 +3317,11 @@ def assign_question(id,type):
           conn.close()
 
           flash('Audio inserido com sucesso', 'success')
+          
+          partes = id.split("_")
+          resultado = "_".join(partes[:2])
    
-          return redirect(url_for('campanha_n', id=id))
+          return redirect(url_for('campanha_n', id=resultado))
 
         else:
          
@@ -3494,7 +3334,7 @@ def assign_question(id,type):
            #app.logger.info(title)
            
            # Execute
-           cursor.execute("UPDATE campanha_question SET questao=%s WHERE campanha=%s",(pergunta,id))
+           cursor.execute("UPDATE display_ref SET ref=%s WHERE id=%s",(pergunta,id))
            
            # Commit to DB
            conn.commit()
@@ -3504,18 +3344,9 @@ def assign_question(id,type):
    
            flash('Pergunta atualizada', 'success')
    
-           return redirect(url_for('campanha_n', id=id))
-        
-     # Get form
-    if type == 'audio':
-       form = AudioForm()
-    else:   
-       form = PerguntaForm(request.form)
-       form.pergunta.data = pergunta[2]
-
-    choices = request_languge()
-    print(choices)       
+           return redirect(url_for('perguntas', id=id))
     
+    choices = request_languge()
    
     return render_template('assign_question.html', form=form, type = type, id=id, options = choices)
 
@@ -4113,20 +3944,8 @@ def adicionar_lingua():
         conn.commit()
         conn.close()
         flash('Lingua Insirida com sucesso', 'success')
-
-    linguas = ["Portugues","Emakhuwa","Cisena","Xachangana","Cinyanja","Ciswati","Gitonga","Elomwe","Chuwabo","Shimakonde","Cinyungwe","Koti","Ronga","Bitonga","Kimwani","Shona"]
-    choices = request_languge()  
-    
-    idioma = []
-    for lingua in linguas:
-        for choice in choices:
-            if lingua == choice[1]:
-               print('saiu'+choice[1])
-               linguas.remove(lingua)
-               idioma.append(lingua)
-                
         
-    return render_template('org_information.html', idiomas = choices, linguas = linguas)
+    return render_template('org_information.html')
 
 
 # essa metodo pega a Org_id selecionada e redericiona o usuario na organizacao
@@ -4373,9 +4192,9 @@ def uploaded_file(filename):
     return send_from_directory(app.config['AUDIO_FOLDER'], filename)
 
 #Funcao para inserco de Audios
-@app.route('/audios/<int:id>/<type>', methods=['GET', 'POST'])
+@app.route('/audios', methods=['GET', 'POST'])
 @is_logged_in
-def audios(id,type):
+def audios():
     form = AudioForm()
     org_id = session['last_org']
     if form.validate_on_submit():
@@ -4409,11 +4228,9 @@ def audios(id,type):
     
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
-    print(id)
-    cursor.execute(f"Select * from aula_intro where aula = {id};")
-    audios = cursor.fetchall()
-    print(audios)
-    return render_template('audios.html', audios=audios, type=type, id = id)
+    cursor.execute(f"SELECT * FROM campanhas where orgid = '{org_id}';")
+    project = cursor.fetchall()
+    return render_template('audios.html', form=form, projects=project)
 
 
 
@@ -4976,8 +4793,8 @@ def submit_inscricao(idioma):
    
 
     
-#if __name__ == '__main__':
- #   app.secret_key='secret123'
-  #  app.run(debug=True)
-    #http_server = WSGIServer(('', 5000), app)
-    #http_server.serve_forever()
+if __name__ == '__main__':
+    app.secret_key='secret123'
+    #app.run(debug=True)
+    http_server = WSGIServer(('', 5000), app)
+    http_server.serve_forever()

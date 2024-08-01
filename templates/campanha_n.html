@@ -4,7 +4,7 @@
 {% block body%}
 <div class="container my-5">
 
-  <h1>campanha - {{id}}</h1>
+  <h1>{% if type == 'formacao' %} Aula {% else %} {{type}} {% endif %}- {{id}}</h1>
   <hr>
   <table class="table table-striped" id="dataTable">
     <tr>
@@ -38,13 +38,16 @@
         
         <td><a href="/assign_question/{{column[0]}}/questao" class="btn btn-default pull-right">Editar Pergunta</a></td>
        
+        {% if type == 'formacao' %} 
+        <td><a href="/add_audio/{{column[0]}}" class="btn btn-default pull-right" >Adicionar Audio</a></td>
+        {% else %}
         <td><a href="/assign_question/{{column[0]}}/audio" class="btn btn-default pull-right" >Adicionar Audio</a></td>
-       
+        {% endif %}
       </tr>
     {% endfor %}
     
   </table>
-  <a class="btn btn-success" href="/add_question/{{id}}">Adicionar Pergunta</a>
+  <a class="btn btn-success" href="/add_question/{{id}}/{{type}}">Adicionar Pergunta</a>
   <a class="btn btn-success" href="/campanhas">Voltar a campanhas</a>
   <a class="btn btn-success" href="/campanhas">Testar</a>
   

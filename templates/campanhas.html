@@ -14,7 +14,7 @@
       <th>Campanha</th>
       <th>Projecto</th>
       
-    
+    <th></th>
       <th>Estado</th>
       <th>Accoes</th>
       
@@ -25,12 +25,16 @@
         <td>{{pendente[0]}}</td>
         <td>{{pendente[3]}}</td>
         <td>{{pendente[2]}}</td>
-       
+        <td><a href="assign_camp/{{pendente[0]}}" class="btn btn-default pull-right">Assign Camp</a></td>
         <td>{% if pendente[5] == 'ativo' %}<span class="badge badge-success">Ativa</span>
           {% else %}
           <span class="badge badge-secondary">inativa</span>{% endif %}</td>
-        <td><a href="/campanha/{{pendente[0]}}/{{pendente[6]}}" class="btn btn-info pull-right" data-toggle="tooltip" data-placement="top" title="ver campanha"><i class="fas fa-eye" ></i></a>
-        
+        {% if pendente[6] == 'formacao'  %} 
+        <td><a href="/ver_formacao/{{pendente[0]}}" class="btn btn-info pull-right" data-toggle="tooltip" data-placement="top" title="ver campanha"><i class="fas fa-eye" ></i></a>
+
+        {% else %} 
+        <td><a href="/campanha/{{pendente[0]}}/{{pendente[5]}}" class="btn btn-info pull-right" data-toggle="tooltip" data-placement="top" title="ver campanha"><i class="fas fa-eye" ></i></a>
+        {% endif %}
           <form action="{{url_for('del_tiket', id=pendente[1])}}" method="post">
             <input type="hidden" name="_method" value="DELETE">
             <button type="submit"  class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="deletar campanha"><i class="fa fa-trash" aria-hidden="true"></i></button>

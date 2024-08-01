@@ -1,7 +1,90 @@
-{% extends 'layout.html' %}
 
-{% block body %}
-    <div class="container mt-5">
+{% extends 'layout.html'%}
+
+
+{% block body%}
+<div class="container my-5">
+
+  <h1> Audios</h1>
+  <hr>
+  <table class="table table-striped" id="dataTable">
+    <tr>
+      <th>Introducao </th>
+      {% if tipo != 'inquerito' %}
+      <th>Aula</th>
+      {% endif %}
+      <th>Conclusao</th>      
+      
+      <th>Idioma</th>
+
+    </tr>
+    {% for column in audios %}
+      <tr>
+        <td><a  onclick="carregarAudio('{{ column[1] }}')">Reproduzir audio <i class="fa fa-audio-description" aria-hidden="true"></i> </a></td>
+        {% if tipo != 'inquerito' %}
+        <td><a  onclick="carregarAudio('{{ column[4] }}')">Reproduzir audio <i class="fa fa-audio-description" aria-hidden="true"></i> </a></td>
+       {% endif %}
+        <td><a  onclick="carregarAudio('{{ column[2] }}')">Reproduzir audio <i class="fa fa-audio-description" aria-hidden="true"></i> </a></td>
+        <td>{{ column[4] }}</td>
+
+        
+        <td>
+          <a class="btn btn-warning" href="/ativar_campanha/{{id}}">Ativar</a>
+          <a href="/edit_campaign/{{column[0]}}" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="editar {{tipo}}"><i class="fa fa-edit" aria-hidden="true"></i></a></td>
+              
+      </tr>
+    {% endfor %}
+    
+  </table>
+</table>
+<a class="btn btn-success" href="/criar_campanhas/{{tipo}}/{{id}}">Add In another language</a>
+
+  
+  <div class="modal " id="ModalAudio" tabindex="-1"  aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title" class="modal-title" id="ModalLabel">Audio</h4>
+                <button type="button" class="close"  onclick="return $('#ModalAudio').modal('hide');" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+          </div>
+        
+        <div class="modal-body" id="modbody">
+       
+        </div>
+      </div>
+    </div>
+</div>
+  
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   <!-- <div class="container mt-5">
         <h1 class="mb-4">Upload Audio</h1>
         <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
@@ -28,6 +111,5 @@
             <div class="form-group">
                 {{ form.submit(class="btn btn-primary") }}
             </div>
-        </form>
+        </form>-->
         
-    {% endblock %}

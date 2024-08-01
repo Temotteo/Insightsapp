@@ -1,38 +1,13 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<h1>Assign Camp</h1>
+  <h1>Assign Camp</h1>
   {% from "includes/_formhelpers.html" import render_field %}
-  
-  {% if null %}
-   <div class="container">
-    <p>Todas as suas Campanhas ja foram Assinadas, </p>
-    <p>Deseja criar uma Campanha? <a class="link-dark"  href="/create_camp" onclick="return confirm('Você está prestes a criar uma campanha, clique ok para comfirmar')">(sim)</a></p>
-
-   </div>
-  {% elif orgs %}
-  <form method="POST" action="/assign_camp/{{id}}">
-  <div class="form-group">
-    <label for="campanha" class="form-label">Campanha</label>
-     <select class="form-control" id="campanha"  name ="campanha" >
-      <option value="">selecione...</option>
-      {% for org in orgs %}
-      <option value="{{org[0]}}">{{org[3]}}</option>
-     {% endfor %}
-    </select>
-  </div>
+  <form method="POST" action="">
     <div class="form-group">
       {{ render_field(form.projecto, class_="form-control") }}
     </div>
-    <p><input class="btn btn-success" type="submit" value="Gravar"></p>
-    </form>    
-  {% else %}
-  <form method="POST" action="">
-  <div class="form-group">
-    {{ render_field(form.projecto, class_="form-control") }}
-  </div>
-  <p><input class="btn btn-success" type="submit" value="Gravar"></p>
-</form>
-  {% endif %}
- 
+    
+    <p><input class="btn btn-success" type="submit" value="Gravar">
+  </form>
 {% endblock %}

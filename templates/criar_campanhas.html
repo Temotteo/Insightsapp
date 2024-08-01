@@ -2,241 +2,182 @@
 
 {% block body %}
   {% from "includes/_formhelpers.html" import render_field %}
-  
- 
- 
-<style>
-   
-  .content {
-      padding: 2em;
-  }
-  
-  h1 {
-      color: #333;
-  }
-  
-  
-  
-  label {
-      display: block;
-      margin-bottom: 0.5em;
-      color: #333;
-  }
 
-  .input-custom{
-    border-top: 1rem sandybrown;
-    border-right: 1rem seashell;
-    border-left: 1rem seashell;
-    width: 90%;
-
-  }
-  
-  
-  
-  
-  button {
-      background-color: #333;
-      color: #fff;
-      padding: 0.5em 2em;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-  }
-  
-  button:hover {
-      background-color: #555;
-  }
-  
-     .file-upload {
-      position: relative;
-      display: inline-block;
-      width: 220px;
-      text-align: center;
-  }
-  
-  .custom-button{
-      width: 180px;
-      padding: 5px;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      
-  }
-  
-  .custom-file-upload {
-      display: inline-block;
-      cursor: pointer;
-      padding: 7px ;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-  }
-  
-  .custom-file-upload i {
-      margin-right: 0px;
-  }
-  
-  .file-upload input[type="file"] {
-      display: none;
-  }
-  
-  
-      </style>
-  </head>
-  <body>
+  <style>
     
-      <div class="content">
-          
-      <div class="col-md-10 ">
-          <div class="card">
-              <div class="card-header">
-                  <h1 class="card-title">Criar {{campanha}}</h1>
-              </div>
-          <div class="card-body">
-          <form action="/criar_campanhas/{{campanha}}/{{id}}" method="post" enctype="multipart/form-data">
-            <input type="hidden" id="id" name="campanha" value="{{id}}">
-              <label for="name">Project:</label>
-              <input type="text" id="name" name="name" class="form-control input-custom" placeholder="insira o tema para a/o {{campanha}}" required>
-              
-             
-  
-               <label for="type" class="mt-4">Language:</label>
-              <select id="type" name="idioma" class="input-custom">
-                {% for option in options %}
-                  <option value="{{option[1]}}">{{option[1]}}</option>
-                  {% endfor %}
-              </select>
-  
-              <label for="question_audio" class="mt-4">Introduction Audio URL:</label>
-              <div class="input-group mb-3">
-              <input type="text" id="intro_audio" placeholder="" class="form-control" name="intro_audio">
-              <div class="file-upload ">
-                  <label for="file-upload1" class="custom-file-upload">
-                      <i class="fas fa-cloud-upload-alt"></i> Upload
-                  </label>
-                  <input id="file-upload1" type="file" name ="intro" accept="audio/mpeg" class="file-upload-input"/>
-                </div>
-          </div>
-          <div style="display:none;" class="border-bottom-1" id="audio-insert1">
-            <h5>Audio Preview</h5>
-          <audio id="audio-preview1" controls ></audio>
-        </div>
-  
-        {% if campanha != 'inquerito' %}
-        {% if campanha == 'formacao'%}  
-              <label for="audio">Lesson Audio URL:</label>
-              {% else  %} 
-              <label for="audio">Audio da Campanha URL:</label>
-              {% endif %} 
+    
+    .content {
+        padding: 2em;
+        max-width: 800px;
+        margin: auto;
+    }
+    
+    fieldset {
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        padding: 2em;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5em;
+    }
+
+    legend {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #343a40;
+        padding: 0 10px;
+    }
+    
+    label {
+        display: block;
+        margin-bottom: 0.5em;
+        color: #495057;
+        font-weight: 500;
+    }
+
+    
+    button {
+        background-color: #007bff;
+        color: #fff;
+        padding: 0.5em 2em;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    button:hover {
+        background-color: #0056b3;
+    }
+    
+    
+  </style>
+
+  <div class="content">
+    <form action="/criar_campanhas/{{campanha}}/{{id}}" method="post" enctype="multipart/form-data">
+      <input type="hidden" id="id" name="campanha" value="{{id}}">
+
+      <fieldset>
+        <legend>Detalhes da {% if campanha == 'formacao' %}Aula {% else %}{{campanha}}{% endif %}</legend>
         
-              <div class="input-group mb-3">
-              <input type="text" id="audio"  class="form-control" name="audio_base">
-              <div class="file-upload ">
-                  <label for="file-upload" class="custom-file-upload">
-                      <i class="fas fa-cloud-upload-alt"></i> Upload
-                  </label>
-                  <input id="file-upload" onchange="audioPreviw()" type="file" name="audio" accept="audio/*" class="file-upload-input"/>
-                </div>
-               </div> 
+        <label for="name">Tema:</label>
+        <input type="text" id="name" name="name" class="input-custom" placeholder="Insira o tema para a/o {{campanha}}" required>
+        
+        <label for="type" class="mt-4">Idioma:</label>
+        <select id="type" name="idioma" class="input-custom">
+          {% for option in options %}
+            <option value="{{option[1]}}">{{option[1]}}</option>
+          {% endfor %}
+        </select>
+      </fieldset>
 
-               <div style="display:none;" id="audio-insert">
-                <h5>Audio Preview</h5>
-              <audio id="audio-preview" controls ></audio>
+      <fieldset>
+        <legend>Áudios da/o {% if campanha == 'formacao' %}Aula {% else %}{{campanha}}{% endif %}</legend>
+        
+        <label for="question_audio" class="mt-4">URL do Áudio de Introdução:</label>
+        <div class="input-group mb-3">
+          <input type="text" id="intro_audio" placeholder="" class="input-custom" name="intro_audio">
+          <div class="file-upload">
+            <label for="file-upload1" class="custom-file-upload">
+              <i class="fas fa-cloud-upload-alt"></i> Upload
+            </label>
+            <input id="file-upload1" type="file" name="intro" accept="audio/mpeg" class="file-upload-input"/>
+          </div>
+        </div>
+        <div class="audio-preview-container" id="audio-insert1">
+          <h5>Prévia do Áudio</h5>
+          <audio id="audio-preview1" controls></audio>
+        </div>
+
+        {% if campanha != 'inquerito' %}
+          {% if campanha == 'formacao' %}
+            <label for="audio">URL do Áudio da Aula:</label>
+          {% else %}
+            <label for="audio">URL do Áudio da Campanha:</label>
+          {% endif %}
+          
+          <div class="input-group mb-3">
+            <input type="text" id="audio" class="input-custom" name="audio_base">
+            <div class="file-upload">
+              <label for="file-upload" class="custom-file-upload">
+                <i class="fas fa-cloud-upload-alt"></i> Upload
+              </label>
+              <input id="file-upload" onchange="audioPreviw()" type="file" name="audio" accept="audio/*" class="file-upload-input"/>
             </div>
-            {% endif %}
-            
-            
-            <label for="question_audio">Conclusion Audio URL:</label>
-              <div class="input-group mb-3">
-              <input type="text" id="con_audio" name="con_audio" class="form-control">
-              <div class="file-upload">
-                  <label for="file-upload2" class="custom-file-upload">
-                      <i class="fas fa-cloud-upload-alt"></i> Upload
-                  </label>
-                  <input id="file-upload2" type="file" name="conclusao" accept="audio/*" class="file-upload-input px-2"/>
-                </div>
-              </div>
-              <div style="display:none;" class="" id="audio-insert2">
-                <h5>Audio Preview</h5>
-              <audio id="audio-preview2" controls ></audio>
-            </div>
-              
-              <button type="submit" class="custom-button mt-2">Create Campaign</button>
-   
-          </form>
-      </div>
-    </div>
-    </div>
+          </div>
+          <div class="audio-preview-container" id="audio-insert">
+            <h5>Prévia do Áudio</h5>
+            <audio id="audio-preview" controls></audio>
+          </div>
+        {% endif %}
+        
+        <label for="question_audio">URL do Áudio de Conclusão:</label>
+        <div class="input-group mb-3">
+          <input type="text" id="con_audio" name="con_audio" class="input-custom">
+          <div class="file-upload">
+            <label for="file-upload2" class="custom-file-upload">
+              <i class="fas fa-cloud-upload-alt"></i> Upload
+            </label>
+            <input id="file-upload2" type="file" name="conclusao" accept="audio/*" class="file-upload-input px-2"/>
+          </div>
+        </div>
+        <div class="audio-preview-container" id="audio-insert2">
+          <h5>Prévia do Áudio</h5>
+          <audio id="audio-preview2" controls></audio>
+        </div>
+      </fieldset>
+
+      <button type="submit" class="custom-button mt-2">Criar Campanha</button>
+    </form>
   </div>
-  
-      <script>
-  
-      
-          document.getElementById('file-upload1').addEventListener('change', function(event) {
-           var audioPreview = document.getElementById('audio-preview1');
-           let introAudio =  document.getElementById('intro_audio')
-           var audioInsert = document.getElementById('audio-insert1');
-           var file = event.target.files[0];
-           introAudio.value = event.target.value
-           if (file) {
-               var reader = new FileReader();
-               
-               reader.onload = function(e) {
-                   audioPreview.src = e.target.result;
-                   audioInsert.style.display = 'block';
-  
-                   
-               };
-               
-               reader.readAsDataURL(file);
-           }
-       });
-       
-        function audioPreviw() {
 
-           var audioPreview = document.getElementById('audio-preview');
-           var audioInsert = document.getElementById('audio-insert');
-           let lessonAudio =  document.getElementById('audio')
-           var file = event.target.files[0];
-           lessonAudio.value = event.target.value
-           
-          console.log('viva')
-           if (file) {
-               var reader = new FileReader();
-               
-               reader.onload = function(e) {
-                   audioPreview.src = e.target.result;
-                   audioInsert.style.display = 'block';
-                  };
-               
-               reader.readAsDataURL(file);
-           }
-       };
-       
-      
-       document.getElementById('file-upload2').addEventListener('change', function(event) {
-            console.log('viva')
-           var audioPreview = document.getElementById('audio-preview2');
-           var audioInsert = document.getElementById('audio-insert2');
-           let conAudio =  document.getElementById('con_audio')
-           var file = event.target.files[0];
-           conAudio.value = event.target.value
-       
-           console.log('viva')
-           if (file) {
-               var reader = new FileReader();
-               
-               reader.onload = function(e) {
-                   audioPreview.src = e.target.result;
-                   audioInsert.style.display = 'block';
-               };
-               
-               
-               reader.readAsDataURL(file);
-           }
-       });
-       
-           </script>
-  {% endblock %}
+  <script>
+    document.getElementById('file-upload1').addEventListener('change', function(event) {
+      var audioPreview = document.getElementById('audio-preview1');
+      var introAudio = document.getElementById('intro_audio');
+      var audioInsert = document.getElementById('audio-insert1');
+      var file = event.target.files[0];
+      introAudio.value = event.target.value;
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          audioPreview.src = e.target.result;
+          audioInsert.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function audioPreviw() {
+      var audioPreview = document.getElementById('audio-preview');
+      var audioInsert = document.getElementById('audio-insert');
+      var lessonAudio = document.getElementById('audio');
+      var file = event.target.files[0];
+      lessonAudio.value = event.target.value;
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          audioPreview.src = e.target.result;
+          audioInsert.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    document.getElementById('file-upload2').addEventListener('change', function(event) {
+      var audioPreview = document.getElementById('audio-preview2');
+      var audioInsert = document.getElementById('audio-insert2');
+      var conAudio = document.getElementById('con_audio');
+      var file = event.target.files[0];
+      conAudio.value = event.target.value;
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          audioPreview.src = e.target.result;
+          audioInsert.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
+{% endblock %}

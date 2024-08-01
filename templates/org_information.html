@@ -8,22 +8,11 @@
                 <label for="lingua">Selecione a Língua</label>
                 <select class="form-control" id="lingua" name="lingua" required>
                     <option value="">Selecione uma língua</option>
-                    <option value="Portugues">Português</option>
-                    <option value="Emakhuwa">Emakhuwa</option>
-                    <option value="Cisena">Cisena</option>
-                    <option value="Xichangana">Xichangana</option>
-                    <option value="Cinyanja">Cinyanja</option>
-                    <option value="Ciswati">Ciswati</option>
-                    <option value="Gitonga">Gitonga</option>
-                    <option value="Elomwe">Elomwe</option>
-                    <option value="Chuwabo">Chuwabo</option>
-                    <option value="Shimakonde">Shimakonde</option>
-                    <option value="Cinyungwe">Cinyungwe</option>
-                    <option value="Koti">Koti</option>
-                    <option value="Ronga">Ronga</option>
-                    <option value="Bitonga">Bitonga</option>
-                    <option value="Kimwani">Kimwani</option>
-                    <option value="Shona">Shona</option>
+               {% for lingua in linguas %}
+                
+                    <option value="{{lingua}}">{{lingua}}</option>
+                   
+                 {% endfor %}
                     <!-- Adicione outras opções conforme necessário -->
                 </select>
             </div>
@@ -33,6 +22,14 @@
             </div>
             <button type="submit" class="btn btn-primary">Adicionar</button>
         </form>
+
+        <label for="abreviatura">Línguas disponiveis</label>
+        <ul class="list-group">
+            {% for idioma in idiomas %}
+            <li class="list-group-item">{{idioma[1]}}</li>
+            {% endfor %}
+        </ul>
+
     </div>
 
     <script>
