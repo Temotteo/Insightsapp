@@ -22,7 +22,7 @@
       <tr>
         <td>{{pendente[0]}}</td>
         <td>none</td>
-        <td>{{pendente[1]}}</td>
+        <td>{{pendente[2]}}</td>
         
 
         <td><a href="edit_ticket/{{pendente[0]}}" class="btn btn-default pull-right">Edit</a></td>
@@ -37,7 +37,7 @@
     {% endfor %}
   </table>
   <a class="btn btn-success" href="/addoption/{{pergunta_ref}}">Add Option</a>
-  <a class="btn btn-success" href="/dashboard2/{{pergunta_ref}}">Dashboard</a>
+  <a class="btn btn-success" href="/dashboard2/{{pergunta_ref}}/{{type}}">Dashboard</a>
   <a class="btn btn-success" href="/campanha_n/{{campang}}">voltar</a>
   
   

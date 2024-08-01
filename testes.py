@@ -57,33 +57,33 @@ import numpy as np
 app = Flask(__name__)
 
 
-logging.basicConfig(level=logging.INFO)
-
-@app.before_request
-def before_request():
-    # Código antes da requisição
-    pass
-
-@app.after_request
-def after_request(response):
-    # Código após a requisição
-    return response
-
-@app.teardown_request
-def teardown_request(exception):
-    if exception:
-        app.logger.error(f"Erro: {exception}")
-        usuario = session.get('username')
-        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-        return render_template('erro.html'), 500
-    
-# Tratamento global de exceções
-@app.errorhandler(Exception)
-def handle_exception(e):
-    app.logger.error(f"Erro inesperado: {e}")
-    usuario = session.get('username')
-    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-    return render_template('erro.html'), 500    
+#logging.basicConfig(level=logging.INFO)
+#
+#@app.before_request
+#def before_request():
+#    # Código antes da requisição
+#    pass
+#
+#@app.after_request
+#def after_request(response):
+#    # Código após a requisição
+#    return response
+#
+#@app.teardown_request
+#def teardown_request(exception):
+#    if exception:
+#        app.logger.error(f"Erro: {exception}")
+#        usuario = session.get('username')
+#        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+#        return render_template('erro.html'), 500
+#    
+## Tratamento global de exceções
+#@app.errorhandler(Exception)
+#def handle_exception(e):
+#    app.logger.error(f"Erro inesperado: {e}")
+#    usuario = session.get('username')
+#    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+#    return render_template('erro.html'), 500    
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
@@ -2824,15 +2824,15 @@ def create_col(id):
     return redirect(url_for('campanha_n',id=id))
 
 
-@app.route('/perguntas/<string:id>')
+@app.route('/perguntas/<int:id>/<type>')
 @is_logged_in
-def perguntas(id):
-    id = int(id)
+def perguntas(type,id):
+ 
     print(id)
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
     cursor = conn.cursor()
-
+   
     cursor.execute(f"SELECT * from campanha_option where questao = {id}")
 
     dados=cursor.fetchall()
@@ -2841,7 +2841,7 @@ def perguntas(id):
 
     
 
-    return render_template('perguntas.html', dados = dados, pergunta_ref = id)
+    return render_template('perguntas.html', dados = dados, pergunta_ref = id, type=type)
 
 
 @app.route('/survey_dashboard')
@@ -2849,15 +2849,15 @@ def survey_dashboard():
     return render_template('survey_dashboard.html', questions=survey_questions, responses=survey_responses)
 
 
-@app.route('/dashboard2/<string:table_name>')
+@app.route('/dashboard2/<int:id>/<string:type>' , methods=['GET'])
 @is_logged_in
-def dashboard2(table_name):
+def dashboard2(id, type):
     # Connect to the database
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
 
-    # Execute the SQL query to fetch data from the specified table
-    cursor.execute(f"SELECT opcao, count_ FROM public.{table_name}")
+       # Execute the SQL query to fetch data from the specified table
+    cursor.execute(f"SELECT opcao, count FROM campanha_option where questao ={id}")
     rows = cursor.fetchall()
 
     # Prepare data for chart
@@ -2865,11 +2865,10 @@ def dashboard2(table_name):
     counts = [row[1] for row in rows]
     
     # Display ref
-    cursor.execute(f"SELECT ref FROM display_ref where id='{table_name}'")
+    cursor.execute(f"SELECT questao FROM campanha_question where questao_nr={id}")
     rows = cursor.fetchone()
 
     table_name = rows[0]
-
     print(rows[0])
 
     # Close the cursor and connection
@@ -3071,6 +3070,9 @@ def add_call(id):
         return redirect(url_for('clientecad'))
 
     if request.method == 'GET':
+        cursor.execute('SELECT * FROM cliente_vendas WHERE id_vendas = %s ;', (id,))
+        calendar = cursor.fetchall()
+
         cursor.execute('SELECT * FROM calendar WHERE id_cliente = %s ORDER BY data DESC;', (id,))
         calendar_data = cursor.fetchall()
 
@@ -3079,7 +3081,7 @@ def add_call(id):
         print(calendar_data)
         conn.close()
 
-    return render_template('/task.html', client=client, calendar_data=calendar_data, depedencias=depedencias, form=form)
+    return render_template('/task.html', client=client,calendar=calendar, calendar_data=calendar_data, depedencias=depedencias, form=form)
 
 
 @app.route('/tarefas_diarias_data/<string:data>', methods=['GET', 'POST'])
@@ -4976,8 +4978,8 @@ def submit_inscricao(idioma):
    
 
     
-#if __name__ == '__main__':
- #   app.secret_key='secret123'
-  #  app.run(debug=True)
+if __name__ == '__main__':
+    app.secret_key='secret123'
+    app.run(debug=True)
     #http_server = WSGIServer(('', 5000), app)
     #http_server.serve_forever()

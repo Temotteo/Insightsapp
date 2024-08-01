@@ -2849,15 +2849,15 @@ def survey_dashboard():
     return render_template('survey_dashboard.html', questions=survey_questions, responses=survey_responses)
 
 
-@app.route('/dashboard2/<string:table_name>')
+@app.route('/dashboard2/<int:id>/<string:type>')
 @is_logged_in
-def dashboard2(table_name):
+def dashboard2(id,type):
     # Connect to the database
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
 
     # Execute the SQL query to fetch data from the specified table
-    cursor.execute(f"SELECT opcao, count_ FROM public.{table_name}")
+    cursor.execute(f"SELECT opcao, count FROM campanha_option where questao ={id}")
     rows = cursor.fetchall()
 
     # Prepare data for chart
@@ -2865,7 +2865,7 @@ def dashboard2(table_name):
     counts = [row[1] for row in rows]
     
     # Display ref
-    cursor.execute(f"SELECT ref FROM display_ref where id='{table_name}'")
+    cursor.execute(f"SELECT questao FROM campanha_question where questao_nr={id}")
     rows = cursor.fetchone()
 
     table_name = rows[0]
@@ -3071,6 +3071,9 @@ def add_call(id):
         return redirect(url_for('clientecad'))
 
     if request.method == 'GET':
+        cursor.execute('SELECT * FROM cliente_vendas WHERE id_vendas = %s ;', (id,))
+        calendar = cursor.fetchall()
+
         cursor.execute('SELECT * FROM calendar WHERE id_cliente = %s ORDER BY data DESC;', (id,))
         calendar_data = cursor.fetchall()
 
@@ -3079,7 +3082,7 @@ def add_call(id):
         print(calendar_data)
         conn.close()
 
-    return render_template('/task.html', client=client, calendar_data=calendar_data, depedencias=depedencias, form=form)
+    return render_template('/task.html', client=client, calendar=calendar, calendar_data=calendar_data, depedencias=depedencias, form=form)
 
 
 @app.route('/tarefas_diarias_data/<string:data>', methods=['GET', 'POST'])
@@ -4976,8 +4979,8 @@ def submit_inscricao(idioma):
    
 
     
-if __name__ == '__main__':
-    app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+#if __name__ == '__main__':
+#    app.secret_key='secret123'
+#    #app.run(debug=True)
+#    http_server = WSGIServer(('', 5000), app)
+#    http_server.serve_forever()

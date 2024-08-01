@@ -213,8 +213,21 @@
           <th>Whatsapp</th>
           <th>Email</th>
           <th>Contacto</th>
+          <th>Contacto 2</th>
           <th></th>
         </tr>
+        {% for line in calendar %}
+        <tr>
+            
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>{{ line[1] }}</td>
+          <td>{{ line[2] }}</td>
+          <td>{{ line[3] }}</td>
+          </tr>
+      {% endfor %}
+
         {% for line in depedencias %}
           <tr>
             
@@ -223,7 +236,7 @@
             <td>{{ line[4] }}</td>
             <td>{{ line[5] }}</td>
             <td>{{ line[6] }}</td>
-            
+            <td></td>
             </tr>
         {% endfor %}
       </table>
