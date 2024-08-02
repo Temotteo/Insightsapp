@@ -55,8 +55,9 @@
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown4" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Campanhas <span class="caret-down"></span></a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown4">
                     <li class="dropdown-header">Campanhas</li>
-                    <li><a class="dropdown-item" href="/campanhas">Ativas</a></li>
-                    <li><a class="dropdown-item"  href="/create_camp" onclick="return confirm('Você está prestes a criar uma campanha, clique ok para comfirmar')">Criar</a></li>
+                    <li><a class="dropdown-item" href="/campanhas_ativas">Ativas</a></li>
+                    <li><a class="dropdown-item" href="/campanhas">ver todas</a></li>
+                    <li><a class="dropdown-item disabled"  href="/create_camp" onclick="return confirm('Você está prestes a criar uma campanha, clique ok para comfirmar')"><strike>Criar</strike></a></li>
                     <li class="dropdown-divider"></li>
                     <!--
                     <li class="dropdown-header">Mensagem de voz</li>
@@ -65,15 +66,17 @@
                     <li class="dropdown-divider"></li>
                     -->
                     <li class="dropdown-header">Survey</li>
-                    <li><a class="dropdown-item" href="/ver_campanha/inquerito">Ativas</a></li>
+                    <li><a class="dropdown-item" href="/surveys">Ativas</a></li>
+                    <li><a class="dropdown-item" href="/ver_campanha/inquerito">ver todas</a></li>
                     <li><a class="dropdown-item" href="/criar_campanhas/inquerito/0">Criar</a></li>
                     <li class="dropdown-divider"></li>
                     <li class="dropdown-header">Formação Remota</li>
-                    <li><a class="dropdown-item" href="/ver_campanha/formacao">Ativas</a></li>
+                    <li><a class="dropdown-item" href="/formacoes">Ativas</a></li>
+                    <li><a class="dropdown-item" href="/ver_campanha/formacao">ver todas</a></li>
                     <li><a class="dropdown-item" href="/criar_modulo/0">Criar</a></li>
                     <li class="dropdown-divider"></li>
                     <li class="dropdown-header">Histórico de chamadas</li>
-                    <li><a class="dropdown-item" href="/campaign_status">Ver</a></li>
+                    <li><a class="dropdown-item disabled" href="/campaign_status"  aria-disabled="true"><strike>Ver</strike></a></li>
                 </ul>
             </li>
             {% endif %}

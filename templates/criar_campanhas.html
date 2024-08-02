@@ -58,10 +58,16 @@
       <input type="hidden" id="id" name="campanha" value="{{id}}">
 
       <fieldset>
-        <legend>Detalhes da {% if campanha == 'formacao' %}{% set campanha = 'Aula' %}Aula {% else %}{{campanha}}{% endif %}</legend>
+        <legend>Detalhes da/o {% if campanha == 'formacao' %}{% set campanha = 'Aula' %}Aula {% else %}{{campanha}}{% endif %}</legend>
         
         <label for="name">Tema:</label>
+        {% if tema %}
+        <input type="hidden" name="name" id="name" value="{{tema}}">
+        <input type="text"  class="input-custom" placeholder="Insira o tema para a/o {{campanha}}" value="{{tema}}" disabled>
+        {% else %}
         <input type="text" id="name" name="name" class="input-custom" placeholder="Insira o tema para a/o {{campanha}}" required>
+        {% endif %}
+
         
         <label for="type" class="mt-4">Idioma:</label>
         <select id="type" name="idioma" class="input-custom">

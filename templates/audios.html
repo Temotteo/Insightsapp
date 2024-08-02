@@ -3,6 +3,19 @@
 
 
 {% block body%}
+
+<style>
+.audioPlayer {
+  width: 75%;
+  border-radius: 0; /* Remove rounded border */
+}
+
+.audioPlayer::-webkit-media-controls-enclosure {
+  background: none;
+  color: rgb(8, 8, 8);
+  border-radius: 0; /* Ensure panel has no rounded corners */
+}</style>
+
 <div class="container my-5">
   <h1> Audios</h1>
   <hr>
@@ -10,11 +23,12 @@
     <ul class="list-group">
       {% for column in audios %}
       <li class="list-group-item">
-        <a onclick="ReproduzirAudio('audioElement{{loop.index}}')"  class="col-md-4"  title="audios">
-          <i class="fa fa-play mx-2" aria-hidden="true"> </i> {{ column[2] }}
-     </a> | <span class="col-md-2"> idioma:  {{ column[3] }} | <div  class="col-md-6 mt-2"><audio id="audioElement{{loop.index}}" style="display: none;"  src="/static/audios/{{ column[2] }} " controls></audio></div> 
-
-
+        <div class="col-md-6"><Strong>Titulo:</Strong> {{ column[2] }}</div>
+       <span class="col-md-2 my-2"><strong> idioma:</strong>  {{ column[3] }}  <div class=""><audio id="audioElement{{loop.index}}" class=" audioPlayer" src="/static/audios/{{ column[2] }} " controls></audio></div> 
+       <div class="d-flex flex-row">
+        <a href="/edit_audios/{{column[2]}}/inquerito_update" class="mx-4" data-toggle="tooltip" data-placement="top" title="Update"><i class="fa fa-audio-description" aria-hidden="true"></i></a>
+       <a href="/edit_audios/{{column[2]}}/inquerito_delete"><i class="fa fa-trash" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Delete"></i></a>
+      </div>
       </li>
       {% endfor %}
     </ul>
@@ -26,25 +40,25 @@
     <tr>
       
       <th>Introducao </th>
-      {% if type != 'inquerito' %}
       <th>Aula</th>
-      {% endif %}
-      <th>Conclusao</th>      
+      <th>Conclusao</th> 
+      <th></th>  
+      <th></th>     
       
 
     </tr>
     {% for column in audios %}
       <tr>
         <td><a  onclick="carregarAudio('{{ column[1] }}')">Reproduzir audio <i class="fa fa-audio-description" aria-hidden="true"></i> </a></td>
-        {% if type != 'inquerito' %}
-        <td><a  onclick="carregarAudio('{{ column[4] }}')">Reproduzir audio <i class="fa fa-audio-description" aria-hidden="true"></i> </a></td>
-       {% endif %}
+        
         <td><a  onclick="carregarAudio('{{ column[2] }}')">Reproduzir audio <i class="fa fa-audio-description" aria-hidden="true"></i> </a></td>
+      
+        <td><a  onclick="carregarAudio('{{ column[3] }}')">Reproduzir audio <i class="fa fa-audio-description" aria-hidden="true"></i> </a></td>
         <td>{{ column[4] }}</td>
 
         
         <td>
-          <a class="btn btn-warning" href="/ativar_campanha/{{id}}">Ativar</a>
+          <a class="btn btn-danger" href="/ativar_campanha/{{id}}"><i class="fa fa-trash" aria-hidden="true"></i></a>
           <a href="/edit_campaign/{{column[0]}}" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="editar {{tipo}}"><i class="fa fa-edit" aria-hidden="true"></i></a></td>
               
       </tr>
@@ -52,7 +66,7 @@
     
   </table>
 </table>
-<a class="btn btn-success" href="/criar_campanhas/{{tipo}}/{{id}}">Add In another language</a>
+<a class="btn btn-success" href="/criar_campanhas/{{type}}_add/{{id}}">Add In another language</a>
 
 {% endif %}
 

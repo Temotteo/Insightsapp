@@ -57,33 +57,33 @@ import numpy as np
 app = Flask(__name__)
 
 
-logging.basicConfig(level=logging.INFO)
-
-@app.before_request
-def before_request():
-    # Código antes da requisição
-    pass
-
-@app.after_request
-def after_request(response):
-    # Código após a requisição
-    return response
-
-@app.teardown_request
-def teardown_request(exception):
-    if exception:
-        app.logger.error(f"Erro: {exception}")
-        usuario = session.get('username')
-        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-        return render_template('erro.html'), 500
-    
-# Tratamento global de exceções
-@app.errorhandler(Exception)
-def handle_exception(e):
-    app.logger.error(f"Erro inesperado: {e}")
-    usuario = session.get('username')
-    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-    return render_template('erro.html'), 500    
+#logging.basicConfig(level=logging.INFO)
+#
+#@app.before_request
+#def before_request():
+#    # Código antes da requisição
+#    pass
+#
+#@app.after_request
+#def after_request(response):
+#    # Código após a requisição
+#    return response
+#
+#@app.teardown_request
+#def teardown_request(exception):
+#    if exception:
+#        app.logger.error(f"Erro: {exception}")
+#        usuario = session.get('username')
+#        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+#        return render_template('erro.html'), 500
+#    
+## Tratamento global de exceções
+#@app.errorhandler(Exception)
+#def handle_exception(e):
+#    app.logger.error(f"Erro inesperado: {e}")
+#    usuario = session.get('username')
+#    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+#    return render_template('erro.html'), 500    
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
@@ -2589,6 +2589,8 @@ def criar_campanhas(type, id):
 
       if id == '0':
         print(id)
+        cursor.execute(f"INTO campanhas (orgid, tipo) VALUES ('{org_id}','{type}') RETURNING id_campanha;")
+
         cursor.execute(f"INSERT INTO campanhas (orgid, tipo) VALUES ('{org_id}','{type}') RETURNING id_campanha;")
         id = int(cursor.fetchone()[0])
         conn.commit()
@@ -3431,7 +3433,7 @@ if not os.path.exists(app.config['AUDIO_FOLDER']):
 @app.route('/assign_question/<int:camp>/<int:id>/<string:type>', methods=['GET', 'POST'])
 @is_logged_in
 def assign_question(camp,id,type):
-
+    print(id)
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     
     # Create cursor
@@ -3510,21 +3512,21 @@ def assign_question(camp,id,type):
 
     
     options = []
-    cursor.execute(f"SELECT idioma FROM campanha_audio WHERE questao_id = {id};")
-    idiomas = cursor.fetchall()[0] 
+    opts =[]
+    cursor.execute(f"SELECT * FROM campanha_audio WHERE questao_id = {id};")
+    idiomas = cursor.fetchall()
     print(idiomas)
 
     choices = request_languge()
     for choice in choices:
         options.append(choice[1])
 
-   
     print(options)      
    
     for idioma in idiomas:
        for option in options:
-        if idioma == option[1]:
-           options.remove(idioma)
+        if idioma[3] == option:
+           options.remove(idioma[3])
            break
 
     print(options)       
@@ -5007,7 +5009,7 @@ def submit_inscricao(idioma):
 
     
 #if __name__ == '__main__':
-    #app.secret_key='secret123'
-    #app.run(debug=True)
+ #   app.secret_key='secret123'
+  #  app.run(debug=True)
     #http_server = WSGIServer(('', 5000), app)
     #http_server.serve_forever()

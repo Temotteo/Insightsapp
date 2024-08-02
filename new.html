@@ -12,7 +12,7 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 20px;
-    background-color: #f0f0f0;
+    background-color: #fff;
 }
 
 h1 {
@@ -49,21 +49,21 @@ input[type="submit"]:hover {
     margin-top: 20px;
     border-radius: 0; /* Remove rounded border */
     overflow: hidden; /* Ensure it looks rectangular */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: add some shadow for better visibility */
 }
 
-#audioPlayer::-webkit-media-controls-panel {
-    background-color: #4CAF50;
-    color: white;
+#audioPlayer::-webkit-media-controls-enclosure {
+    background: none;
+    color: rgb(8, 8, 8);
     border-radius: 0; /* Ensure panel has no rounded corners */
 }
+
 
 #audioPlayer::-webkit-media-controls-play-button,
 #audioPlayer::-webkit-media-controls-current-time-display,
 #audioPlayer::-webkit-media-controls-time-remaining-display,
 #audioPlayer::-webkit-media-controls-timeline,
 #audioPlayer::-webkit-media-controls-volume-slider {
-    color: white;
+    color: rgb(12, 12, 12);
     border-radius: 0; /* Ensure controls have no rounded corners */
 }
 </style>

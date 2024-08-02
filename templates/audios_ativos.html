@@ -1,44 +1,27 @@
 {% extends 'layout.html'%}
 {% block body%}
-<div class="container my-5">
-  <div class="col-md-8 offset-md-2">
+ <div class="container mt-5">
+  <div class="card border-warning mb-3 mt-5" style="max-width: 18rem;">
+    <div class="card-header bg-transparent border-warning">Upload Audio {{id}}</div>
 
-    <!-- Recent Videos -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h4>Audios Ativos</h4>
-        </div>
-        <div class="card-body">
-    {% for dado in dados %}
-     <h2>{{dado[3]}}</h2>
-     <ul class="list-group">
-      {% for audio in audios %}
-      {% set partes = audio[0].split("_") %}
-        {% set primeira_palavra = "_".join(partes[:2]) %}
-        {% if primeira_palavra == dado[3] %}
-        <li class="list-group-item">
-        {% if dado[3] == 'campanha_32' %}  
-        <audio id="audio"  controls>
-          <source src="/audio/{{audio[1]}}" type="audio/mpeg">
-          Your browser does not support the audio element.
-      </audio> 
-      {% else %}
-      <audio id="audio"  controls>
-        <source src="{{ url_for('static', filename='audios/' + audio[1]) }}" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
-     {% endif %}
-        {% endif %} 
-      {% endfor %}
-    </li>
-    </ul>
-    
-    {% endfor %}
- 
-        </div>
+    <div class="card-body text-wborder-warning">
+      
+        <form method="POST" action="/edit_audios/{{id}}/{{type}}" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.organization.label(class="form-control-label") }}
+                {{ form.organization(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.audio_file.label(class="form-control-label") }}
+                {{ form.audio_file(class="form-control-file") }}
+            </div>
+            <div class="card-footer bg-transparent border-warning">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+        
     </div>
-  </div> 
-</div>  
                 
 
 {% endblock %}
