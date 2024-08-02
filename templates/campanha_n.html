@@ -49,7 +49,11 @@
           
         {% endif %}
     </td>
+    {% if id == 18512 %}
+    <td><a href="/perguntas/{{id}}/campanha_32_pergunta_{{loop.index}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
+     {% else %}
         <td><a href="/perguntas/{{column[1]}}/{{type}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
+        {% endif %}
         <td><a href="/assign_question/{{id}}/{{column[1]}}/questao" class="btn btn-default pull-right">Editar Pergunta</a></td>
         <td><a href="/assign_question/{{id}}/{{column[1]}}/audio" class="btn btn-default pull-right" >Adicionar Audio</a></td>
 

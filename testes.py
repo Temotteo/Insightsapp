@@ -3369,7 +3369,7 @@ def start_ivr_campaign():
             from_=TWILIO_PHONE_NUMBER
         )
 
-    return render_template('campaign_status.html')
+    return render_template('teste2.html')
 
 
 @app.route('/audio/<path:filename>')
@@ -5007,7 +5007,7 @@ def submit_inscricao(idioma):
 
     
 #if __name__ == '__main__':
- #   app.secret_key='secret123'
+    #app.secret_key='secret123'
     #app.run(debug=True)
-  #  http_server = WSGIServer(('', 5000), app)
-   # http_server.serve_forever()
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()

@@ -83,7 +83,8 @@ def handle_exception(e):
     app.logger.error(f"Erro inesperado: {e}")
     usuario = session.get('username')
     #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-    return render_template('erro.html'), 500    
+    return render_template('erro.html'), 500   
+
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
@@ -2494,8 +2495,8 @@ def campanha_n(id, type):
         cursor = connection.cursor()
        
         if type == 'inquerito':
-           cursor.execute(f"SELECT * FROM campanha_question WHERE campanha = {id};")
-           result = cursor.fetchall()
+              cursor.execute(f"SELECT * FROM campanha_question WHERE campanha = {id};")
+              result = cursor.fetchall()
 
         else:
             cursor.execute(f"SELECT * FROM aula_questao WHERE aula = {id};")
@@ -2830,16 +2831,24 @@ def create_col(id):
 
 @app.route('/perguntas/<int:id>/<type>')
 @is_logged_in
-def perguntas(type,id):
+def perguntas(id,type):
  
     print(id)
+    
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
     cursor = conn.cursor()
-   
-    cursor.execute(f"SELECT * from campanha_option where questao = {id}")
 
-    dados=cursor.fetchall()
+    if id == 18512:
+        cursor.execute(f"SELECT * from {type} ")
+
+        dados=cursor.fetchall()
+
+
+    else:
+       cursor.execute(f"SELECT * from campanha_option where questao = {id}")
+
+       dados=cursor.fetchall()
 
     conn.close()
 
@@ -2860,20 +2869,28 @@ def dashboard2(id, type):
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
 
-       # Execute the SQL query to fetch data from the specified table
-    cursor.execute(f"SELECT opcao, count FROM campanha_option where questao ={id}")
-    rows = cursor.fetchall()
+    
+    if id == 18512:
+        cursor.execute(f"SELECT opcao, count_ from {type} ")
+        rows=cursor.fetchall()
+        table_name = type
+        
+
+    else:    
+       cursor.execute(f"SELECT opcao, count FROM campanha_option where questao ={id}")
+       rows = cursor.fetchall()
+       cursor.execute(f"SELECT questao FROM campanha_question where questao_nr={id}")
+       rows = cursor.fetchone()
+       table_name = rows[0]
+
+    
+    print(rows[0])
+
+       
 
     # Prepare data for chart
     labels = [row[0] for row in rows]
     counts = [row[1] for row in rows]
-    
-    # Display ref
-    cursor.execute(f"SELECT questao FROM campanha_question where questao_nr={id}")
-    rows = cursor.fetchone()
-
-    table_name = rows[0]
-    print(rows[0])
 
     # Close the cursor and connection
     cursor.close()
