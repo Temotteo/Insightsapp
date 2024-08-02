@@ -162,24 +162,7 @@ def save_survey_response(phone_number, question_index, selected_option, campaign
     # Update count_
     cur.execute(f"UPDATE {ref} SET count_=count_+1 where id='{selected_option}'")
     
-    cur.execute(f"SELECT questao_nr FROM campanha_questao  where campanha = (select id_campanha from campanhas where campanha_ref ='{campaign}') ;")
-    
-    id = cur.fetchone()[0]
-
-
-    if selected_option == 1:
-       # Update count
-       cur.execute(f"UPDATE campanha_opcao SET count= count + 1 where questao = {id} and opcao='Sim';")
-
-    elif selected_option == 2:
-       # Update count
-       cur.execute(f"UPDATE campanha_opcao SET count= count + 1 where questao = {id} and opcao='Nao';")
-
-    elif selected_option == 3:
-       # Update count
-       cur.execute(f"UPDATE campanha_opcao SET count= count + 1 where questao = {id} and opcao='Talvez';")
    
-    conn.close()
 
 
 
@@ -3525,11 +3508,29 @@ def assign_question(camp,id,type):
        form = PerguntaForm(request.form)
        form.pergunta.data = pergunta[2]
 
+    
+    options = []
+    cursor.execute(f"SELECT idioma FROM campanha_audio WHERE questao_id = {id};")
+    idiomas = cursor.fetchall()[0] 
+    print(idiomas)
+
     choices = request_languge()
-    print(choices)       
+    for choice in choices:
+        options.append(choice[1])
+
+   
+    print(options)      
+   
+    for idioma in idiomas:
+       for option in options:
+        if idioma == option[1]:
+           options.remove(idioma)
+           break
+
+    print(options)       
     
    
-    return render_template('assign_question.html', form=form, type = type,camp= camp, id=id, options = choices)
+    return render_template('assign_question.html', form=form, type = type,camp= camp, id=id, options = options)
 
 
 @app.route('/addfunction', methods=['GET', 'POST'])

@@ -4798,3 +4798,22 @@ if __name__ == '__main__':
     #app.run(debug=True)
     http_server = WSGIServer(('', 5000), app)
     http_server.serve_forever()
+
+
+       #cur.execute(f"SELECT questao_nr FROM campanha_questao  where campanha = (select id_campanha from campanhas where campanha_ref ='{campaign}') ;")
+    #
+    #id = cur.fetchone()[0]
+#
+#
+    #if selected_option == 1:
+    #   # Update count
+    #   cur.execute(f"UPDATE campanha_opcao SET count= count + 1 where questao = {id} and opcao='Sim';")
+#
+    #elif selected_option == 2:
+    #   # Update count
+    #   cur.execute(f"UPDATE campanha_opcao SET count= count + 1 where questao = {id} and opcao='Nao';")
+#
+    #elif selected_option == 3:
+    #   # Update count
+    #   cur.execute(f"UPDATE campanha_opcao SET count= count + 1 where questao = {id} and opcao='Talvez';")
+    #conn.commit()
