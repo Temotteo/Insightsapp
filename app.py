@@ -4897,19 +4897,21 @@ def submit_inscricao(idioma):
         cur = conn.cursor()
         cur.execute('''
             INSERT INTO inscricoes2 (nome, titulo, igreja, cargo,  telefone, email)
-            VALUES (%s, %s, %s, %s, %s)
-        ''', (nome, titulo, igreja, cargo, telefone))
+            VALUES (%s, %s, %s, %s, %s,%s)
+        ''', (nome, titulo, igreja, cargo, telefone, email))
         conn.commit()
         cur.close()
         conn.close()
-    
-        return redirect(url_for('submit_inscricao'))
+        
+        flash('Dados inseridos com sucesso', 'success')
+
+        return redirect(url_for('submit_inscricao', idioma = idioma))
 
     
     if idioma == 'en':
-      return render_template('inscricao_pastoral_EN.html')
+      return render_template('inscricao_pastoral_EN.html', idioma=idioma)
     else:
-      return render_template('inscricao_pastoral_PT.html')
+      return render_template('inscricao_pastoral_PT.html', idioma = idioma)
    
 
     
