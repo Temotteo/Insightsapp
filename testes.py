@@ -57,33 +57,34 @@ import numpy as np
 app = Flask(__name__)
 
 
-#logging.basicConfig(level=logging.INFO)
-#
-#@app.before_request
-#def before_request():
-#    # Código antes da requisição
-#    pass
-#
-#@app.after_request
-#def after_request(response):
-#    # Código após a requisição
-#    return response
-#
-#@app.teardown_request
-#def teardown_request(exception):
-#    if exception:
-#        app.logger.error(f"Erro: {exception}")
-#        usuario = session.get('username')
-#        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-#        return render_template('erro.html'), 500
-#    
-## Tratamento global de exceções
-#@app.errorhandler(Exception)
-#def handle_exception(e):
-#    app.logger.error(f"Erro inesperado: {e}")
-#    usuario = session.get('username')
-#    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-#    return render_template('erro.html'), 500    
+logging.basicConfig(level=logging.INFO)
+
+@app.before_request
+def before_request():
+    # Código antes da requisição
+    pass
+
+@app.after_request
+def after_request(response):
+    # Código após a requisição
+    return response
+
+@app.teardown_request
+def teardown_request(exception):
+    if exception:
+        app.logger.error(f"Erro: {exception}")
+        usuario = session.get('username')
+        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+        return render_template('erro.html'), 500
+    
+# Tratamento global de exceções
+@app.errorhandler(Exception)
+def handle_exception(e):
+    app.logger.error(f"Erro inesperado: {e}")
+    usuario = session.get('username')
+    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+    return render_template('erro.html'), 500   
+
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
@@ -1384,146 +1385,58 @@ def campanhas():
     return render_template('campanhas.html', campanhas = dados)
 
 
-@app.route('/surveys')
+@app.route('/campanhas_ativas')
 @is_logged_in
-def surveys():
+def campanhas_ativas():
     org_id = session['last_org']
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
     cursor = conn.cursor()
 
-    cursor.execute(f"SELECT * FROM campanhas where orgid='{org_id}' and status = 'activo' and tipo ='inquerito';")
+    cursor.execute(f"SELECT * FROM campanhas where orgid='{org_id}' and status = 'ativo';")
 
     dados=cursor.fetchall()
 
     # Close connection
     conn.close()
 
-    return render_template('campanhas.html', surveys = dados)
+    return render_template('campanhas.html', campanhas = dados, type = 'Campanhas ativas')
+
+
+@app.route('/inquerito_ativo')
+@is_logged_in
+def inquerito_ativo():
+    org_id = session['last_org']
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+
+    cursor = conn.cursor()
+
+    cursor.execute(f"SELECT * FROM campanhas where orgid='{org_id}' and status = 'ativo' and tipo ='inquerito';")
+
+    dados=cursor.fetchall()
+
+    # Close connection
+    conn.close()
+
+    return render_template('campanhas.html', campanhas = dados, type = 'Campanhas ativas')
+
+@app.route('/formacao_ativa')
+@is_logged_in
+def formacao_ativa():
+    org_id = session['last_org']
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+
+    cursor = conn.cursor()
+
+    cursor.execute(f"SELECT * FROM campanhas where orgid='{org_id}' and status = 'ativo' and tipo ='formacao';")
+
+    dados=cursor.fetchall()
+
+    # Close connection
+    conn.close()
+
+    return render_template('campanhas.html', campanhas = dados, type='Fomacao Remota')
    
-
-@app.route('/insert_audio', methods=['GET', 'POST'])
-def create_formacao():
-    if request.method == 'POST':
-        audio_lingua = request.form['idiomas']
-        # Alterando o nome do arquivo adicionando audio_lingua no meio
-
-        tema = request.form['tema']
-        audio_introducao = request.files['audioIntroducao']
-        audio_aula = request.files['audioAula']
-        audio_questao = request.files['audioQuestao']
-        audio_conclusao = request.files['audioConclusao']
-
-        audio_intro_filename = secure_filename(audio_introducao.filename)
-        audio_aula_filename = secure_filename(audio_aula.filename)
-        audio_questao_filename = secure_filename(audio_questao.filename)
-        audio_conclusao_filename = secure_filename(audio_conclusao.filename)
-
-        intro, ext = os.path.splitext(audio_intro_filename)
-        aula, ext = os.path.splitext(audio_aula_filename)
-        questao, ext = os.path.splitext(audio_questao_filename)
-        conclusao, ext = os.path.splitext(audio_conclusao_filename)
-
-        new_intro_filename = f"{intro}_{audio_lingua}{ext}"
-        new_aula_filename = f"{aula}_{audio_lingua}{ext}"
-        new_questao_filename = f"{questao}_{audio_lingua}{ext}"
-        new_conclusao_filename = f"{conclusao}_{audio_lingua}{ext}"
-        
-        audio_introducao.save(os.path.join(app.config['UPLOAD_FOLDER'], new_intro_filename))
-        audio_aula.save(os.path.join(app.config['UPLOAD_FOLDER'], new_aula_filename))
-        audio_questao.save(os.path.join(app.config['UPLOAD_FOLDER'], new_questao_filename))
-        audio_conclusao.save(os.path.join(app.config['UPLOAD_FOLDER'], new_conclusao_filename))
-
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO formacoes (tema, audio_introducao, audio_aula, audio_questao, audio_conclusao)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (tema, audio_intro_filename, audio_aula_filename, audio_questao_filename, audio_conclusao_filename))
-        conn.commit()
-        cur.close()
-        conn.close()
-
-        return redirect(url_for('create_formacao'))
-
-    return render_template('formacao.html')
-
-
-@app.route('/ivr_formacao/<string:campaign>', methods=['POST'])
-def ivr_formacao(campaign):
-    audios = buscar_Audio()
-    QUESTION_AUDIO = []
-    for audio in audios:
-        QUESTION_AUDIO.append(f"https://insightsap.com/audio/{audio[1]}")
-
-    
-    response = VoiceResponse()
-    response.play(QUESTION_AUDIO[0])
-
-    current_question_index = request.args.get('current_question_index', default=1, type=int)
-    with response.gather(num_digits=1, action=url_for('handle_question_form', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
-        gather.play(QUESTION_AUDIO[current_question_index])
-
-    return str(response), 200, {'Content-Type': 'application/xml'}
-
-
-# Handle question route
-@app.route('/handle_question_form', methods=['POST'])
-def handle_question_form():
-    selected_option = request.form.get('Digits')
-    phone_number = request.form.get('To')
-    current_question_index = int(request.args.get('current_question_index'))
-    campaign=request.args.get('campaign')
-    audios = buscar_Audio()
-    QUESTION_AUDIO = []
-    for audio in audios:
-        QUESTION_AUDIO.append(f"https://insightsap.com/audio/{audio[1]}")
-
-    response = VoiceResponse()
-
-    if current_question_index < len(QUESTION_AUDIO) - 1:  # Not the concluding message
-        if current_question_index == 2:
-          try:
-              selected_option = int(selected_option)
-              if selected_option < 1 or selected_option > 5:
-                  raise ValueError()
-          except ValueError:
-            # Handle invalid input by redirecting back to /ivr with current_question_index
-            return redirect(url_for('ivr_formacao', current_question_index=current_question_index))
-
-        # Save the survey response to the database
-        save_survey_response(phone_number, current_question_index, selected_option, campaign)
-
-        # Continue with the next question
-        next_question_index = current_question_index + 1
-        with response.gather(num_digits=1, action=url_for('handle_question_form', current_question_index=next_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
-            gather.play(QUESTION_AUDIO[next_question_index])
-
-    else:  # Concluding message
-        response.play(QUESTION_AUDIO[-1])
-
-    return str(response), 200, {'Content-Type': 'application/xml'}
-
-
-# Start IVR campaign route
-@app.route('/start_ivr_formacao', methods=['POST'])
-def start_ivr_formacao():
-    # Extract phone numbers from the HTML form
-    phone_numbers = request.form.getlist('numero')
-    campaign = request.form.get('campanha')
-    
-    url='https://insightsap.com/ivr_formacao/'+campaign
-
-    for number in phone_numbers:
-        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-        call = client.calls.create(
-            url=url,  # URL for handling IVR logic
-            to=number,
-            from_=TWILIO_PHONE_NUMBER
-        )
-
-    return render_template('campaign_status.html')
-
 
 
 @app.route('/pendentes')
@@ -2358,11 +2271,17 @@ def addoption(id):
         #query = sql.SQL("INSERT INTO {} (opcao) VALUES (%s)").format(sql.Identifier(id))
 
         # Execute query with parameterized value
-        cursor.execute(f"Insert into campanha_option values({id},'{opcao}');")
+        if type == 'inquerito':
+           cursor.execute(f"Insert into campanha_option values({id},'{opcao}');")
 
-        # Commit to DB
-        conn.commit()
+           # Commit to DB
+           conn.commit()
 
+        else:   
+           cursor.execute(f"Insert into questoes_opcoes values({id},'{opcao}');")
+
+           # Commit to DB
+           conn.commit()
         # Close connection
         conn.close()
 
@@ -2459,31 +2378,6 @@ def questoes(id):
     return data
 
 
-@app.route('/audios_ativos', methods=['GET'])
-@is_logged_in
-def audios_ativos():
-    org_id = session['last_org']
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-    cursor = conn.cursor()
-    
-    audios = []
-    print(org_id)
-
-    cursor.execute(f"SELECT * FROM campanhas where orgid='{org_id}' and status = 'activo';")
-        
-    dados=cursor.fetchall()
-    
-    print(' ')
-
-    cursor.execute("SELECT * FROM display_ref_linguas")
-    audios = cursor.fetchall()
-
-    print(audios) 
-    conn.close()
-    
-    return render_template('audios_ativos.html', audios=audios, dados=dados)
-
-
 
 @app.route('/campanha_n/<int:id>/<type>',methods=['GET'])
 @is_logged_in
@@ -2494,8 +2388,8 @@ def campanha_n(id, type):
         cursor = connection.cursor()
        
         if type == 'inquerito':
-           cursor.execute(f"SELECT * FROM campanha_question WHERE campanha = {id};")
-           result = cursor.fetchall()
+              cursor.execute(f"SELECT * FROM campanha_question WHERE campanha = {id};")
+              result = cursor.fetchall()
 
         else:
             cursor.execute(f"SELECT * FROM aula_questao WHERE aula = {id};")
@@ -2558,171 +2452,197 @@ def add_audio(id):
 @app.route('/criar_campanhas/<type>/<int:id>', methods=['GET','POST'])
 @is_logged_in
 def criar_campanhas(type, id):
+    # Obter o ID da organização da sessão
     org_id = session['last_org']
+    
+    # Conectar ao banco de dados
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-    print(type)
     cursor = conn.cursor()
 
     if request.method == 'POST':
-      conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-      cursor = conn.cursor()
-      tema = request.form['name']
-      id = request.form['campanha']
-      audio_lingua = request.form['idioma']
-
-
-      introducao = request.files['intro']
-      audio_intro = secure_filename(introducao.filename)
-      
-      conclusao = request.files['conclusao']
-      audio_con = secure_filename(conclusao.filename)
-
-      introducao.save(os.path.join(app.config['AUDIO_FOLDER'], audio_intro))
-      conclusao.save(os.path.join(app.config['AUDIO_FOLDER'], audio_con))
-
-
-      if type !='inquerito':
-         audio = request.files['audio']
-         audio_base = secure_filename(audio.filename)
-         audio.save(os.path.join(app.config['AUDIO_FOLDER'], audio_base))
-  
-
-      if id == '0':
-        print(id)
-        cursor.execute(f"INTO campanhas (orgid, tipo) VALUES ('{org_id}','{type}') RETURNING id_campanha;")
-
-        cursor.execute(f"INSERT INTO campanhas (orgid, tipo) VALUES ('{org_id}','{type}') RETURNING id_campanha;")
-        id = int(cursor.fetchone()[0])
-        conn.commit()
         
-      
-      if type == 'inquerito':
-          cursor.execute(f"Insert into inqueritos values ({id},'{audio_intro}','{audio_con}','{audio_lingua}');" )
-          conn.commit()
+        # Obter dados do formulário
+        tema = request.form['name']
+        id = request.form['campanha']
+        audio_lingua = request.form['idioma']
 
-      elif type == 'formacao':
-          cursor.execute(f"Insert into Aulas( tema, modulo) values ('{tema}',{id}) Returning id;" )
-          id = cursor.fetchone()[0]
-          conn.commit()
+        # Obter e salvar arquivos de áudio
+        introducao = request.files['intro']
+        audio_intro = secure_filename(introducao.filename)
+        
+        conclusao = request.files['conclusao']
+        audio_con = secure_filename(conclusao.filename)
 
-          cursor.execute(f"Insert into aula_intro(introducao, conclusao, idioma, audio_base, tema, modulo) values ({id},'{audio_intro}','{audio_con}','{audio_base}','{audio_lingua}') ;" )
-          conn.commit()
-    
-      
-      flash('Dados inseridos com sucesso', 'success')
-      
+        introducao.save(os.path.join(app.config['AUDIO_FOLDER'], audio_intro))
+        conclusao.save(os.path.join(app.config['AUDIO_FOLDER'], audio_con))
 
-      return redirect(url_for('campanha_n', id= id, type=type))
+        # Se a campanha não for do tipo 'inquérito', obter e salvar o áudio adicional
+        if type != 'inquerito':
+            audio = request.files['audio']
+            audio_base = secure_filename(audio.filename)
+            audio.save(os.path.join(app.config['AUDIO_FOLDER'], audio_base))
 
-    #flash('Campanha criada: '+str(id), 'success')
-
-    choices = request_languge()
-    
-    # Close connection
-    conn.close()
-
-    return render_template('criar_campanhas.html', options = choices, id=id, campanha= type)
-
-
-@app.route('/criar_modulo/<int:id>',methods=['GET','POST'])
-@is_logged_in
-def criar_modulo(id):
-     if request.method == 'POST':
-         conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-         org_id = session['last_org']
-         cursor = conn.cursor()
-         modulo = request.form['modulo']
-     
-         if id == 0 :
-            cursor.execute(f"INSERT INTO campanhas (orgid, tipo) VALUES ('{org_id}','formacao') RETURNING id_campanha;")
+        # Se id é '0', criar uma nova campanha
+        if id == '0':
+            print(id)
+            cursor.execute("SELECT * FROM campanhas;")
+            ref = 36 + len(cursor.fetchall())
+            cursor.execute(f"INSERT INTO campanhas (orgid, campanha_ref, status, tipo) VALUES ('{org_id}', 'campanha_{ref}', 'inativo', '{type}') RETURNING id_campanha;")
             id = int(cursor.fetchone()[0])
             conn.commit()
-     
-         cursor.execute(f"INSERT INTO modulos (campanha, nome) VALUES ('{id}','{modulo}') RETURNING modulo;")
-         conn.commit()
-         modulo = int(cursor.fetchone()[0])
-     
-         # Close connection
-         conn.close()
-     
-         return redirect(url_for('criar_campanhas', id = modulo, type='formacao'))
-     
-     return render_template('Modulos.html', id= id)
+        
+        # Inserir dados na tabela correspondente, dependendo do tipo de campanha
+        if type == 'inquerito':
+            cursor.execute(f"INSERT INTO campanha_base VALUES ('{audio_intro}', '{audio_con}', '{audio_lingua}', '{tema}', {id});")
+            conn.commit()
+        elif type == 'formacao':
+            cursor.execute(f"INSERT INTO Aulas (tema, modulo) VALUES ('{tema}', {id}) RETURNING id;")
+            aula_id = cursor.fetchone()[0]
+            conn.commit()
+            cursor.execute(f"INSERT INTO aula_intro (aula, introducao, audio_base, conclusao, idioma) VALUES ({aula_id}, '{audio_intro}', '{audio_base}', '{audio_con}', '{audio_lingua}');")
+            conn.commit()
+        else:
+            cursor.execute(f"INSERT INTO aula_intro (aula, introducao, audio_base, conclusao, idioma) VALUES ({id}, '{audio_intro}', '{audio_base}', '{audio_con}', '{audio_lingua}');")
+            type = 'formacao'
+            conn.commit()
+            print('viva')
 
-@app.route('/ver_campanha/<type>',methods=['GET'])
+        # Exibir mensagem de sucesso
+        flash('Dados inseridos com sucesso', 'success')
+        
+        # Redirecionar para a página de visualização da campanha
+        return redirect(url_for('campanha_n', id=id, type=type))
+
+    # Obter opções de idioma
+    choices = request_languge()
+
+    # Se o tipo for 'formacao_add', obter o tema da aula e renderizar o template com as opções
+    if type == 'formacao_add':
+        cursor.execute(f"SELECT tema FROM Aulas WHERE id = {id};")
+        tema = cursor.fetchone()[0]
+        conn.close()
+        return render_template('criar_campanhas.html', options=choices, id=id, campanha=type, tema=tema)
+    
+    # Fechar a conexão com o banco de dados
+    conn.close()
+
+    # Renderizar o template com as opções
+    return render_template('criar_campanhas.html', options=choices, id=id, campanha=type)
+
+
+
+@app.route('/criar_modulo/<int:id>', methods=['GET', 'POST'])
+@is_logged_in
+def criar_modulo(id):
+    # Se o método da solicitação for POST, processar o formulário
+    if request.method == 'POST':
+        # Conectar ao banco de dados
+        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        org_id = session['last_org']
+        cursor = conn.cursor()
+        
+        # Obter o nome do módulo do formulário
+        modulo = request.form['modulo']
+        
+        # Se o id for 0, criar uma nova campanha
+        if id == 0:
+            cursor.execute(f"INSERT INTO campanhas (orgid, tipo) VALUES ('{org_id}', 'formacao') RETURNING id_campanha;")
+            id = int(cursor.fetchone()[0])
+            conn.commit()
+        
+        # Inserir o novo módulo na campanha
+        cursor.execute(f"INSERT INTO modulos (campanha, nome) VALUES ('{id}', '{modulo}') RETURNING modulo;")
+        conn.commit()
+        modulo = int(cursor.fetchone()[0])
+        
+        # Fechar a conexão com o banco de dados
+        conn.close()
+        
+        # Redirecionar para a página de criação de campanhas
+        return redirect(url_for('criar_campanhas', id=modulo, type='formacao'))
+    
+    # Renderizar o template para criar módulos
+    return render_template('Modulos.html', id=id)
+
+@app.route('/ver_campanha/<type>', methods=['GET'])
 @is_logged_in
 def ver_campanha(type):
+    # Conectar ao banco de dados
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-
     cursor = conn.cursor()
-
-    cursor.execute(f"SELECT * FROM campanhas where tipo='{type}'")
-
-    dados=cursor.fetchall()
-
-    # Close connection
+    
+    # Selecionar campanhas do tipo especificado
+    cursor.execute(f"SELECT * FROM campanhas WHERE tipo='{type}'")
+    dados = cursor.fetchall()
+    
+    # Fechar a conexão com o banco de dados
     conn.close()
+    
+    # Renderizar o template de visualização de campanhas
+    return render_template('campanhas.html', campanhas=dados, type=type)
 
-    return render_template('campanhas.html', campanhas = dados, type=type)
-
-@app.route('/ver_formacao/<int:id>',methods=['GET'])
+@app.route('/ver_formacao/<int:id>', methods=['GET'])
 @is_logged_in
 def ver_formacao(id):
+    # Conectar ao banco de dados
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-
     cursor = conn.cursor()
-
-    cursor.execute(f"SELECT * FROM modulos where campanha ={id}")
-
-    modulo=cursor.fetchall()
-
-    cursor.execute(f"SELECT * FROM modulos join aulas on modulos.modulo = aulas.modulo where modulos.campanha ={id}")
-
-    dados=cursor.fetchall()
-
-    # Close connection
+    
+    # Selecionar módulos da formacao
+    cursor.execute(f"SELECT * FROM modulos WHERE campanha={id}")
+    modulo = cursor.fetchall()
+    
+    # Selecionar módulos e aulas associadas
+    cursor.execute(f"SELECT * FROM modulos JOIN aulas ON modulos.modulo = aulas.modulo WHERE modulos.campanha={id}")
+    dados = cursor.fetchall()
+    
+    # Fechar a conexão com o banco de dados
     conn.close()
+    
+    # Renderizar o template de visualização de formação
+    return render_template('formacao.html', modulos=modulo, formacao=dados, id=id)
 
-    return render_template('formacao.html',modulos = modulo, formacao = dados, id=id)
-
-  
-@app.route('/ativar_campanha/<int:id>',methods=['GET'])
+@app.route('/ativar_campanha/<int:id>', methods=['GET'])
 @is_logged_in
 def ativar_campanha(id):
+    # Conectar ao banco de dados
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-
     cursor = conn.cursor()
-
-    cursor.execute(f"update campanhas set status = 'ativo' where id_campanha={id};")
+    
+    # Atualizar o status da campanha para 'ativo'
+    cursor.execute(f"UPDATE campanhas SET status='ativo' WHERE id_campanha={id};")
     conn.commit()
     
-    cursor.execute(f"SELECT * FROM campanhas ;")
-    dados=cursor.fetchall()
-
-    # Close connection
+    # Selecionar todas as campanhas
+    cursor.execute(f"SELECT * FROM campanhas;")
+    dados = cursor.fetchall()
+    
+    # Fechar a conexão com o banco de dados
     conn.close()
-
+    
+    # Exibir mensagem de sucesso
     flash('Campanha ativada com sucesso', 'success')
+    
+    # Renderizar o template de visualização de campanhas
+    return render_template('campanhas.html', campanhas=dados, type=type)
 
-    return render_template('campanhas.html', campanhas = dados, type=type)
-
-
-
-@app.route('/campanha/<int:id>/<type>',methods=['GET'])
+@app.route('/campanha/<int:id>/<type>', methods=['GET'])
 @is_logged_in
 def campanha(id, type):
-        print(id)
-        # Connect to the PostgreSQL database
-        connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-        cursor = connection.cursor()
-       
-        if type == 'formacao':
-            cursor.execute(f"SELECT * FROM aulas WHERE id = {id};")
-            result = cursor.fetchall()
-            return render_template('campanha.html', campanha = result, id=id, tipo = type)
- 
-        
-        return redirect(url_for('campanha_n', id=id, type = type ))
+    print(id)
+    
+    # Conectar ao banco de dados
+    connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = connection.cursor()
+    
+    # Se o tipo for 'formacao', selecionar as aulas associadas
+    if type == 'formacao':
+        cursor.execute(f"SELECT * FROM aulas WHERE id={id};")
+        result = cursor.fetchall()
+        return render_template('campanha.html', campanha=result, id=id, tipo=type)
+    
+    # Redirecionar para a visualização da campanha
+    return redirect(url_for('campanha_n', id=id, type=type))
 
 
 
@@ -2832,22 +2752,34 @@ def create_col(id):
 
 @app.route('/perguntas/<int:id>/<type>')
 @is_logged_in
-def perguntas(type,id):
- 
+def perguntas(id, type):
+    # Imprimir o ID para depuração
     print(id)
+    
+    # Conectar ao banco de dados
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-
     cursor = conn.cursor()
-   
-    cursor.execute(f"SELECT * from campanha_option where questao = {id}")
 
-    dados=cursor.fetchall()
-
+    # Verificar o ID
+    if id == 18512:
+        # Se o ID for 18512, selecionar todas as entradas da tabela especificada pelo tipo
+        cursor.execute(f"SELECT * FROM {type}")
+        dados = cursor.fetchall()
+    else:
+        # Se o tipo for 'formacao', selecionar todas as entradas da tabela 'questoes_opcoes' onde a questão é igual ao ID
+        if type == 'formacao':
+            cursor.execute(f"SELECT * FROM questoes_opcoes WHERE questao = {id}")
+            dados = cursor.fetchall()
+        else:
+            # Para outros tipos, selecionar todas as entradas da tabela 'campanha_option' onde a questão é igual ao ID
+            cursor.execute(f"SELECT * FROM campanha_option WHERE questao = {id}")
+            dados = cursor.fetchall()
+    
+    # Fechar a conexão com o banco de dados
     conn.close()
 
-    
-
-    return render_template('perguntas.html', dados = dados, pergunta_ref = id, type=type)
+    # Renderizar o template de perguntas com os dados obtidos
+    return render_template('perguntas.html', dados=dados, pergunta_ref=id, type=type)
 
 
 @app.route('/survey_dashboard')
@@ -2862,20 +2794,28 @@ def dashboard2(id, type):
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
 
-       # Execute the SQL query to fetch data from the specified table
-    cursor.execute(f"SELECT opcao, count FROM campanha_option where questao ={id}")
-    rows = cursor.fetchall()
+    
+    if id == 18512:
+        cursor.execute(f"SELECT opcao, count_ from {type} ")
+        rows=cursor.fetchall()
+        table_name = type
+        
+
+    else:    
+       cursor.execute(f"SELECT opcao, count FROM campanha_option where questao ={id}")
+       rows = cursor.fetchall()
+       cursor.execute(f"SELECT questao FROM campanha_question where questao_nr={id}")
+       rows = cursor.fetchone()
+       table_name = rows[0]
+
+    
+    print(rows[0])
+
+       
 
     # Prepare data for chart
     labels = [row[0] for row in rows]
     counts = [row[1] for row in rows]
-    
-    # Display ref
-    cursor.execute(f"SELECT questao FROM campanha_question where questao_nr={id}")
-    rows = cursor.fetchone()
-
-    table_name = rows[0]
-    print(rows[0])
 
     # Close the cursor and connection
     cursor.close()
@@ -3371,7 +3311,7 @@ def start_ivr_campaign():
             from_=TWILIO_PHONE_NUMBER
         )
 
-    return render_template('teste2.html')
+    return render_template('campaign_status.html')
 
 
 @app.route('/audio/<path:filename>')
@@ -3429,11 +3369,49 @@ app.config['AUDIO_FOLDER'] = AUDIO_FOLDER
 if not os.path.exists(app.config['AUDIO_FOLDER']):
     os.makedirs(app.config['AUDIO_FOLDER'])
 
+
+@app.route('/audios/<int:id>/<string:type>', methods=['GET', 'POST'])
+@is_logged_in
+def audios(id, type):
+    # Inicializar o formulário de áudio
+    form = AudioForm()
+    
+    # Conectar ao banco de dados dentro de um bloco 'with' para garantir que a conexão seja fechada
+    with psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy') as conn:
+        with conn.cursor() as cursor:
+            # Imprimir o ID e o tipo para depuração
+            print(id)
+            print(type)
+
+            # Executar diferentes consultas dependendo do tipo
+            if type == 'formacao':
+                cursor.execute(f"SELECT * FROM aula_intro WHERE aula = {id};")
+                audios = cursor.fetchall()
+                print(audios)
+            elif type == 'inquerito':
+                cursor.execute(f"SELECT * FROM campanha_base WHERE campanha = {id};")
+                audios = cursor.fetchall()
+                print(audios)   
+            elif type == 'aula':
+                cursor.execute(f"SELECT * FROM questao_audio WHERE questao_id = {id};")
+                audios = cursor.fetchall()
+                print(audios)
+                print('menos')
+            else:
+                cursor.execute(f"SELECT * FROM campanha_audio WHERE questao_id = {id};")
+                audios = cursor.fetchall()
+                print(audios)   
+
+    # Renderizar o template de áudios com os dados obtidos
+    return render_template('audios.html', audios=audios, type=type, id=id)
+
+    
+
 # Assign question
 @app.route('/assign_question/<int:camp>/<int:id>/<string:type>', methods=['GET', 'POST'])
 @is_logged_in
 def assign_question(camp,id,type):
-    print(id)
+
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     
     # Create cursor
@@ -4387,67 +4365,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def uploaded_file(filename):
     return send_from_directory(app.config['AUDIO_FOLDER'], filename)
 
-#Funcao para inserco de Audios
-@app.route('/audios/<int:id>/<string:type>', methods=['GET', 'POST'])
-@is_logged_in
-def audios(id,type):
-    form = AudioForm()
-    org_id = session['last_org']
-    if form.validate_on_submit():
-        project = request.form['project']
-        questao = request.form['questao']
-
-        audio_lingua = form.organization.data
-
-        audio_file = form.audio_file.data
-        filename = secure_filename(audio_file.filename)
-        name, ext = os.path.splitext(filename)
-          
-        # Alterando o nome do arquivo adicionando audio_lingua no meio
-        new_filename = f"{name}_{audio_lingua}{ext}"
-        filepath = os.path.join(app.config['AUDIO_FOLDER'], new_filename)
-        audio_file.save(filepath)
-        
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-        cursor = conn.cursor()
-         
-        # Execute
-        cursor.execute("INSERT INTO display_ref_linguas VALUES (%s,%s)",(questao,new_filename,))
-         
-        # Commit to DB
-        conn.commit()
-
-        #Close connection
-        conn.close()
-        flash('Audio Insirida com sucesso', 'success')
-        return redirect(url_for('audios'))
-    
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-    cursor = conn.cursor()
-    print(id)
-
-    if type == 'formacao':
-       cursor.execute(f"Select * from aula_intro where aula = {id};")
-       audios = cursor.fetchall()
-       print(audios)
-    elif type == 'inquerito':
-       cursor.execute(f"Select * from campanha_base where campanha = {id};")
-       audios = cursor.fetchall()
-       print(audios)   
-    if type == 'aula':
-       cursor.execute(f"Select * from questao_audio where questao_id = {id};")
-       audios = cursor.fetchall()
-       print(audios)
-
-    else:
-       cursor.execute(f"Select * from campanha_audio where questao_id = {id};")
-       audios = cursor.fetchall()
-       print(audios)   
-
-
-    return render_template('audios.html', audios=audios, type=type, id = id)
-
-
+#(funcoes Adiconis, fora do contesto da plataforma)
 
 @app.route('/videos/<type>', methods=['GET','POST'])
 def videos(type):
@@ -4570,8 +4488,6 @@ def buscar_testemunho():
 @app.route('/testes_OV')
 def testes_OV():
       return redirect( url_for('teste_ov',tipo = 'iniciar' )) 
-
-
 
 
 @app.route('/teste_ov/<tipo>',methods=['POST','GET'])
