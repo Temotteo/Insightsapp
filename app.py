@@ -4867,38 +4867,38 @@ def submit_inscricao(idioma):
         titulo = request.form['titulo']
         igreja = request.form['igreja']
         cargo = request.form['cargo']
-        endereco = request.form['endereco']
-        cidade = request.form['cidade']
-        estado = request.form['estado']
-        codigoPostal = request.form['codigoPostal']
-        pais = request.form['pais']
+      #  endereco = request.form['endereco']
+       # cidade = request.form['cidade']
+        #estado = request.form['estado']
+        #codigoPostal = request.form['codigoPostal']
+      #  pais = request.form['pais']
         telefone = request.form['telefone']
         email = request.form['email']
-        acomodacao = request.form['acomodacao']
-        restricoesAlimentares = request.form.get('restricoesAlimentares', '')
-        contatoEmergencia = request.form['contatoEmergencia']
-        telefoneContatoEmergencia = request.form['telefoneContatoEmergencia']
-        sessao = ', '.join(request.form.getlist('sessao'))
-        outroSessao = request.form.get('outroSessao', '')
-        jantarNetworking = request.form['jantarNetworking']
-        oficina = ', '.join(request.form.getlist('oficina'))
-        outraOficina = request.form.get('outraOficina', '')
-        solicitacoesEspeciais = request.form.get('solicitacoesEspeciais', '')
-        taxaInscricao = request.form['taxaInscricao']
-        metodoPagamento = request.form['metodoPagamento']
-        numeroCartao = request.form.get('numeroCartao', '')
-        validadeCartao = request.form.get('validadeCartao', '')
-        cvvCartao = request.form.get('cvvCartao', '')
-        nomeCartao = request.form.get('nomeCartao', '')
-        comentariosAdicionais = request.form.get('comentariosAdicionais', '')
+       # acomodacao = request.form['acomodacao']
+       # restricoesAlimentares = request.form.get('restricoesAlimentares', '')
+       # contatoEmergencia = request.form['contatoEmergencia']
+       # telefoneContatoEmergencia = request.form['telefoneContatoEmergencia']
+       # sessao = ', '.join(request.form.getlist('sessao'))
+       # outroSessao = request.form.get('outroSessao', '')
+       # jantarNetworking = request.form['jantarNetworking']
+       # oficina = ', '.join(request.form.getlist('oficina'))
+       # outraOficina = request.form.get('outraOficina', '')
+       # solicitacoesEspeciais = request.form.get('solicitacoesEspeciais', '')
+       # taxaInscricao = request.form['taxaInscricao']
+       # metodoPagamento = request.form['metodoPagamento']
+       # numeroCartao = request.form.get('numeroCartao', '')
+       # validadeCartao = request.form.get('validadeCartao', '')
+       # cvvCartao = request.form.get('cvvCartao', '')
+       # nomeCartao = request.form.get('nomeCartao', '')
+       # comentariosAdicionais = request.form.get('comentariosAdicionais', '')
     
         # Conectando ao banco de dados e inserindo os dados
         conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
         cur = conn.cursor()
         cur.execute('''
-            INSERT INTO inscricoes (nome, titulo, igreja, cargo, endereco, cidade, estado, codigo_postal, pais, telefone, email, acomodacao, restricoes_alimentares, contato_emergencia, telefone_contato_emergencia, sessao, outro_sessao, jantar_networking, oficina, outra_oficina, solicitacoes_especiais, taxa_inscricao, metodo_pagamento, numero_cartao, validade_cartao, cvv_cartao, nome_cartao, comentarios_adicionais)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ''', (nome, titulo, igreja, cargo, endereco, cidade, estado, codigoPostal, pais, telefone, email, acomodacao, restricoesAlimentares, contatoEmergencia, telefoneContatoEmergencia, sessao, outroSessao, jantarNetworking, oficina, outraOficina, solicitacoesEspeciais, taxaInscricao, metodoPagamento, numeroCartao, validadeCartao, cvvCartao, nomeCartao, comentariosAdicionais))
+            INSERT INTO inscricoes2 (nome, titulo, igreja, cargo,  telefone, email)
+            VALUES (%s, %s, %s, %s, %s)
+        ''', (nome, titulo, igreja, cargo, telefone))
         conn.commit()
         cur.close()
         conn.close()
