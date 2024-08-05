@@ -2388,7 +2388,7 @@ def campanha_n(id, type):
         cursor = connection.cursor()
        
         if type == 'inquerito':
-              cursor.execute(f"SELECT * FROM campanha_question WHERE campanha = {id};")
+              cursor.execute(f"SELECT * FROM campanha_question WHERE campanha_id = {id};")
               result = cursor.fetchall()
 
         else:
@@ -2407,7 +2407,7 @@ def add_question(id, type):
          cursor.execute(f"insert into aula_questao(aula,questao) values({id},'Inicialise a informacao da pergunta') ;")
          conn.commit()
       else:
-          cursor.execute(f"insert into campanha_question(campanha,questao, audios) values({id},'Inicialise a informacao da pergunta', 0) ;")
+          cursor.execute(f"insert into campanha_question(campanha_id,questao, audios) values({id},'Inicialise a informacao da pergunta', 0) ;")
           conn.commit()
       conn.close()
       return redirect(url_for('campanha_n', id= id, type=type))
@@ -2448,16 +2448,75 @@ def add_audio(id):
      return render_template('add_audio.html', id = id, options = choices)
 
 
+@app.route('/aulas/<int:id>/<query>', methods=['GET','POST'])
+@is_logged_in
+def aula( id, query):
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+         tema = request.form['name']
+         if type == 'update':
+            cursor.execute(f"INSERT INTO Aulas (tema, modulo) VALUES ('{tema}', {id}) RETURNING id;")
+            aula_id = cursor.fetchone()[0]
+            conn.commit()
+         
+    choices = request_languge()
+
+    if type == 'add':
+        cursor.execute(f"SELECT tema FROM Aulas WHERE id = {id};")
+        tema = cursor.fetchone()[0]
+        conn.close()
+        return render_template('criar_campanhas.html', options=choices, id=id, campanha=type, tema=tema)
+    
+
+
+def criar_aula(id, tema ,intro, aula_base, con, audio_intro, audio_base, audio_con,audio_lingua ):
+         try:   
+            conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+            cursor = conn.cursor()
+            cursor.execute(f"INSERT INTO Aulas (tema, modulo) VALUES ('{tema}', {id}) RETURNING id;")
+            aula_id = cursor.fetchone()[0]
+            conn.commit()
+            cursor.execute(f"INSERT INTO aula_intro (aula, introducao, audio_base, conclusao, idioma) VALUES ({aula_id}, '{audio_intro}', '{audio_base}', '{audio_con}', '{audio_lingua}');")
+            conn.commit()
+            return flash('Dados inseridos com sucesso', 'success') 
+         except psycopg2.Error as e:
+            return flash('Erro ao enviar dados', 'erro') 
+        
+
+
+def inquerito(id, tema ,intro,  con, audio_intro,  audio_con,audio_lingua ):
+          try:
+            conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+            cursor = conn.cursor()
+            cursor.execute(f" UPDATE campanhas set projecto = '{tema}' where id_campanha = {id}")
+            conn.commit()
+            cursor.execute(f"INSERT INTO campanha_question(campanha_id, descricao, audios, tipo) VALUES ('{id}', '{intro}', 0, 'Introducao') RETURNING id ;")
+            intro_id = cursor.fetchone[0]
+            conn.commit()
+            cursor.execute(f"INSERT INTO campanha_question(campanha_id, descricao, audios, tipo) VALUES ('{id}', '{con}', 0, 'Conclusao') RETURNING id;")
+            conn.commit()
+            con_id = cursor.fetchone[0]
+            cursor.execute(f"INSERT INTO campanha_audio(questao_id, audio, idioma) VALUES ('{intro_id}', '{audio_intro}', '{audio_lingua}');")
+            conn.commit()
+            cursor.execute(f"INSERT INTO campanha_audio(questao_id, audio, idioma) VALUES ('{con_id}', '{audio_con}', '{audio_lingua}');")
+            conn.commit()  
+            return flash('Dados inseridos com sucesso', 'success')  
+          except psycopg2.Error as e:
+            return flash('Erro ao enviar dados', 'erro')      
+       
+
+
+    
+
+
 
 @app.route('/criar_campanhas/<type>/<int:id>', methods=['GET','POST'])
 @is_logged_in
 def criar_campanhas(type, id):
     # Obter o ID da organização da sessão
     org_id = session['last_org']
-    
-    # Conectar ao banco de dados
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-    cursor = conn.cursor()
 
     if request.method == 'POST':
         
@@ -2465,48 +2524,41 @@ def criar_campanhas(type, id):
         tema = request.form['name']
         id = request.form['campanha']
         audio_lingua = request.form['idioma']
+        introducao = request.form['introducao']
+        conclusao = request.form['conclusao']
+       
 
         # Obter e salvar arquivos de áudio
-        introducao = request.files['intro']
-        audio_intro = secure_filename(introducao.filename)
+        intro= request.files['intro']
+        audio_intro = secure_filename(intro.filename)
         
-        conclusao = request.files['conclusao']
-        audio_con = secure_filename(conclusao.filename)
+        con = request.files['con']
+        audio_con = secure_filename(con.filename)
 
-        introducao.save(os.path.join(app.config['AUDIO_FOLDER'], audio_intro))
-        conclusao.save(os.path.join(app.config['AUDIO_FOLDER'], audio_con))
+        intro.save(os.path.join(app.config['AUDIO_FOLDER'], audio_intro))
+        con.save(os.path.join(app.config['AUDIO_FOLDER'], audio_con))
 
-        # Se a campanha não for do tipo 'inquérito', obter e salvar o áudio adicional
-        if type != 'inquerito':
-            audio = request.files['audio']
-            audio_base = secure_filename(audio.filename)
-            audio.save(os.path.join(app.config['AUDIO_FOLDER'], audio_base))
-
-        # Se id é '0', criar uma nova campanha
-        if id == '0':
-            print(id)
-            cursor.execute("SELECT * FROM campanhas;")
-            ref = 36 + len(cursor.fetchall())
-            cursor.execute(f"INSERT INTO campanhas (orgid, campanha_ref, status, tipo) VALUES ('{org_id}', 'campanha_{ref}', 'inativo', '{type}') RETURNING id_campanha;")
-            id = int(cursor.fetchone()[0])
-            conn.commit()
+       
+        cursor.execute("SELECT * FROM campanhas;")
+        ref = 36 + len(cursor.fetchall())
+        cursor.execute(f"INSERT INTO campanhas (orgid, campanha_ref, status, tipo) VALUES ('{org_id}', 'campanha_{ref}', 'inativo', '{type}') RETURNING id_campanha;")
+        id = int(cursor.fetchone()[0])
+        conn.commit()
         
+
         # Inserir dados na tabela correspondente, dependendo do tipo de campanha
         if type == 'inquerito':
-            cursor.execute(f"INSERT INTO campanha_ref VALUES ('{audio_intro}', '{audio_con}', '{audio_lingua}', '{tema}', {id});")
-            conn.commit()
-        elif type == 'formacao':
-            cursor.execute(f"INSERT INTO Aulas (tema, modulo) VALUES ('{tema}', {id}) RETURNING id;")
-            aula_id = cursor.fetchone()[0]
-            conn.commit()
-            cursor.execute(f"INSERT INTO aula_intro (aula, introducao, audio_base, conclusao, idioma) VALUES ({aula_id}, '{audio_intro}', '{audio_base}', '{audio_con}', '{audio_lingua}');")
-            conn.commit()
-        else:
-            cursor.execute(f"INSERT INTO aula_intro (aula, introducao, audio_base, conclusao, idioma) VALUES ({id}, '{audio_intro}', '{audio_base}', '{audio_con}', '{audio_lingua}');")
-            type = 'formacao'
-            conn.commit()
-            print('viva')
+           inquerito(id, tema ,introducao, conclusao, audio_intro, audio_con,audio_lingua )
+        
+        if type == 'formacao':
+           aula_base = request.form['aula_base']
+           audio = request.files['audio']
+           audio_base = secure_filename(audio.filename)
+           audio.save(os.path.join(app.config['AUDIO_FOLDER'], audio_base))
+           inquerito(id, tema ,introducao, aula_base , conclusao, audio_intro,audio_base, audio_con,audio_lingua )
 
+
+        
         # Exibir mensagem de sucesso
         flash('Dados inseridos com sucesso', 'success')
         
@@ -2515,16 +2567,6 @@ def criar_campanhas(type, id):
 
     # Obter opções de idioma
     choices = request_languge()
-
-    # Se o tipo for 'formacao_add', obter o tema da aula e renderizar o template com as opções
-    if type == 'formacao_add':
-        cursor.execute(f"SELECT tema FROM Aulas WHERE id = {id};")
-        tema = cursor.fetchone()[0]
-        conn.close()
-        return render_template('criar_campanhas.html', options=choices, id=id, campanha=type, tema=tema)
-    
-    # Fechar a conexão com o banco de dados
-    conn.close()
 
     # Renderizar o template com as opções
     return render_template('criar_campanhas.html', options=choices, id=id, campanha=type)
