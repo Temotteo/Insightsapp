@@ -26,7 +26,7 @@
           <label for="Idioma"><i class="fa fa-language" aria-hidden="true"></i> Idiomas</label>
          <select name="idioma" id="idioma">
           {% for option in options %}
-                      <option value="{{option}}">{{option}}</option>
+                      <option value="{{option[1]}}">{{option[1]}}</option>
                       {% endfor %}
          </select>
         </div>

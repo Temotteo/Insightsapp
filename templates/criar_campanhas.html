@@ -58,7 +58,7 @@
       <input type="hidden" id="id" name="campanha" value="{{id}}">
 
       <fieldset>
-        <legend>Detalhes da/o {% if campanha == 'formacao' %}{% set campanha = 'Aula' %}Aula {% else %}{{campanha}}{% endif %}</legend>
+        <legend>{% if campanha == 'formacao' %}{% set campanha = 'Aula' %}Aula {% else %}{{campanha}}{% endif %}</legend>
         
         <label for="name">Tema:</label>
         {% if tema %}
@@ -78,11 +78,11 @@
       </fieldset>
 
       <fieldset>
-        <legend>Áudios da/o {{campanha}}</legend>
+        <legend>Descricão da/o {{campanha}}</legend>
         
-        <label for="question_audio" class="mt-4">URL do Áudio de Introdução:</label>
+        <label for="question_audio" class="mt-4">Descricão Introdução:</label>
         <div class="input-group mb-3">
-          <input type="text" id="intro_audio" placeholder="" class="input-custom" name="intro_audio">
+          <input type="text" id="introducao" name="introducao" placeholder="" class="input-custom" name="intro_audio">
           <div class="file-upload">
             <label for="file-upload1" class="custom-file-upload">
               <i class="fas fa-cloud-upload-alt"></i> Upload
@@ -99,11 +99,11 @@
           {% if campanha == 'Aula' %}
             <label for="audio">URL do Áudio da Aula:</label>
           {% else %}
-            <label for="audio">URL do Áudio da Campanha:</label>
+            <label for="audio">Áudio da Campanha:</label>
           {% endif %}
           
           <div class="input-group mb-3">
-            <input type="text" id="audio" class="input-custom" name="audio_base">
+            <input type="text" id="audio" class="input-custom" name="aula_base">
             <div class="file-upload">
               <label for="file-upload" class="custom-file-upload">
                 <i class="fas fa-cloud-upload-alt"></i> Upload
@@ -117,14 +117,14 @@
           </div>
         {% endif %}
         
-        <label for="question_audio">URL do Áudio de Conclusão:</label>
+        <label for="question_audio">Descricão da Conclusão:</label>
         <div class="input-group mb-3">
-          <input type="text" id="con_audio" name="con_audio" class="input-custom">
+          <input type="text" id="con_audio" name="conclusao" class="input-custom">
           <div class="file-upload">
             <label for="file-upload2" class="custom-file-upload">
               <i class="fas fa-cloud-upload-alt"></i> Upload
             </label>
-            <input id="file-upload2" type="file" name="conclusao" accept="audio/*" class="file-upload-input px-2"/>
+            <input id="file-upload2" type="file" name="con" accept="audio/*" class="file-upload-input px-2"/>
           </div>
         </div>
         <div class="audio-preview-container" id="audio-insert2">
@@ -140,10 +140,8 @@
   <script>
     document.getElementById('file-upload1').addEventListener('change', function(event) {
       var audioPreview = document.getElementById('audio-preview1');
-      var introAudio = document.getElementById('intro_audio');
       var audioInsert = document.getElementById('audio-insert1');
       var file = event.target.files[0];
-      introAudio.value = event.target.value;
       if (file) {
         var reader = new FileReader();
         reader.onload = function(e) {
@@ -157,9 +155,7 @@
     function audioPreviw() {
       var audioPreview = document.getElementById('audio-preview');
       var audioInsert = document.getElementById('audio-insert');
-      var lessonAudio = document.getElementById('audio');
       var file = event.target.files[0];
-      lessonAudio.value = event.target.value;
       if (file) {
         var reader = new FileReader();
         reader.onload = function(e) {
@@ -173,9 +169,7 @@
     document.getElementById('file-upload2').addEventListener('change', function(event) {
       var audioPreview = document.getElementById('audio-preview2');
       var audioInsert = document.getElementById('audio-insert2');
-      var conAudio = document.getElementById('con_audio');
       var file = event.target.files[0];
-      conAudio.value = event.target.value;
       if (file) {
         var reader = new FileReader();
         reader.onload = function(e) {
