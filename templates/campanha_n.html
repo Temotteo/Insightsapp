@@ -24,7 +24,7 @@
       {% if column[4] == 'Introducao '  or column[4] == 'campanha' or  column[4] == 'Aula'  %} 
       <td>{{ column[4] }}</td>
       {% elif column[4] == 'Pergunta' %}
-        <td>pergunta {{loop.index }}</td>
+        <td>pergunta {{loop.index -1 }}</td>
         {% else  %} 
         <td>{{ column[4] }}</td>
         {% endif %}
