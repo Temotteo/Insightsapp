@@ -2388,7 +2388,7 @@ def campanha_n(id, type):
             result = cursor.fetchall()
 
         else:
-            cursor.execute(f"SELECT * FROM campanha_question WHERE campanha_id = {id};")
+            cursor.execute(f"SELECT * FROM campanha_question WHERE campanha_id = {id} ORDER BY tipo DESC;")
             result = cursor.fetchall()
            
             

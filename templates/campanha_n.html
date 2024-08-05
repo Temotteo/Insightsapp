@@ -4,7 +4,7 @@
 {% block body%}
 <div class="container my-5">
 
-  <h1>{% if type == 'formacao' %} Aula {% else %} Inquerito {% endif %}- {{id}}</h1>
+  <h1>{% if type == 'formacao' %} Aula {% elif type == 'simples' %} Campanha Simples {% else %} Inquerito {% endif %}</h1>
   <hr>
   <table class="table table-striped" id="dataTable">
     <tr>
@@ -19,17 +19,19 @@
 
     </tr>
     {% for column in columns_list %}
+      
       <tr>
-      {% if column[4] == 'Introducao' or column[4] == 'Aula'  or column[4] == 'campanha'  %} 
+      {% if column[4] == 'Introducao '  or column[4] == 'campanha' or  column[4] == 'Aula'  %} 
       <td>{{ column[4] }}</td>
       {% elif column[4] == 'Pergunta' %}
         <td>pergunta {{loop.index }}</td>
         {% else  %} 
         <td>{{ column[4] }}</td>
         {% endif %}
-        <td>{{ column[2] }}</td>
-       
 
+
+    <td>{{ column[2] }}</td>
+       
 
     {% if type == 'formacao' %} 
     <td>
@@ -42,7 +44,7 @@
        {% endif %}
      </td>
         <td><a href="/perguntas/{{column[0]}}/{{type}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
-        <td><a href="/assign_question/{{id}}/{{column[0]}}/questao" class="btn btn-default pull-right">{% if column[4] == 'Introducao' or column[4] == 'Aula'  or column[4] == 'Conclusao'  %} Editar {{column[4]}} {% else %} Editar Pergunta {% endif %}</a></td>
+        <td><a href="/assign_question/{{id}}/{{column[0]}}/questao" class="btn btn-default pull-right">{% if column[4] == 'Introducao' or column[4] == 'Aula'  or column[4] == 'Conclusao' or column[4] == 'campanha'  %} Editar {{column[4]}} {% else %} Editar Pergunta {% endif %}</a></td>
         <td><a href="#" class="btn btn-default pull-right"><strike>Adicionar Audio</strike></a></td>
 
         {% else %}
@@ -64,7 +66,7 @@
      {% else %}
         <td><a href="/perguntas/{{column[1]}}/{{type}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
         {% endif %}
-        <td><a href="/assign_question/{{id}}/{{column[1]}}/questao" class="btn btn-default pull-right">{% if column[4] == 'Introducao' or column[4] == 'Aula'  or column[4] == 'Conclusao'  %} Editar {{column[4]}} {% else %} Editar Pergunta {% endif %}</a></td>
+        <td><a href="/assign_question/{{id}}/{{column[1]}}/questao" class="btn btn-default pull-right">{% if column[4] == 'Introducao' or column[4] == 'Aula'  or column[4] == 'Conclusao' or column[4] == 'campanha'  %} Editar {{column[4]}} {% else %} Editar Pergunta {% endif %}</a></td>
         <td><a href="/assign_question/{{id}}/{{column[1]}}/audio" class="btn btn-default pull-right" >Adicionar Audio</a></td>
 
         {% endif %}
