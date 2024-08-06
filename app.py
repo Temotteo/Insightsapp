@@ -712,130 +712,138 @@ class ProformaInvoiceForm(FlaskForm):
     generate_invoice = SubmitField('Generate Invoice')
 
 
-# Add contact
 @app.route('/add_contact', methods=['GET', 'POST'])
 @is_logged_in
 def add_contact():
-   org_id =session['last_org']
-   try: 
-     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-     cursor = conn.cursor()
-     cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contact_org.org_id = '{org_id}';")
-     contacts = cursor.fetchall()
-     cursor.execute("SELECT * FROM grupo ;")
-     grupo = cursor.fetchall()
-     conn.close()
-   except psycopg2.Error as e:
-     error_msg = f"Erro ao fazer a transação: {e}"
-     return render_template('erro.html', error=error_msg) 
-   
-   #Verifica se o saldo e suficiente para prosseguir
-   if session['saldo'] == '00.0':
-     agent = 'Saldo insuficiente, Recarregue a sua conta!'
-     return render_template('add_contat.html', contacts=contacts, grupo = grupo, agent= agent)
+    # Obtém o ID da organização da sessão do usuário
+    org_id = session['last_org']
     
-   
-   if request.method == 'POST':
-     file = request.files['file']
-     if file:
-        df = pd.read_excel(file)      
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-        cur = conn.cursor()
-        # Iterar sobre as linhas do DataFrame e inserir os dados no banco de dados
-        for index, row in df.iterrows():
-            valores = row.to_json()
-            insert_query = "INSERT INTO contacts (dados_contactos) VALUES (%s) RETURNING id;"
-            try:
-             cur.execute(insert_query, [valores])
-             inserted_id = cur.fetchone()[0]
-             conn.commit()
-             print(f"Inserido ID: {inserted_id}")
-             cur.execute("INSERT INTO contact_org VALUES (%s,%s);",(inserted_id,org_id,))
-             conn.commit()
-            except Exception as e:
-             print(f"Erro ao inserir a linha {index}: {e}")
-   
-        conn.close()
-        return redirect(url_for('add_contact'))
-            
-     else:
-        grupo_id = request.form['grupo']
+    try:
+        # Conectar ao banco de dados PostgreSQL
         conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
         cursor = conn.cursor()
-        cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where  contact_org.org_id = '{org_id}' LIMIT 1;")
-        contactos = cursor.fetchone()
+        
+        # Recuperar todos os contatos associados à organização
+        cursor.execute(f"SELECT * FROM contacts JOIN contact_org ON contacts.id = contact_org.id_cont WHERE contact_org.org_id = '{org_id}';")
+        contacts = cursor.fetchall()
+        
+        # Recuperar todos os grupos disponíveis
+        cursor.execute("SELECT * FROM grupo;")
+        grupo = cursor.fetchall()
+        
+        # Fechar a conexão com o banco de dados
         conn.close()
-        dados = {}
-        for contact in contactos[6]:  
-             # Pegando o nome do campo a ser atualizado
-             field = contact
-             dados[field] = []
-
-             if field:
-                # Atualizando o campo específico com o valor do formulário
-                field_to_update = request.form[field]
-                print(field_to_update)
-                # Insere o valor atualizado no dicionário dados
-                # intera sobre os dados no formato Json para dinamizar os atributos do contacto
-                # as organizacao podem ter diferentes  atributos para a insercao dos seus contacto.
-                # quando esse atributos sao colocados em JSON ele pode aceitar receber qualquer tipo de atributo de forma dinamica
-       
-                dados[field] = field_to_update
+    
+    except psycopg2.Error as e:
+        # Em caso de erro, exibir uma página de erro
+        error_msg = f"Erro ao fazer a transação: {e}"
+        return render_template('erro.html', error=error_msg)
+    
+    # Verifica se o saldo é suficiente para prosseguir
+    if session['saldo'] == '00.0':
+        agent = 'Saldo insuficiente, Recarregue a sua conta!'
+        return render_template('add_contat.html', contacts=contacts, grupo=grupo, agent=agent)
+    
+    if request.method == 'POST':
+        file = request.files['file']
         
-       
-        try:
-         #Connect to database
-         conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-          
-         # Create cursor
-         cursor = conn.cursor()
-   
-         #verifica se o contacto ja existe!
-         
-         for field, values in dados.items():
-             cursor.execute(f"SELECT * FROM contacts WHERE phone = '{values[-1]}';")
-             cont = cursor.fetchone()
-   
-             #verifica se o contacto ja existe na organizacao!
-             cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contacts.phone ='{values[-1]}' and contact_org.org_id = '{org_id}';")
-             contactos = cursor.fetchone()
-        except psycopg2.Error as e:
-          error_msg = f"Erro ao fazer a transação: {e}"
-          return render_template('erro.html', error=error_msg) 
+        if file:
+            # Se um arquivo for enviado, processa o arquivo Excel
+            df = pd.read_excel(file)
+            conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+            cur = conn.cursor()
+            
+            # Iterar sobre as linhas do DataFrame e inserir os dados no banco de dados
+            for index, row in df.iterrows():
+                valores = row.to_json()  # Converte a linha para formato JSON
+                insert_query = "INSERT INTO contacts (dados_contactos) VALUES (%s) RETURNING id;"
+                try:
+                    cur.execute(insert_query, [valores])
+                    inserted_id = cur.fetchone()[0]
+                    conn.commit()
+                    print(f"Inserido ID: {inserted_id}")
+                    cur.execute("INSERT INTO contact_org VALUES (%s, %s);", (inserted_id, org_id))
+                    conn.commit()
+                except Exception as e:
+                    print(f"Erro ao inserir a linha {index}: {e}")
+            
+            conn.close()
+            return redirect(url_for('add_contact'))
         
-        #verifica se o contacto ja existe na organizacao! e lanca uma mensagem de baramento
-        if contactos:
-             erro = 'Este número de telefone já está registrado.'
-             return render_template('add_contat.html', contacts=contacts, grupo = grupo,erro =erro)
-        else:    
-           # Insert a new contact into the database
-           insert_query1 = '''
-               INSERT INTO contacts (dados_contactos)
-               VALUES (%s) RETURNING id;
-               '''
-           insert_query2 = '''
-               INSERT INTO contact_org (id_cont, org_id)
-               VALUES (%s, %s);
-               '''
-           
-           #verifica se o contacto ja existe e pula a sua insercao
-           if not cont:
-              cursor.execute(insert_query1, (extras.Json(dados),))
-              contact_id = cursor.fetchone()[0]
-              conn.commit()
-   
-           else:
-              contact_id = cont[0]  
-              cursor.execute(insert_query2, (contact_id, org_id))
-           conn.commit()
-           
-   
-           cursor.execute(f"SELECT * FROM contacts where id in (select id_cont from contact_org where org_id = '{org_id}');")
-           contacts = cursor.fetchall()
-           conn.close()
-           return render_template('add_contat.html', contacts=contacts,grupo = grupo)
+        else:
+            # Se não for um arquivo, trata a atualização de contatos
+            grupo_id = request.form['grupo']
+            conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+            cursor = conn.cursor()
+            
+            # Recuperar o primeiro contato da organização
+            cursor.execute(f"SELECT * FROM contacts JOIN contact_org ON contacts.id = contact_org.id_cont WHERE contact_org.org_id = '{org_id}' LIMIT 1;")
+            contactos = cursor.fetchone()
+            conn.close()
+            
+            dados = {}
+            for contact in contactos[6]:  
+                field = contact
+                dados[field] = []
 
-   return render_template('add_contat.html', contacts=contacts, grupo = grupo)
+                if field:
+                    # Atualiza o campo específico com o valor do formulário
+                    field_to_update = request.form[field]
+                    print(field_to_update)
+                    dados[field] = field_to_update
+            
+            try:
+                # Conectar ao banco de dados para verificação e inserção
+                conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+                cursor = conn.cursor()
+                
+                # Verifica se o contato já existe
+                for field, values in dados.items():
+                    cursor.execute(f"SELECT * FROM contacts WHERE phone = '{values[-1]}';")
+                    cont = cursor.fetchone()
+                    
+                    # Verifica se o contato já existe na organização
+                    cursor.execute(f"SELECT * FROM contacts JOIN contact_org ON contacts.id = contact_org.id_cont WHERE contacts.phone = '{values[-1]}' AND contact_org.org_id = '{org_id}';")
+                    contactos = cursor.fetchone()
+            
+            except psycopg2.Error as e:
+                # Em caso de erro, exibir uma página de erro
+                error_msg = f"Erro ao fazer a transação: {e}"
+                return render_template('erro.html', error=error_msg)
+            
+            # Verifica se o contato já existe na organização e exibe mensagem de erro se necessário
+            if contactos:
+                erro = 'Este número de telefone já está registrado.'
+                return render_template('add_contat.html', contacts=contacts, grupo=grupo, erro=erro)
+            else:
+                # Insere um novo contato na base de dados
+                insert_query1 = '''
+                    INSERT INTO contacts (dados_contactos)
+                    VALUES (%s) RETURNING id;
+                '''
+                insert_query2 = '''
+                    INSERT INTO contact_org (id_cont, org_id)
+                    VALUES (%s, %s);
+                '''
+                
+                if not cont:
+                    cursor.execute(insert_query1, (extras.Json(dados),))
+                    contact_id = cursor.fetchone()[0]
+                    conn.commit()
+                else:
+                    contact_id = cont[0]
+                    cursor.execute(insert_query2, (contact_id, org_id))
+                
+                conn.commit()
+                
+                # Atualizar a lista de contatos após inserção
+                cursor.execute(f"SELECT * FROM contacts WHERE id IN (SELECT id_cont FROM contact_org WHERE org_id = '{org_id}');")
+                contacts = cursor.fetchall()
+                conn.close()
+                return render_template('add_contat.html', contacts=contacts, grupo=grupo)
+
+    # Renderiza o template de contatos e grupos para GET requests e quando o POST não é um arquivo
+    return render_template('add_contat.html', contacts=contacts, grupo=grupo)
   
 
 # essa funcao deleta uma lista de contactos referentes as linhas selecionadas na tabela
@@ -975,9 +983,9 @@ def delete_contact(id):
         return render_template('erro.html', error=error_msg) 
 
 
-@app.route('/detalhes_contact/<int:id>', methods=['GET','POST'])
+@app.route('/contact_info/<int:id>', methods=['GET','POST'])
 @is_logged_in
-def detalhes_contact(id):
+def contact_info(id):
    org_id = session['last_org']
    try:
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
@@ -997,7 +1005,7 @@ def detalhes_contact(id):
     grupo= cur.fetchall()
     conn.close()
     print(contacts)
-    return render_template('detalhes_de_contactos.html', contact=contacts, grupo=grupo, grupos=grupos)
+    return render_template('contact_info.html', contact=contacts, grupo=grupo, grupos=grupos)
    except psycopg2.Error as e:
         error_msg = f"Erro ao fazer a transação: {e}"
         return render_template('erro.html', error=error_msg) 
@@ -1015,7 +1023,7 @@ def add_group(id):
     cursor.execute(insert_query)
     conn.commit()
     conn.close()
-    return redirect(url_for('detalhes_contact',id=int(id)))
+    return redirect(url_for('contact_info',id=int(id)))
    except psycopg2.Error as e:
         error_msg = f"Erro ao fazer a transação: {e}"
         return render_template('erro.html', error=error_msg) 
@@ -1029,7 +1037,7 @@ def remove_group(id):
     conn.commit()
     conn.close()
     sucesso = "Cliente Removido com sucesso"
-    return redirect(url_for('detalhes_contact',id=int(id)))
+    return redirect(url_for('contact_info',id=int(id)))
    except psycopg2.Error as e:
         error_msg = f"Erro ao fazer a transação: {e}"
         return render_template('erro.html', error=error_msg)    
@@ -1994,6 +2002,52 @@ def testes():
     return render_template('testes.html', form = form)
 
 
+@app.route('/enviar_sms_grupo', methods=['GET','POST'])
+@is_logged_in
+def enviar_sms_grupo():
+        org_id = session['last_org']
+        form = SmsForm(request.form)
+        data = request.get_json()
+    
+        grupo_id = data.get('grupo')
+        mensagem = data.get('mensagem')
+        Sender_id = data.get('Sender_id')
+        
+        print(mensagem)
+        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+
+        cursor = conn.cursor()
+
+        cursor.execute(f"SELECT * FROM contacts join contact_group on contacts.id = contact_group.id_cont where contact_group.grp_id = '{grupo_id}';")
+        
+        sms_grupo=cursor.fetchall()
+
+        account_sid = "AC952933e9303a9c0021be3c0ce432caec"
+        auth_token = "5e14a5105201307f6d9a77af3fd81853"
+        
+        #message_sid = 'SMbc7fc62463f463c39ba12f9be200802a'
+    
+        for sms in sms_grupo:
+          message_sid = send_sms(mensagem,str("+258"+sms[3]),Sender_id)
+          client = Client(account_sid, auth_token)
+          messagem = client.messages(message_sid).fetch()
+          status = messagem.status
+          cmd='INSERT INTO envio_sms(mensagem, contato, nv_enviadas, sender_id, status_sms) VALUES ('+"'"+mensagem+"'"+",'"+str("+258"+sms[3])+"','0','"+org_id+"'"+status+"'"+') RETURNING id_alerta'
+          cursor.execute(cmd)
+          conn.commit()
+
+        conn.close()  
+        return redirect(url_for('sucesso_sms'))
+
+
+@app.route('/sucesso_sms', methods=['GET'])
+@is_logged_in
+def sucesso_sms():
+        form = SmsForm(request.form)
+        flash('Teste criado com sucesso', 'success')
+        return render_template('testes.html', form = form)
+
+
 def status_sms(message_sid):
     message = Client.messages(message_sid).fetch()
     status_msg = message.status
@@ -2384,7 +2438,7 @@ def campanha_n(id, type):
         cursor = connection.cursor()
        
         if type == 'formacao':
-            cursor.execute(f"SELECT * FROM aula_questao WHERE aula = {id};")
+            cursor.execute(f"SELECT * FROM aula_info WHERE aula = {id};")
             result = cursor.fetchall()
 
         else:
@@ -2397,18 +2451,28 @@ def campanha_n(id, type):
 
 @app.route('/add_question/<id>/<type>', methods=['GET', 'POST'])
 def add_question(id, type):
+      # Conecte-se ao banco de dados PostgreSQL
       conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
       cursor = conn.cursor()
+      
+      # Converta o id de string para inteiro
       id = int(id)
+      
+      # Verifique o tipo de campanha e insira a pergunta apropriada
       if type == 'formacao':
-         cursor.execute(f"insert into aula_questao(aula,descricao) values({id},'Inicialise a informacao da pergunta') ;")
+         # Insere a pergunta na tabela aula_info para formação
+         cursor.execute(f"INSERT INTO aula_info(aula, descricao, audios, tipo) VALUES (%s, %s, %s, %s);", (id, 'Inicialise a informacao da pergunta', 0, 'Pergunta'))
          conn.commit()
       else:
-          cursor.execute(f"insert into campanha_question(campanha_id,descricao, audios,tipo) values({id},'Inicialise a informacao da pergunta', 0, 'Pergunta') ;")
-          conn.commit()
+         # Insere a pergunta na tabela campanha_question para campanha
+         cursor.execute(f"INSERT INTO campanha_question(campanha_id, descricao, audios, tipo) VALUES (%s, %s, %s, %s);", (id, 'Inicialise a informacao da pergunta', 0, 'Pergunta'))
+         conn.commit()
 
+      # Feche a conexão com o banco de dados
       conn.close()
-      return redirect(url_for('campanha_n', id= id, type=type))
+      
+      # Redirecione para a página de campanha correspondente
+      return redirect(url_for('campanha_n', id=id, type=type))
 
 
 @app.route('/audios/<int:id>/<string:type>', methods=['GET', 'POST'])
@@ -2419,92 +2483,138 @@ def audios(id, type):
     
     # Conectar ao banco de dados dentro de um bloco 'with' para garantir que a conexão seja fechada
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-    cursor = conn.cursor() 
+    cursor = conn.cursor()
 
+    # Executar uma função armazenada para verificar a tabela associada ao 'id' fornecido
     cursor.execute("SELECT verificar_tabela_por_id(%s)", (id,))
     result = cursor.fetchone()[0]
-        
-    if result == 'campanha' :
-        cursor.execute(f"SELECT * FROM campanha_audio WHERE questao_id = {id} ;")
+          
+    if result == 'campanha':
+        # Se a tabela associada é 'campanha', selecionar todos os áudios da tabela 'campanha_audio'
+        cursor.execute(f"SELECT * FROM campanha_audio WHERE questao_id = {id};")
         audios = cursor.fetchall()
-        print(audios)  
+        print(audios)  # Exibir os áudios no console (para depuração)
 
     else:
+        # Se a tabela associada é 'aula', selecionar todos os áudios da tabela 'aula_audio'
         cursor.execute(f"SELECT * FROM aula_audio WHERE questao_id = {id};")
         audios = cursor.fetchall()
-        print(audios)     
-               
+        print(audios)  # Exibir os áudios no console (para depuração)
 
-    # Renderizar o template de áudios com os dados obtidos
+    # Fechar o cursor e a conexão com o banco de dados
+    cursor.close()
+    conn.close()
+
+    # Renderizar o template 'audios.html' com os dados obtidos, incluindo o tipo e id
     return render_template('audios.html', audios=audios, type=type, id=id)
 
 
 
-@app.route('/add_audio/<id>', methods=['GET', 'POST'])
+@app.route('/add_audio/<int:id>', methods=['GET', 'POST'])
 def add_audio(id):
-     if request.method == 'POST':   
-           conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-           cursor = conn.cursor()
-           id = int(id)
-           audio = request.files['audio']
-           audio_lingua = request.form['idioma']
-     
-           audio_filename = secure_filename(audio.filename)
-           audio.save(os.path.join(app.config['AUDIO_FOLDER'], audio_filename))
-     
-           cursor.execute(f"SELECT * FROM aula_audio where questao_id = {id}")
-     
-           dados=cursor.fetchall()
-           
-           if dados:
-              numero = len(dados)
-              questao_nr = numero + 1
-
-           else:
-               questao_nr = 1    
-           
-           cursor.execute(f"insert into aula_audio(questao_id, questao_nr, audio, idioma) values({id}, {questao_nr},'{audio_filename}','{audio_lingua}') ")
-           conn.commit()
-           conn.close()
-           return redirect(url_for('campanha_n', id= id, type=type))
-     
-     choices = request_languge()
-     print(choices)
-     
-     return render_template('add_audio.html', id = id, options = choices)    
-
-
-def criar_aula(id, tema ,intro, base, con, audio_intro, audio_base, audio_con,audio_lingua ):
-         try:   
+    # Verifica se o método da requisição é POST
+    if request.method == 'POST':
+        try:
+            # Conecta ao banco de dados PostgreSQL usando as credenciais fornecidas
             conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
             cursor = conn.cursor()
-            cursor.execute(f"INSERT INTO Aulas (tema, modulo) VALUES ('{tema}', {id}) RETURNING id;")
-            aula_id = cursor.fetchone()[0]
+            
+            # Converte o id de string para inteiro
+            id = int(id)
+            
+            # Obtém o arquivo de áudio enviado pelo usuário
+            audio = request.files['audio']
+            audio_lingua = request.form['idioma']
+            
+            # Salva o arquivo de áudio no servidor com um nome seguro
+            audio_filename = secure_filename(audio.filename)
+            audio.save(os.path.join(app.config['AUDIO_FOLDER'], audio_filename))
+            
+            # Verifica se já existem registros de áudio para a questão fornecida
+            cursor.execute("SELECT * FROM aula_audio WHERE questao_id = %s", (id,))
+            dados = cursor.fetchall()
+            
+            # Determina o número da questão com base na quantidade de registros existentes
+            if dados:
+                questao_nr = len(dados) + 1
+            else:
+                questao_nr = 1
+            
+            # Insere um novo registro de áudio na tabela aula_audio
+            cursor.execute(
+                "INSERT INTO aula_audio (questao_id, questao_nr, audio, idioma) VALUES (%s, %s, %s, %s)",
+                (id, questao_nr, audio_filename, audio_lingua)
+            )
+            conn.commit()
+        
+        except (Exception, psycopg2.DatabaseError) as error:
+            # Imprime o erro, se houver
+            print(f"Erro ao executar a query: {error}")
+        
+        finally:
+            # Fecha a conexão com o banco de dados
+            if conn is not None:
+                conn.close()
+        
+        # Redireciona para a página de campanha correspondente
+        return redirect(url_for('campanha_n', id=id, type=type))
+    
+    # Obtém as opções de idioma para o formulário
+    choices = request_languge()
+    print(choices)
+    
+    # Renderiza o template add_audio.html com as opções de idioma
+    return render_template('add_audio.html', id=id, options=choices)
+
+
+def criar_aula(id, tema, intro, base, con, audio_intro, audio_base, audio_con, audio_lingua):
+    try:
+        # Estabelece uma conexão com o banco de dados PostgreSQL usando psycopg2
+        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        cursor = conn.cursor()
+        
+        # Insere um novo registro na tabela 'Aulas' e retorna o 'id' gerado
+        cursor.execute(f"INSERT INTO Aulas (tema, modulo) VALUES ('{tema}', {id}) RETURNING id;")
+        aula_id = cursor.fetchone()[0]
+        conn.commit()
+
+        # Insere um novo registro na tabela 'aula_info' para a introdução da aula e retorna o 'questao_id' gerado
+        cursor.execute(f"INSERT INTO aula_info(aula, descricao, audios, tipo) VALUES ('{aula_id}', '{intro}', 0, 'Introducao') RETURNING questao_id;")
+        intro_id = cursor.fetchone()[0]
+        conn.commit()
+
+        # Insere um novo registro na tabela 'aula_info' para o conteúdo da aula e retorna o 'questao_id' gerado
+        cursor.execute(f"INSERT INTO aula_info(aula, descricao, audios, tipo) VALUES ('{aula_id}', '{base}', 0, 'aula') RETURNING questao_id;")
+        tema_id = cursor.fetchone()[0]
+        conn.commit()
+
+        # Insere um novo registro na tabela 'aula_info' para a conclusão da aula e retorna o 'questao_id' gerado
+        cursor.execute(f"INSERT INTO aula_info(aula, descricao, audios, tipo) VALUES ('{aula_id}', '{con}', 0, 'Conclusao') RETURNING questao_id;")
+        con_id = cursor.fetchone()[0]
+        conn.commit()
+
+        # Se o áudio de introdução foi fornecido, insere-o na tabela 'aula_audio'
+        if audio_intro:
+            cursor.execute(f"INSERT INTO aula_audio(questao_id, audio, idioma) VALUES ('{intro_id}', '{audio_intro}', '{audio_lingua}');")
             conn.commit()
 
-            cursor.execute(f"INSERT INTO aula_info(aula_id, descricao, audios, tipo) VALUES ('{aula_id}', '{intro}', 0, 'Introducao') RETURNING questao_id ;")
-            intro_id = cursor.fetchone()[0]
+        # Se o áudio base foi fornecido, insere-o na tabela 'aula_audio'
+        if audio_base:
+            cursor.execute(f"INSERT INTO aula_audio(questao_id, audio, idioma) VALUES ('{tema_id}', '{audio_base}', '{audio_lingua}');")
             conn.commit()
 
-            cursor.execute(f"INSERT INTO aula_info(aula_id, descricao, audios, tipo) VALUES ('{aula_id}', '{base}', 0, 'aula') RETURNING questao_id;")
-            tema_id = cursor.fetchone()[0]
+        # Se o áudio de conclusão foi fornecido, insere-o na tabela 'aula_audio'
+        if audio_con:
+            cursor.execute(f"INSERT INTO aula_audio(questao_id, audio, idioma) VALUES ('{con_id}', '{audio_con}', '{audio_lingua}');")
             conn.commit()
 
-            cursor.execute(f"INSERT INTO aula_info(aula_id, descricao, audios, tipo) VALUES ('{aula_id}', '{con}', 0, 'Conclusao') RETURNING questao_id;")
-            conn.commit()
-            con_id = cursor.fetchone()[0]
+        return aula_id
+    
+    except psycopg2.Error as e:
+        # Se ocorrer um erro durante a operação, exibe uma mensagem de erro usando flash
+        return flash(f'Erro ao enviar dados {e}', 'error')
 
-            cursor.execute(f"INSERT INTO campanha_audio(questao_id, audio, idioma) VALUES ('{intro_id}', '{audio_intro}', '{audio_lingua}');")
-            conn.commit()
 
-            cursor.execute(f"INSERT INTO campanha_audio(questao_id, audio, idioma) VALUES ('{tema_id}', '{audio_base}', '{audio_lingua}');")
-            conn.commit()
-
-            cursor.execute(f"INSERT INTO campanha_audio(questao_id, audio, idioma) VALUES ('{con_id}', '{audio_con}', '{audio_lingua}');")
-            conn.commit()  
-            return flash('Dados inseridos com sucesso', 'success') 
-         except psycopg2.Error as e:
-            return flash('Erro ao enviar dados', 'error') 
         
 def criar_campanha(id, tema ,intro, base, con, audio_intro, audio_base, audio_con,audio_lingua ):
         try:
@@ -2524,15 +2634,18 @@ def criar_campanha(id, tema ,intro, base, con, audio_intro, audio_base, audio_co
             cursor.execute(f"INSERT INTO campanha_question(campanha_id, descricao, audios, tipo) VALUES ({id}, '{con}', 0, 'Conclusao') RETURNING questao_id;")
             conn.commit()
             con_id = cursor.fetchone()[0]
-
-            cursor.execute(f"INSERT INTO campanha_audio(questao_id, audio, idioma) VALUES ('{intro_id}', '{audio_intro}', '{audio_lingua}');")
-            conn.commit()
-
-            cursor.execute(f"INSERT INTO campanha_audio(questao_id, audio, idioma) VALUES ('{audio_id}', '{audio_base}', '{audio_lingua}');")
-            conn.commit()
-
-            cursor.execute(f"INSERT INTO campanha_audio(questao_id, audio, idioma) VALUES ('{con_id}', '{audio_con}', '{audio_lingua}');")
-            conn.commit()  
+            
+            if audio_intro:
+               cursor.execute(f"INSERT INTO campanha_audio(questao_id, audio, idioma) VALUES ('{intro_id}', '{audio_intro}', '{audio_lingua}');")
+               conn.commit()
+            
+            if audio_base:
+               cursor.execute(f"INSERT INTO campanha_audio(questao_id, audio, idioma) VALUES ('{audio_id}', '{audio_base}', '{audio_lingua}');")
+               conn.commit()
+            
+            if audio_con:
+               cursor.execute(f"INSERT INTO campanha_audio(questao_id, audio, idioma) VALUES ('{con_id}', '{audio_con}', '{audio_lingua}');")
+               conn.commit()  
 
             return flash('Dados inseridos com sucesso', 'success')  
         except psycopg2.Error as e:
@@ -2553,12 +2666,14 @@ def inquerito(id, tema ,intro,  con, audio_intro,  audio_con,audio_lingua ):
             cursor.execute(f"INSERT INTO campanha_question(campanha_id, descricao, audios, tipo) VALUES ({id}, '{con}', 0, 'Conclusao') RETURNING questao_id;")
             conn.commit()
             con_id = cursor.fetchone()[0]
-
-            cursor.execute(f"INSERT INTO campanha_audio(questao_id, audio, idioma) VALUES ('{intro_id}', '{audio_intro}', '{audio_lingua}');")
-            conn.commit()
-
-            cursor.execute(f"INSERT INTO campanha_audio(questao_id, audio, idioma) VALUES ('{con_id}', '{audio_con}', '{audio_lingua}');")
-            conn.commit()  
+            
+            if audio_intro:
+               cursor.execute(f"INSERT INTO campanha_audio(questao_id, audio, idioma) VALUES ('{intro_id}', '{audio_intro}', '{audio_lingua}');")
+               conn.commit()
+            
+            if audio_con:
+               cursor.execute(f"INSERT INTO campanha_audio(questao_id, audio, idioma) VALUES ('{con_id}', '{audio_con}', '{audio_lingua}');")
+               conn.commit()  
 
             return flash('Dados inseridos com sucesso', 'success')  
           except psycopg2.Error as e:
@@ -2576,43 +2691,51 @@ def criar_campanhas(type, id):
         
         # Obter dados do formulário
         tema = request.form['name']
-        id = request.form['campanha']
         audio_lingua = request.form['idioma']
         introducao = request.form['introducao']
         conclusao = request.form['conclusao']
-       
+        intro= request.files['intro']
+        con = request.files['con']
+        audio_intro = ""
+        audio_con = ""
+        audio_base = ""
 
         # Obter e salvar arquivos de áudio
-        intro= request.files['intro']
-        audio_intro = secure_filename(intro.filename)
+        if intro:
+           audio_intro = secure_filename(intro.filename)
+           intro.save(os.path.join(app.config['AUDIO_FOLDER'], audio_intro))
+
         
-        con = request.files['con']
-        audio_con = secure_filename(con.filename)
+        if con:
+           audio_con = secure_filename(con.filename)
+           con.save(os.path.join(app.config['AUDIO_FOLDER'], audio_con))
 
-        intro.save(os.path.join(app.config['AUDIO_FOLDER'], audio_intro))
-        con.save(os.path.join(app.config['AUDIO_FOLDER'], audio_con))
-
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM campanhas;")
-        ref = 36 + len(cursor.fetchall())
-        cursor.execute(f"INSERT INTO campanhas (orgid, campanha_ref, status, tipo) VALUES ('{org_id}', 'campanha_{ref}', 'inativo', '{type}') RETURNING id_campanha;")
-        id = int(cursor.fetchone()[0])
-        conn.commit()
-        conn.close()
+         # Conectar ao banco de dados e inserir nova campanha se id for 0
+        if id == 0:
+           conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+           cursor = conn.cursor()
+           cursor.execute("SELECT * FROM campanhas;")
+           ref = 36 + len(cursor.fetchall())
+           cursor.execute(f"INSERT INTO campanhas (orgid, campanha_ref, status, tipo) VALUES ('{org_id}', 'campanha_{ref}', 'inativo', '{type}') RETURNING id_campanha;")
+           conn.commit()
+           id = int(cursor.fetchone()[0])
+           print('diz'+str(id))
+           conn.close()
         
 
         # Inserir dados na tabela correspondente, dependendo do tipo de campanha
         if type == 'inquerito':
+           print("escreva"+str(id)) 
            inquerito(id, tema ,introducao, conclusao, audio_intro, audio_con,audio_lingua )
         
         else:
            base = request.form['aula_base']
            audio = request.files['audio']
-           audio_base = secure_filename(audio.filename)
-           audio.save(os.path.join(app.config['AUDIO_FOLDER'], audio_base))
+           if audio:
+              audio_base = secure_filename(audio.filename)
+              audio.save(os.path.join(app.config['AUDIO_FOLDER'], audio_base))
            if type == 'formacao':
-              criar_aula(id, tema ,introducao, base , conclusao, audio_intro,audio_base, audio_con,audio_lingua )
+              id = criar_aula(id, tema ,introducao, base , conclusao, audio_intro,audio_base, audio_con,audio_lingua )         
            else:
               criar_campanha(id, tema ,introducao, base , conclusao, audio_intro,audio_base, audio_con,audio_lingua )
 
@@ -4190,52 +4313,6 @@ def org_id(org_id):
     return render_template('tasks.html')
 
 
-@app.route('/enviar_sms_grupo', methods=['GET','POST'])
-@is_logged_in
-def enviar_sms_grupo():
-        org_id = session['last_org']
-        form = SmsForm(request.form)
-        data = request.get_json()
-    
-        grupo_id = data.get('grupo')
-        mensagem = data.get('mensagem')
-        Sender_id = data.get('Sender_id')
-        
-        print(mensagem)
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-
-        cursor = conn.cursor()
-
-        cursor.execute(f"SELECT * FROM contacts join contact_group on contacts.id = contact_group.id_cont where contact_group.grp_id = '{grupo_id}';")
-        
-        sms_grupo=cursor.fetchall()
-
-        account_sid = "AC952933e9303a9c0021be3c0ce432caec"
-        auth_token = "5e14a5105201307f6d9a77af3fd81853"
-        
-        #message_sid = 'SMbc7fc62463f463c39ba12f9be200802a'
-    
-        for sms in sms_grupo:
-          message_sid = send_sms(mensagem,str("+258"+sms[3]),Sender_id)
-          client = Client(account_sid, auth_token)
-          messagem = client.messages(message_sid).fetch()
-          status = messagem.status
-          cmd='INSERT INTO envio_sms(mensagem, contato, nv_enviadas, sender_id, status_sms) VALUES ('+"'"+mensagem+"'"+",'"+str("+258"+sms[3])+"','0','"+org_id+"'"+status+"'"+') RETURNING id_alerta'
-          cursor.execute(cmd)
-          conn.commit()
-
-        conn.close()  
-        return redirect(url_for('sucesso_sms'))
-
-@app.route('/sucesso_sms', methods=['GET'])
-@is_logged_in
-def sucesso_sms():
-        form = SmsForm(request.form)
-        flash('Teste criado com sucesso', 'success')
-        return render_template('testes.html', form = form)
-
-
-
 # FUNCAO DE RELATORIO DE CAMERAS
 @app.route('/Relatorio_camera')
 @is_logged_in
@@ -4909,6 +4986,7 @@ def concluir_ticket(ticket_id):
         
 
 
+
 @app.route('/idioma_inscricao/<idioma>', methods=['GET'])
 def idioma_inscricao(idioma):
     print('idioma')
@@ -4970,7 +5048,8 @@ def submit_inscricao(idioma):
       return render_template('inscricao_pastoral_PT.html', idioma = idioma)
    
 
-@app.route('/ivr_formacao/<string:campaign>', methods=['POST'])
+
+@app.route('/ivr_teste/<string:campaign>', methods=['POST'])
 def ivr_formacao(campaign):
   try:  
     audios = buscar_Audio(19077)
@@ -4995,8 +5074,8 @@ def ivr_formacao(campaign):
         return render_template('error.html', message="An error occurred while starting the IVR campaign.")
 
 
-# Handle question route
-@app.route('/handle_question_form', methods=['POST'])
+
+@app.route('/handle_question_teste', methods=['POST'])
 def handle_question_form():
     selected_option = request.form.get('Digits')
     phone_number = request.form.get('To')
@@ -5034,13 +5113,13 @@ def handle_question_form():
 
 
 # Start IVR campaign route
-@app.route('/start_ivr_formacao/<int:campaign>', methods=['POST','GET'])
+@app.route('/start_ivr_teste/<int:campaign>', methods=['POST','GET'])
 def start_ivr_formacao(campaign):
   try:
     #phone_numbers = request.form.getlist('numero')
    
     
-    url='https://insightsap.com/ivr_formacao/'+campaign
+    url='https://insightsap.com/ivr_teste/'+campaign
 
    
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)

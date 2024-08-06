@@ -123,7 +123,7 @@
     <tr>
       {% for key, dados in contact[6].items() %}
         {% if loop.index ==1 %}
-        <td><a href="{{ url_for('detalhes_contact', id=contact[0]) }}">{{ dados }}</a></td>
+        <td><a href="{{ url_for('contact_info', id=contact[0]) }}">{{ dados }}</a></td>
         {% else %}
         <td>{{ dados }}</td>
         {% endif %}
