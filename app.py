@@ -3020,7 +3020,6 @@ def dashboard2(id, type):
     if id == 18512:
         cursor.execute(f"SELECT opcao, count_ from {type}; ")
         rows=cursor.fetchall()
-        # Display ref
         cursor.execute(f"SELECT ref FROM display_ref where id='{type}';")
         question = cursor.fetchone()
         table_name = question
