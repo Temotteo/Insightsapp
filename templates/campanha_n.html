@@ -43,7 +43,11 @@
       
        {% endif %}
      </td>
+     {% if loop.index ==1 %}
+        <td><a href="#" class="btn btn-default pull-right">-------------</a></td>
+        {% else %}
         <td><a href="/perguntas/{{column[0]}}/{{type}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
+        {% endif %}
         <td><a href="/assign_question/{{id}}/{{column[0]}}/questao" class="btn btn-default pull-right">{% if column[4] == 'Introducao' or column[4] == 'Aula'  or column[4] == 'Conclusao' or column[4] == 'campanha'  %} Editar {{column[4]}} {% else %} Editar Pergunta {% endif %}</a></td>
         <td><a href="#" class="btn btn-default pull-right"><strike>Adicionar Audio</strike></a></td>
 
@@ -62,10 +66,18 @@
         {% endif %}
     </td>
     {% if id == 18512 %}
-    <td><a href="/perguntas/{{id}}/campanha_32_pergunta_{{loop.index}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
-     {% else %}
-        <td><a href="/perguntas/{{column[1]}}/{{type}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
+    {% if loop.index ==1 %}
+        <td><a href="#" class="btn btn-default pull-right">-------------</a></td>
+        {% else %}
+        <td><a href="/perguntas/{{id}}/campanha_32_pergunta_{{loop.index-1}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
         {% endif %}
+     {% else %}
+     {% if loop.index ==1 %}
+     <td><a href="#" class="btn btn-default pull-right">-------------</a></td>
+     {% else %}
+     <td><a href="/perguntas/{{column[1]}}/{{type}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
+     {% endif %}        
+     {% endif %}
         <td><a href="/assign_question/{{id}}/{{column[1]}}/questao" class="btn btn-default pull-right">{% if column[4] == 'Introducao' or column[4] == 'Aula'  or column[4] == 'Conclusao' or column[4] == 'campanha'  %} Editar {{column[4]}} {% else %} Editar Pergunta {% endif %}</a></td>
         <td><a href="/assign_question/{{id}}/{{column[1]}}/audio" class="btn btn-default pull-right" >Adicionar Audio</a></td>
 
