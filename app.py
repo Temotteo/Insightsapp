@@ -635,7 +635,7 @@ for y in dados1:
 # Close connection
 conn.close()
 
-def get_db_connection():
+def relatorio_obra_db_connection():
     connection_string = "postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy"
     return psycopg2.connect(connection_string)
 
@@ -851,7 +851,7 @@ def add_contact():
 def delete():
     delete_ids = request.form.getlist('delete_ids')
     if delete_ids:
-        conn = get_db_connection()
+        conn = relatorio_obra_db_connection()
         cursor = conn.cursor()
         delete_ids_str = ', '.join(cursor.mogrify("%s", (id,)).decode('utf-8') for id in delete_ids)
         cursor.execute(f"DELETE FROM contacts WHERE id IN ({delete_ids_str})")
@@ -3118,7 +3118,7 @@ def cliente_ong():
     cursor = conn.cursor()
 
     # Execute query
-    cursor.execute('SELECT * FROM cliente_vendas WHERE ong = true ORDER BY nome;')
+    cursor.execute("select * from cliente_vendas where id_vendas not in (select id_cliente from calendar where hora_actual > '2024-07-23 00:00:00');")
         
     dados=cursor.fetchall()
 
@@ -3936,107 +3936,145 @@ def hello(name):
 
 
 # FUNCAO DE RELATORIO DE OBRAS(AUTOMACAO)
+def relatorio_obra_db_connection():
+    """Função para obter uma conexão com o banco de dados"""
+    return  psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
+
+
+
 @app.route('/Relatorio_obra')
 @is_logged_in
 def Relatorio_obra():
-  try:  
-    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
-    cur = conn.cursor()  
-    cur.execute("SELECT * FROM cliente ")
-    clientes = cur.fetchall() 
-    conn.commit()
-    cur.close()
-    conn.close()
-    return render_template('formulario_de_obra.html', clientes=clientes)
-  except psycopg2.Error as e:
+    try:
+        # Conectar ao banco de dados PostgreSQL
+       with relatorio_obra_db_connection() as conn:
+        cur = conn.cursor()
+        
+        # Recuperar todos os clientes
+        cur.execute("SELECT * FROM cliente")
+        clientes = cur.fetchall()
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        # Renderiza o template com a lista de clientes
+        return render_template('formulario_de_obra.html', clientes=clientes)
+    except psycopg2.Error as e:
+        # Exibe uma página de erro caso ocorra um problema
         return render_template('formulario_de_obra.html')
 
 
 @app.route('/ver_relatorio/<int:id>')
 @is_logged_in
 def ver_relatorio(id):
-   try: 
-    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
-    cur = conn.cursor()  
-    cur.execute("""SELECT
-    relatorios.id AS relatorio_id,
-    relatorios.relatorio,
-    relatorios.status AS status_relatorio,
-    relatorios.hora_entrada,
-    relatorios.hora_saida,
-    relatorios.data,
-    cliente.id AS cliente_id,
-    cliente.nome AS cliente_nome,
-    dificuldades.id AS dificuldade_id,
-    dificuldades.dificuldade,
-    dificuldades.status AS status_dificuldade
-    FROM
-    relatorios
-    JOIN
-    cliente ON relatorios.cliente_id = cliente.id
-    JOIN
-    dificuldades ON relatorios.id = dificuldades.rel_id
-    WHERE
-    relatorios.id = %s
-    """,(id,))
-    relatorios = cur.fetchall() 
-    cur.close()
-    conn.close()
-    return render_template('ver_relatorio.html', relatorios=relatorios)
-   except psycopg2.Error as e:
+    try:
+        # Conectar ao banco de dados PostgreSQL
+       with relatorio_obra_db_connection() as conn:
+        cur = conn.cursor()
+        
+        # Recuperar detalhes do relatório, cliente e dificuldades associadas ao relatório
+        cur.execute("""
+            SELECT
+                relatorios.id AS relatorio_id,
+                relatorios.relatorio,
+                relatorios.status AS status_relatorio,
+                relatorios.hora_entrada,
+                relatorios.hora_saida,
+                relatorios.data,
+                cliente.id AS cliente_id,
+                cliente.nome AS cliente_nome,
+                dificuldades.id AS dificuldade_id,
+                dificuldades.dificuldade,
+                dificuldades.status AS status_dificuldade
+            FROM
+                relatorios
+            JOIN
+                cliente ON relatorios.cliente_id = cliente.id
+            JOIN
+                dificuldades ON relatorios.id = dificuldades.rel_id
+            WHERE
+                relatorios.id = %s
+        """, (id,))
+        relatorios = cur.fetchall()
+        
+        cur.close()
+        conn.close()
+        
+        # Renderiza o template com os detalhes do relatório
+        return render_template('ver_relatorio.html', relatorios=relatorios)
+    except psycopg2.Error as e:
+        # Exibe uma página de erro caso ocorra um problema
         error_msg = f"Erro ao fazer a transação: {e}"
-        return render_template('erro.html', error=error_msg) 
-   
+        return render_template('erro.html', error=error_msg)
 
 
 @app.route('/pdf_obra')
 @is_logged_in
 def pdf_obra():
-   user = True
-   try: 
-    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
-    cur = conn.cursor()  
-    cur.execute("""SELECT 
-    relatorios.id,
-    relatorios.relatorio,
-    relatorios.status,
-    relatorios.hora_entrada,
-    relatorios.hora_saida,
-    relatorios.data,
-    relatorios.cliente_id,
-    cliente.nome AS nome_cliente
-    FROM 
-    relatorios
-    JOIN 
-    cliente ON relatorios.cliente_id = cliente.id ORDER BY relatorios.data; """)
-    relatoriopdf = cur.fetchall() 
-    conn.close()
-    today = datetime.now().date()
-    return render_template('relatorio_de_obra_pdf.html', user=user, relatorios=relatoriopdf, today=today)
-   except psycopg2.Error as e:
+    user = True
+    try:
+        # Conectar ao banco de dados PostgreSQL
+       with relatorio_obra_db_connection() as conn:
+        cur = conn.cursor()
+        
+        # Recuperar todos os relatórios ordenados por data
+        cur.execute("""
+            SELECT 
+                relatorios.id,
+                relatorios.relatorio,
+                relatorios.status,
+                relatorios.hora_entrada,
+                relatorios.hora_saida,
+                relatorios.data,
+                relatorios.cliente_id,
+                cliente.nome AS nome_cliente
+            FROM 
+                relatorios
+            JOIN 
+                cliente ON relatorios.cliente_id = cliente.id 
+            ORDER BY relatorios.data;
+        """)
+        relatoriopdf = cur.fetchall()
+        
+        conn.close()
+        
+        today = datetime.now().date()
+        
+        # Renderiza o template com os dados dos relatórios
+        return render_template('relatorio_de_obra_pdf.html', user=user, relatorios=relatoriopdf, today=today)
+    except psycopg2.Error as e:
+        # Exibe uma página de erro caso ocorra um problema
         error_msg = f"Erro ao fazer a transação: {e}"
         return render_template('erro.html', error=error_msg)
-   
+
 
 @app.route('/deletar_relatorio/<int:id>', methods=['GET','POST'])
 def deletar_relatorio(id):
-   try:
-    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
-    cur = conn.cursor() 
-    cur.execute("DELETE FROM dificuldades WHERE rel_id = %s;",(id,))
-    conn.commit() 
-    cur.execute("DELETE FROM relatorios WHERE id = %s;",(id,))
-    conn.commit()
-    conn.close()
-    flash = "Relatorio Removido com sucesso"
-    return redirect(url_for('pdf_obra'))
-   except psycopg2.Error as e:
+    try:
+        # Conectar ao banco de dados PostgreSQL
+       with relatorio_obra_db_connection() as conn:
+        cur = conn.cursor()
+        
+        # Deletar dificuldades associadas ao relatório
+        cur.execute("DELETE FROM dificuldades WHERE rel_id = %s;", (id,))
+        conn.commit()
+        
+        # Deletar o relatório
+        cur.execute("DELETE FROM relatorios WHERE id = %s;", (id,))
+        conn.commit()
+        
+        conn.close()
+        
+        flash = "Relatório removido com sucesso"
+        return redirect(url_for('pdf_obra'))
+    except psycopg2.Error as e:
+        # Exibe uma página de erro caso ocorra um problema
         error_msg = f"Erro ao fazer a transação: {e}"
-        return render_template('erro.html', error=error_msg) 
+        return render_template('erro.html', error=error_msg)
 
 
-
-#funcao para submessao de relatorio de obra
+# Função para submissão de relatório de obra
 @app.route('/submit_rel', methods=['POST'])
 def submit_rel():
     relatorio = request.form['relatorio']
@@ -4048,120 +4086,123 @@ def submit_rel():
     data_atual = datetime.now().date()
 
     try:
-     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
-     cur = conn.cursor()  
-     cur.execute("INSERT INTO relatorios( relatorio, status, hora_entrada, hora_saida,data, cliente_id ) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id",(relatorio,status,hora_chegada,hora_saida,data_atual,cliente,))
-     relatorio_id = cur.fetchone()[0] 
-     conn.commit()
-     cur.close()
-     cur = conn.cursor()  
-     cur.execute("INSERT INTO dificuldades( rel_id, dificuldade, status ) VALUES (%s,%s,%s)",(relatorio_id,dificuldade,'Pedente',))
-     conn.commit()
-     cur.close()
-     cur = conn.cursor()
-     cur.execute("SELECT * FROM cliente where id = %s ",(relatorio_id,))
-     cliente = cur.fetchone()
-     cur.close()
-     conn.close()
-     sucesso = "O seu relatorio foi concluido com sucesso"
-     return render_template('relatorio_de_obra_pdf.html' ,relatorio_id = relatorio_id, cliente=cliente)
+        # Conectar ao banco de dados PostgreSQL
+       with relatorio_obra_db_connection() as conn:
+        cur = conn.cursor()
+        
+        # Inserir novo relatório
+        cur.execute("INSERT INTO relatorios(relatorio, status, hora_entrada, hora_saida, data, cliente_id) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id", (relatorio, status, hora_chegada, hora_saida, data_atual, cliente,))
+        relatorio_id = cur.fetchone()[0]
+        conn.commit()
+        
+        # Inserir dificuldade associada ao relatório
+        cur.execute("INSERT INTO dificuldades(rel_id, dificuldade, status) VALUES (%s, %s, %s)", (relatorio_id, dificuldade, 'Pendentes',))
+        conn.commit()
+        
+        cur.close()
+        cur = conn.cursor()
+        
+        # Recuperar informações do cliente associado
+        cur.execute("SELECT * FROM cliente WHERE id = %s", (cliente,))
+        cliente = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        sucesso = "O seu relatório foi concluído com sucesso"
+        return render_template('relatorio_de_obra_pdf.html', relatorio_id=relatorio_id, cliente=cliente)
     except psycopg2.Error as e:
+        # Exibe uma página de erro caso ocorra um problema
         error_msg = f"Erro ao fazer a transação: {e}"
         return render_template('erro.html', error=error_msg)
-    
-# FUNCAO PARA GESTAO DE CLIENTES   
+ 
+
 @app.route('/Gerir_clientes')
 @is_logged_in
-def Gerir_clientes():
-   try:  
-    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
-    cur = conn.cursor()  
-    cur.execute("SELECT * FROM cliente ")
-    clientes = cur.fetchall() 
-    conn.commit()
-    cur.close()
-    conn.close()
-    return render_template('gestao_clientes.html', clientes=clientes)
-   except psycopg2.Error as e:
+def gerir_clientes():
+    #Exibe a lista de clientes
+    try:
+        with relatorio_obra_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM cliente")
+                clientes = cur.fetchall()
+        return render_template('gestao_clientes.html', clientes=clientes)
+    except psycopg2.Error as e:
         error_msg = f"Erro ao fazer a transação: {e}"
         return render_template('erro.html', error=error_msg)
 
 @app.route('/novo_cliente', methods=['POST'])
 def novo_cliente():
-    cliente = request.form['cliente']
+    #Adiciona um novo cliente
+    cliente = request.form.get('cliente')
+    if not cliente:
+        flash("Nome do cliente é obrigatório", 'error')
+        return redirect(url_for('gerir_clientes'))
+
     try:
-     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
-     cur = conn.cursor()  
-     cur.execute("INSERT INTO cliente( nome ) VALUES (%s) ",(cliente,))
-     conn.commit()
-     cur.close()
-     cur = conn.cursor()
-     cur.execute("SELECT * FROM cliente ")
-     clientes = cur.fetchall() 
-     cur.close()
-     conn.close()
-     sucesso = "Cliente inserido com sucesso"
-     return render_template('gestao_clientes.html', clientes=clientes ,sucesso = sucesso)
+        with relatorio_obra_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("INSERT INTO cliente (nome) VALUES (%s) RETURNING id", (cliente,))
+                conn.commit()
+                cur.execute("SELECT * FROM cliente")
+                clientes = cur.fetchall()
+        flash("Cliente inserido com sucesso", 'success')
+        return render_template('gestao_clientes.html', clientes=clientes)
     except psycopg2.Error as e:
         error_msg = f"Erro ao fazer a transação: {e}"
         return render_template('erro.html', error=error_msg)
-    
 
-@app.route('/edit_cliente/<int:id>', methods=['GET','POST'])
+@app.route('/edit_cliente/<int:id>', methods=['POST'])
 def edit_cliente(id):
-   cliente = request.form['cliente']
-   try:
-    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
-    cur = conn.cursor()  
-    cur.execute("UPDATE cliente SET nome = %s WHERE id = %s",(cliente,id,))
-    conn.commit()
-    cur.close()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM cliente ")
-    clientes = cur.fetchall() 
-    cur.close()
-    conn.close()
-    sucesso = "Cliente Atualizado com sucesso"
-    return render_template('gestao_clientes.html', clientes=clientes,sucesso = sucesso)
-   except psycopg2.Error as e:
-        error_msg = f"Erro ao fazer a transação: {e}"
-        return render_template('erro.html', error=error_msg) 
+    #Atualiza um cliente existente
+    cliente = request.form.get('cliente')
+    if not cliente:
+        flash("Nome do cliente é obrigatório", 'error')
+        return redirect(url_for('gerir_clientes'))
 
-@app.route('/delete_cliente/<int:id>', methods=['GET','POST'])
-def delete_cliente(id):
-   try:
-    conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
-    cur = conn.cursor()  
-    cur.execute("DELETE FROM cliente WHERE id = %s",(id,))
-    conn.commit()
-    cur.close()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM cliente ")
-    clientes = cur.fetchall() 
-    cur.close()
-    conn.close()
-    sucesso = "Cliente Removido com sucesso"
-    return render_template('gestao_clientes.html', clientes=clientes,sucesso = sucesso)
-   except psycopg2.Error as e:
+    try:
+        with relatorio_obra_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE cliente SET nome = %s WHERE id = %s", (cliente, id))
+                conn.commit()
+                cur.execute("SELECT * FROM cliente")
+                clientes = cur.fetchall()
+        flash("Cliente atualizado com sucesso", 'success')
+        return render_template('gestao_clientes.html', clientes=clientes)
+    except psycopg2.Error as e:
         error_msg = f"Erro ao fazer a transação: {e}"
-        return render_template('erro.html', error=error_msg) 
+        return render_template('erro.html', error=error_msg)
+
+@app.route('/delete_cliente/<int:id>', methods=['POST'])
+def delete_cliente(id):
+    #Remove um cliente existente
+    try:
+        with relatorio_obra_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM cliente WHERE id = %s", (id,))
+                conn.commit()
+                cur.execute("SELECT * FROM cliente")
+                clientes = cur.fetchall()
+        flash("Cliente removido com sucesso", 'success')
+        return render_template('gestao_clientes.html', clientes=clientes)
+    except psycopg2.Error as e:
+        error_msg = f"Erro ao fazer a transação: {e}"
+        return render_template('erro.html', error=error_msg)
+
 
 
 @app.route('/ralatori/pdf/<int:id>')
 def gerar_pdf(id):
     # Obtendo relatórios do banco de dados para o usuário
     try: 
-     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/relatorio_obra')
-     cur = conn.cursor()  
-     cur.execute("SELECT * FROM relatorios where id = %s ",(id,))
-     relatoriopdf = cur.fetchone() 
-     cur.close()
-     cur.close()
-     cur = conn.cursor()
-     cur.execute("SELECT * FROM cliente where id = %s ",(relatoriopdf[6],))
-     cliente = cur.fetchone()
-     cur.close()
-     conn.close()
+     with relatorio_obra_db_connection() as conn:
+      with conn.cursor() as cur:
+          cur.execute("SELECT * FROM relatorios where id = %s ",(id,))
+          relatoriopdf = cur.fetchone() 
+          cur.close()
+          cur.close()
+          cur = conn.cursor()
+          cur.execute("SELECT * FROM cliente where id = %s ",(relatoriopdf[6],))
+          cliente = cur.fetchone()
     except psycopg2.Error as e:
         error_msg = f"Erro ao fazer a transação: {e}"
         return render_template('erro.html') 
@@ -4209,109 +4250,107 @@ def gerar_pdf(id):
 
 
 
-# FUNCAO DE BUTAO SALTAR
+def get_db_connection():
+    #Função para obter uma conexão com o banco de dados
+    return psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+
 @app.route('/saltar_org_id', methods=['GET'])
 @is_logged_in
 def saltar_org_id():
-  conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-  cursor = conn.cursor()
-  if session['last_org'] == 'Demo_Org':
-    org_id = session['last_org']
+    #Retorna informações sobre as organizações para o usuário logado
     user = session['username']
-    query ="SELECT * FROM usuarios where "+ ' "user"=' + "'" + user + "';"
-    cursor.execute(query)
-    user_id= cursor.fetchone()[0]
-    cursor.execute(f"SELECT * FROM  usuarios  where  id_usuarios = {user_id} ;")
-    orgs = cursor.fetchall()
-    conn.close()
-    data = [{'Org_id': org[6], 'Nome': org[1], 'Saldo': '00.0'} for org in orgs]
-    print(data)
-    return jsonify(data)
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT id FROM usuarios WHERE \"user\" = %s", (user,))
+                user_id = cursor.fetchone()[0]
+                
+                if session['last_org'] == 'Demo_Org':
+                    cursor.execute("SELECT * FROM usuarios WHERE id_usuarios = %s", (user_id,))
+                    orgs = cursor.fetchall()
+                    data = [{'Org_id': org[6], 'Nome': org[1], 'Saldo': '00.0'} for org in orgs]
+                else:
+                    cursor.execute("""
+                        SELECT * FROM organizacao
+                        JOIN usuario_org ON organizacao.org_id = usuario_org.org_id
+                        WHERE usuario_org.usuario_id = %s
+                    """, (user_id,))
+                    orgs = cursor.fetchall()
+                    data = [{'Org_id': org[1], 'Nome': org[0], 'Saldo': org[7]} for org in orgs]
+                
+                return jsonify(data)
+    except psycopg2.Error as e:
+        return jsonify({"error": f"Erro ao fazer a transação: {e}"})
 
-  else:  
-    org_id = session['last_org']
-    user = session['username']
-    query ="SELECT * FROM usuarios where "+ ' "user"=' + "'" + user + "';"
-    cursor.execute(query)
-    user_id= cursor.fetchone()[0]
-    cursor.execute(f"SELECT * FROM organizacao join usuario_org on organizacao.org_id = usuario_org.org_id where  usuario_org.usuario_id = {user_id} ;")
-    orgs = cursor.fetchall()
-    conn.close()
-    data = [{'Org_id': org[1], 'Nome': org[0], 'Saldo': org[7]} for org in orgs]
-
-    return jsonify(data)
-
-
-# essa funcao busca os grupos possiveis para selecao para enviar a sms
 @app.route('/selecionar_group', methods=['GET'])
 @is_logged_in
 def selecionar_group():
-    org_id = session['last_org']
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-    cursor = conn.cursor()
-    
-    cursor.execute(f"SELECT * FROM grupo")
-    grupos = cursor.fetchall()
-    conn.close()
-    data = [{'id': grupo[0], 'nome': grupo[1] }for grupo in grupos]
+    #Retorna a lista de grupos disponíveis
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM grupo")
+                grupos = cursor.fetchall()
+                data = [{'id': grupo[0], 'nome': grupo[1]} for grupo in grupos]
+                return jsonify(data)
+    except psycopg2.Error as e:
+        return jsonify({"error": f"Erro ao fazer a transação: {e}"})
 
-    return jsonify(data)
-
-
-# essa metodo pega a Org_id selecionada e redericiona o usuario na organizacao
-@app.route('/adicionar_lingua', methods=['GET','POST'])
+@app.route('/adicionar_lingua', methods=['GET', 'POST'])
 @is_logged_in
 def adicionar_lingua():
-    if  request.form: 
-        org_id = session['last_org']  
-        lingua = request.form['lingua']
-        abreviatura = request.form['abreviatura']
+    #Adiciona uma nova língua à organização
+    if request.method == 'POST':
+        org_id = session['last_org']
+        lingua = request.form.get('lingua')
+        abreviatura = request.form.get('abreviatura')
 
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-        cursor = conn.cursor()
-        
-        cursor.execute(f"INSERT INTO org_linguas VALUES('{org_id}','{lingua}','{abreviatura}')")
-        conn.commit()
-        conn.close()
-        flash('Lingua Insirida com sucesso', 'success')
+        if not lingua or not abreviatura:
+            flash('Língua e abreviatura são obrigatórios', 'error')
+            return redirect(url_for('adicionar_lingua'))
 
-    linguas = ["Portugues","Emakhuwa","Cisena","Xachangana","Cinyanja","Ciswati","Gitonga","Elomwe","Chuwabo","Shimakonde","Cinyungwe","Koti","Ronga","Bitonga","Kimwani","Shona"]
-    choices = request_languge()  
-    
-    idioma = []
-    for lingua in linguas:
-        for choice in choices:
-            if lingua == choice[1]:
-               print('saiu'+choice[1])
-               linguas.remove(lingua)
-               idioma.append(lingua)
-                
-        
-    return render_template('org_information.html', idiomas = choices, linguas = linguas)
+        try:
+            with get_db_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute("INSERT INTO org_linguas (org_id, lingua, abreviatura) VALUES (%s, %s, %s)",
+                                   (org_id, lingua, abreviatura))
+                    conn.commit()
+                    flash('Língua inserida com sucesso', 'success')
+        except psycopg2.Error as e:
+            flash(f"Erro ao inserir a língua: {e}", 'error')
 
+    linguas = ["Português", "Emakhuwa", "Cisena", "Xachangana", "Cinyanja", "Ciswati", "Gitonga", "Elomwe", "Chuwabo", "Shimakonde", "Cinyungwe", "Koti", "Ronga", "Bitonga", "Kimwani", "Shona"]
+    choices = request_languge()
 
-# essa metodo pega a Org_id selecionada e redericiona o usuario na organizacao
+    idioma = [lingua for lingua in linguas if any(lingua == choice[1] for choice in choices)]
+    linguas = [lingua for lingua in linguas if lingua not in idioma]
+
+    return render_template('org_information.html', idiomas=choices, linguas=linguas)
+
 @app.route('/get_org/<org_id>', methods=['GET'])
 def get_org(org_id):
-    return redirect(url_for('org_id',org_id=org_id))
+    #Redireciona o usuário para a organização selecionada
+    return redirect(url_for('org_id', org_id=org_id))
 
 @app.route('/org_id/<org_id>', methods=['GET'])
 @is_logged_in
 def org_id(org_id):
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-
-    cursor = conn.cursor()
-
-    # Faz a captura das org_id referentes ao usurio  
-    cursor.execute(f"SELECT * FROM organizacao WHERE org_id = '{org_id}' ;")
-        
-    org=cursor.fetchone()
-
-    session['last_org'] = org_id
-    session['saldo'] = str(org[7])
-    conn.close()
-    return render_template('tasks.html')
-
+    #Configura a organização selecionada na sessão do usuário
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM organizacao WHERE org_id = %s", (org_id,))
+                org = cursor.fetchone()
+                if org:
+                    session['last_org'] = org_id
+                    session['saldo'] = str(org[7])
+                else:
+                    flash("Organização não encontrada", 'error')
+                    return redirect(url_for('gerir_clientes'))
+                
+                return render_template('tasks.html')
+    except psycopg2.Error as e:
+        return render_template('erro.html', error=f"Erro ao fazer a transação: {e}")
 
 # FUNCAO DE RELATORIO DE CAMERAS
 @app.route('/Relatorio_camera')
@@ -4605,87 +4644,90 @@ def buscar_testemunho():
 
 
 
-
-# FUNCAO PROJECTO OV
 @app.route('/testes_OV')
 def testes_OV():
-      return redirect( url_for('teste_ov',tipo = 'iniciar' )) 
+    # Redireciona para a função 'teste_ov' com o parâmetro 'tipo' definido como 'iniciar'
+    return redirect(url_for('teste_ov', tipo='iniciar')) 
 
 
-@app.route('/teste_ov/<tipo>',methods=['POST','GET'])
+@app.route('/teste_ov/<tipo>', methods=['POST', 'GET'])
 def teste_ov(tipo): 
-  if request.method =='POST':
-    print('cqui')
-    resposta = {}
-    try:
-     conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Quizdb')
-     cur = conn.cursor()
-     cur.execute("SELECT * FROM quiz WHERE tipo = %s;",(tipo,))
-     questoes = cur.fetchall()
-     print(questoes)
-     
-     for questoes in questoes:
-      print(questoes)
-      resposta = request.form.get(f'quiz{ questoes[0] }')
-      cur.execute("SELECT * FROM respostas WHERE usuario_id=1 and questao_id = %s;",(questoes[0],))
-      resposta_existente = cur.fetchall()
-      if resposta_existente:
-         for resp in resposta_existente:
-          cur.execute("SELECT * FROM quiz WHERE id = %s;",(resp[1],))
-          resposta_quiz = cur.fetchone()
-          cur.execute("DELETE FROM respostas WHERE usuario_id=1 and questao_id = %s;",(resp[1],))
-          conn.commit()
-          if resposta_quiz[3] == resposta:
-           cur.execute('INSERT INTO respostas(usuario_id,questao_id,resposta ,situacao) VALUES(%s,%s,%s,%s);',(1 , resp[1], resposta, 'correcto',))
-          else:  
-           cur.execute('INSERT INTO respostas(usuario_id,questao_id,resposta ,situacao) VALUES(%s,%s,%s,%s);',(1 , resp[1], resposta, 'incorrecto',))
-          conn.commit()
-      else:    
-        if questoes[3] == resposta:
-           print('cheguei')
-           print(questoes[0])
-           cur.execute('INSERT INTO respostas(usuario_id,questao_id,resposta ,situacao) VALUES(%s,%s,%s,%s);',(1 , questoes[0], resposta, 'correcto',))
-        else:
-           print('cheguei')
-           print(questoes[0])
-           cur.execute('INSERT INTO respostas(usuario_id,questao_id,resposta ,situacao) VALUES(%s,%s,%s,%s);',(1 , questoes[0], resposta, 'incorrecto',))
-        
-        conn.commit()
-     conn.close()   
-    except psycopg2.Error as e:
-     error_msg = f"Erro ao fazer a transação: {e}"
+    if request.method == 'POST':
+        resposta = {}
+        try:
+            # Conectar ao banco de dados
+            conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Quizdb')
+            cur = conn.cursor()
+            # Selecionar as questões com base no tipo
+            cur.execute("SELECT * FROM quiz WHERE tipo = %s;", (tipo,))
+            questoes = cur.fetchall()
+            
+            for questao in questoes:
+                resposta = request.form.get(f'quiz{questao[0]}')
+                # Verificar se já existe uma resposta para essa questão
+                cur.execute("SELECT * FROM respostas WHERE usuario_id = 1 AND questao_id = %s;", (questao[0],))
+                resposta_existente = cur.fetchall()
+                if resposta_existente:
+                    for resp in resposta_existente:
+                        cur.execute("SELECT * FROM quiz WHERE id = %s;", (resp[1],))
+                        resposta_quiz = cur.fetchone()
+                        cur.execute("DELETE FROM respostas WHERE usuario_id = 1 AND questao_id = %s;", (resp[1],))
+                        conn.commit()
+                        if resposta_quiz[3] == resposta:
+                            situacao = 'correcto'
+                        else:
+                            situacao = 'incorrecto'
+                        cur.execute(
+                            "INSERT INTO respostas (usuario_id, questao_id, resposta, situacao) VALUES (%s, %s, %s, %s);",
+                            (1, resp[1], resposta, situacao)
+                        )
+                        conn.commit()
+                else:
+                    if questao[3] == resposta:
+                        situacao = 'correcto'
+                    else:
+                        situacao = 'incorrecto'
+                    cur.execute(
+                        "INSERT INTO respostas (usuario_id, questao_id, resposta, situacao) VALUES (%s, %s, %s, %s);",
+                        (1, questao[0], resposta, situacao)
+                    )
+                    conn.commit()
+            conn.close()   
+        except psycopg2.Error as e:
+            error_msg = f"Erro ao fazer a transação: {e}"
+            print(error_msg)
 
-  try:
-   conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Quizdb')
-   cur = conn.cursor()
-   if tipo == "iniciar": 
-      cur.execute("SELECT * FROM quiz WHERE tipo='logico' ORDER BY id;")
-      questoes = cur.fetchall()
-      logico = True
-      return render_template('testes_OV.html', questoes=questoes, logico = logico)
-   elif tipo == "verbal": 
-      cur.execute("SELECT * FROM quiz WHERE tipo='numerico' ORDER BY id;")
-      questoes = cur.fetchall()
-      numerico = True
-      return render_template('testes_OV.html', questoes=questoes, numerico = numerico)
-   elif tipo == "logico": 
-      cur.execute("SELECT * FROM quiz WHERE tipo='verbal' ORDER BY id;")
-      questoes = cur.fetchall()
-      verbal = True
-      return render_template('testes_OV.html', questoes=questoes, verbal = verbal)
-   elif tipo == "numerico": 
-      cur.execute("SELECT * FROM quiz WHERE tipo='preferencias' ORDER BY id;")
-      questoes = cur.fetchall()
-      preferencias = True
-      return render_template('testes_OV.html', questoes=questoes, preferencias = preferencias)
-   else:
-      preferencias = True
-      return redirect( url_for('resultado',usuario_id = 1 )) 
-      
-   conn.close()
-  except psycopg2.Error as e:
-     error_msg = f"Erro ao fazer a transação: {e}"
-     return render_template('erro.html', error=error_msg) 
+    try:
+        # Conectar ao banco de dados novamente para obter as questões
+        conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Quizdb')
+        cur = conn.cursor()
+        # Selecionar questões com base no tipo
+        if tipo == "iniciar": 
+            cur.execute("SELECT * FROM quiz WHERE tipo = 'logico' ORDER BY id;")
+            questoes = cur.fetchall()
+            logico = True
+            return render_template('testes_OV.html', questoes=questoes, logico=logico)
+        elif tipo == "verbal": 
+            cur.execute("SELECT * FROM quiz WHERE tipo = 'numerico' ORDER BY id;")
+            questoes = cur.fetchall()
+            numerico = True
+            return render_template('testes_OV.html', questoes=questoes, numerico=numerico)
+        elif tipo == "logico": 
+            cur.execute("SELECT * FROM quiz WHERE tipo = 'verbal' ORDER BY id;")
+            questoes = cur.fetchall()
+            verbal = True
+            return render_template('testes_OV.html', questoes=questoes, verbal=verbal)
+        elif tipo == "numerico": 
+            cur.execute("SELECT * FROM quiz WHERE tipo = 'preferencias' ORDER BY id;")
+            questoes = cur.fetchall()
+            preferencias = True
+            return render_template('testes_OV.html', questoes=questoes, preferencias=preferencias)
+        else:
+            return redirect(url_for('resultado', usuario_id=1))
+        conn.close()
+    except psycopg2.Error as e:
+        error_msg = f"Erro ao fazer a transação: {e}"
+        return render_template('erro.html', error=error_msg) 
     
 
 
@@ -4747,11 +4789,11 @@ def reniciar(usuario_id):
     try:
      conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Quizdb')
      cur = conn.cursor()
-     cur.execute("SELECT * FROM respostas WHERE usuario_id=1 ;")
+     cur.execute(f"SELECT * FROM respostas WHERE usuario_id={usuario_id} ;")
      resposta_existente = cur.fetchall()
     
      for resposta in resposta_existente:
-      cur.execute("DELETE FROM respostas WHERE usuario_id=1;")
+      cur.execute(f"DELETE FROM respostas WHERE usuario_id={usuario_id};")
       conn.commit()
      conn.close() 
     except psycopg2.Error as e:
@@ -4964,8 +5006,7 @@ def deletar_ticket(ticket_id):
      error_msg = f"Erro ao fazer a transação: {e}"
      return render_template('erro.html', error=error_msg)  
 
-
- #funcao   
+ 
 @app.route('/concluir_ticket/<int:ticket_id>', methods=['GET', 'POST'])
 @is_logged_in
 def concluir_ticket(ticket_id):
@@ -5048,9 +5089,8 @@ def submit_inscricao(idioma):
       return render_template('inscricao_pastoral_PT.html', idioma = idioma)
    
 
-
 @app.route('/ivr_teste/<string:campaign>', methods=['POST'])
-def ivr_formacao(campaign):
+def ivr_teste(campaign):
   try:  
     audios = buscar_Audio(19077)
     QUESTION_AUDIO = []
@@ -5065,7 +5105,7 @@ def ivr_formacao(campaign):
     current_question_index = request.args.get('current_question_index', default=1, type=int)
     logging.debug(f"Current question index: {current_question_index}")
 
-    with response.gather(num_digits=1, action=url_for('handle_question_form', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
+    with response.gather(num_digits=1, action=url_for('handle_question_teste', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
         gather.play(QUESTION_AUDIO[current_question_index])
 
     return str(response), 200, {'Content-Type': 'application/xml'}
@@ -5076,7 +5116,7 @@ def ivr_formacao(campaign):
 
 
 @app.route('/handle_question_teste', methods=['POST'])
-def handle_question_form():
+def handle_question_teste():
     selected_option = request.form.get('Digits')
     phone_number = request.form.get('To')
     current_question_index = int(request.args.get('current_question_index'))
@@ -5084,7 +5124,7 @@ def handle_question_form():
     audios = buscar_Audio(19077)
     QUESTION_AUDIO = []
     for audio in audios:
-        QUESTION_AUDIO.append(f"https://insightsap.com/static/audios/{audio}")
+        QUESTION_AUDIO.append(f"https://insightsap.com/get_audio/{audio}")
 
     response = VoiceResponse()
 
@@ -5096,14 +5136,14 @@ def handle_question_form():
                   raise ValueError()
           except ValueError:
             # Handle invalid input by redirecting back to /ivr with current_question_index
-            return redirect(url_for('ivr_formacao', current_question_index=current_question_index))
+            return redirect(url_for('ivr_teste', current_question_index=current_question_index))
 
         # Save the survey response to the database
         save_survey_response2(phone_number, current_question_index, selected_option, campaign)
 
         # Continue with the next question
         next_question_index = current_question_index + 1
-        with response.gather(num_digits=1, action=url_for('handle_question_form', current_question_index=next_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
+        with response.gather(num_digits=1, action=url_for('handle_question_teste', current_question_index=next_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
             gather.play(QUESTION_AUDIO[next_question_index])
 
     else:  # Concluding message
@@ -5113,7 +5153,7 @@ def handle_question_form():
 
 
 # Start IVR campaign route
-@app.route('/start_ivr_teste/<int:campaign>', methods=['POST','GET'])
+@app.route('/start_ivr_teste/<campaign>', methods=['POST','GET'])
 def start_ivr_formacao(campaign):
   try:
     #phone_numbers = request.form.getlist('numero')
@@ -5132,15 +5172,23 @@ def start_ivr_formacao(campaign):
     audios = buscar_Audio(campaign)
     QUESTION_AUDIO = []
     for audio in audios:
-        QUESTION_AUDIO.append(f"https://insightsap.com/static/audios/{audio}")
+        QUESTION_AUDIO.append(f"https://insightsap.com/get_audio/{audio}")
 
     print(QUESTION_AUDIO)
     return render_template('campaign_status.html')
   except Exception as e:
         logging.error(f"Error in start_ivr_campaign: {e}")
-        return render_template('error.html', message="An error occurred while starting the IVR campaign.")
+        return f"An error occurred while starting the IVR campaign. {e}"
 
 
+@app.route('/get_audio/<filename>')
+def get_audio(filename):
+    try:
+        return send_from_directory('static/audios', filename)
+    except FileNotFoundError as e:
+        return render_template('error.html', erro=f"An error occurred while starting the IVR campaign. {e}")
+
+        
 
 def save_survey_response2(phone_number, question_index, selected_option, campaign):
     # Connect to the database
@@ -5180,6 +5228,7 @@ def save_survey_response2(phone_number, question_index, selected_option, campaig
     elif selected_option == 3:
         cur.execute(f"UPDATE campanha_opcao SET count= count + 1 where questao = {id} and opcao='Talvez';")
     conn.commit()
+
     
 if __name__ == '__main__':
     app.secret_key='secret123'

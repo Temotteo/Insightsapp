@@ -4923,6 +4923,138 @@ def submit_inscricao(idioma):
       return render_template('inscricao_pastoral_PT.html')
    
 
+
+@app.route('/ivr_teste/<string:campaign>', methods=['POST'])
+def ivr_formacao(campaign):
+  try:  
+    audios = buscar_Audio(19077)
+    QUESTION_AUDIO = []
+    for audio in audios:
+        QUESTION_AUDIO.append(f"https://insightsap.com/static/audios/{audio}")
+    
+    logging.debug(f"IVR started for campaign: {campaign}")
+    print(QUESTION_AUDIO)
+    response = VoiceResponse()
+    response.play(QUESTION_AUDIO[0])
+
+    current_question_index = request.args.get('current_question_index', default=1, type=int)
+    logging.debug(f"Current question index: {current_question_index}")
+
+    with response.gather(num_digits=1, action=url_for('handle_question_form', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
+        gather.play(QUESTION_AUDIO[current_question_index])
+
+    return str(response), 200, {'Content-Type': 'application/xml'}
+  except Exception as e:
+        logging.error(f"Error in start_ivr_campaign: {e}")
+        return render_template('error.html', message="An error occurred while starting the IVR campaign.")
+
+
+
+@app.route('/handle_question_teste', methods=['POST'])
+def handle_question_form():
+    selected_option = request.form.get('Digits')
+    phone_number = request.form.get('To')
+    current_question_index = int(request.args.get('current_question_index'))
+    campaign=request.args.get('campaign')
+    audios = buscar_Audio(19077)
+    QUESTION_AUDIO = []
+    for audio in audios:
+        QUESTION_AUDIO.append(f"https://insightsap.com/static/audios/{audio}")
+
+    response = VoiceResponse()
+
+    if current_question_index < len(QUESTION_AUDIO) - 1:  # Not the concluding message
+        if current_question_index == 2:
+          try:
+              selected_option = int(selected_option)
+              if selected_option < 1 or selected_option > 5:
+                  raise ValueError()
+          except ValueError:
+            # Handle invalid input by redirecting back to /ivr with current_question_index
+            return redirect(url_for('ivr_formacao', current_question_index=current_question_index))
+
+        # Save the survey response to the database
+        save_survey_response2(phone_number, current_question_index, selected_option, campaign)
+
+        # Continue with the next question
+        next_question_index = current_question_index + 1
+        with response.gather(num_digits=1, action=url_for('handle_question_form', current_question_index=next_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
+            gather.play(QUESTION_AUDIO[next_question_index])
+
+    else:  # Concluding message
+        response.play(QUESTION_AUDIO[-1])
+
+    return str(response), 200, {'Content-Type': 'application/xml'}
+
+
+# Start IVR campaign route
+@app.route('/start_ivr_teste/<int:campaign>', methods=['POST','GET'])
+def start_ivr_formacao(campaign):
+  try:
+    #phone_numbers = request.form.getlist('numero')
+   
+    
+    url='https://insightsap.com/ivr_teste/'+campaign
+
+   
+    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    call = client.calls.create(
+         url=url,  # URL for handling IVR logic
+         to=258849109478,
+         from_=TWILIO_PHONE_NUMBER
+     )
+    
+    audios = buscar_Audio(campaign)
+    QUESTION_AUDIO = []
+    for audio in audios:
+        QUESTION_AUDIO.append(f"https://insightsap.com/static/audios/{audio}")
+
+    print(QUESTION_AUDIO)
+    return render_template('campaign_status.html')
+  except Exception as e:
+        logging.error(f"Error in start_ivr_campaign: {e}")
+        return render_template('error.html', message="An error occurred while starting the IVR campaign.")
+
+
+
+def save_survey_response2(phone_number, question_index, selected_option, campaign):
+    # Connect to the database
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+
+    # Create a cursor object
+    cur = conn.cursor()
+
+    # Create survey_responses table if not exists
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS survey_responses (
+            id SERIAL PRIMARY KEY,
+            phone_number VARCHAR(20),
+            question_index INT,
+            selected_option INT,
+            campaign VARCHAR(40),
+            data timestamp without time zone   )
+    """)
+    
+    # Insert survey response into the table
+    cur.execute("""
+        INSERT INTO survey_responses (phone_number, question_index, selected_option, campaign)
+        VALUES (%s, %s, %s, %s)
+    """, (phone_number, question_index, selected_option, str(campaign) ))
+
+    cur.execute(f"SELECT questao_id FROM campanha_questao  where campanha_id = {int(campaign)} ;")
+    
+    id = cur.fetchone()[0]
+
+
+    if selected_option == 1:
+       cur.execute(f"UPDATE campanha_opcao SET count= count + 1 where questao = {id} and opcao='Sim';")
+
+    elif selected_option == 2:
+       cur.execute(f"UPDATE campanha_opcao SET count= count + 1 where questao = {id} and opcao='Nao';")
+
+    elif selected_option == 3:
+        cur.execute(f"UPDATE campanha_opcao SET count= count + 1 where questao = {id} and opcao='Talvez';")
+    conn.commit()
     
 #if __name__ == '__main__':
  #   app.secret_key='secret123'
