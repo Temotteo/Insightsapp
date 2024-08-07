@@ -5095,7 +5095,7 @@ def ivr_teste(campaign):
     audios = buscar_Audio(19077)
     QUESTION_AUDIO = []
     for audio in audios:
-        QUESTION_AUDIO.append(f"https://insightsap.com/static/audios/{audio}")
+        QUESTION_AUDIO.append(f"https://insightsap.com/get_audio/{audio}")
     
     logging.debug(f"IVR started for campaign: {campaign}")
     print(QUESTION_AUDIO)
