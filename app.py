@@ -3021,8 +3021,7 @@ def dashboard2(id, type):
         cursor.execute(f"SELECT opcao, count_ from {type}; ")
         rows=cursor.fetchall()
         cursor.execute(f"SELECT ref FROM display_ref where id='{type}';")
-        question = cursor.fetchone()
-        table_name = question
+        table_name = cursor.fetchone()[0]
         
 
     else:    
@@ -3041,7 +3040,7 @@ def dashboard2(id, type):
     labels = [row[0] for row in rows]
     counts = [row[1] for row in rows]
 
-    # Close the cursor and connection
+    
     cursor.close()
     conn.close()
 
