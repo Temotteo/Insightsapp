@@ -58,7 +58,7 @@
       <input type="hidden" id="id" name="campanha" value="{{id}}">
 
       <fieldset>
-        <legend>{% if campanha == 'formacao' %}{% set campanha = 'Aula' %}Aula {% else %}{{campanha}}{% endif %}- {{id}}</legend>
+        <legend>{% if campanha == 'formacao' %}{% set campanha = 'Aula' %}Aula  {% elif  campanha == 'Inquerito %}{% set campanha = 'Inquerito' %} {% else %}{% set campanha = 'Campanha' %}{{Campanha}}{% endif %}- {{id}}</legend>
         
         <label for="name">Tema:</label>
         {% if tema %}
@@ -80,7 +80,7 @@
       <fieldset>
         <legend>Descricão da/o {{campanha}}</legend>
         
-        <label for="question_audio" class="mt-4">Descricão Introdução:</label>
+        <label for="question_audio" class="mt-4">Descricão da Introdução:</label>
         <div class="input-group mb-3">
           <input type="text" id="introducao" name="introducao" placeholder="" class="input-custom" name="intro_audio" required>
           <div class="file-upload">
