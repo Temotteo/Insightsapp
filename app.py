@@ -3119,7 +3119,7 @@ def cliente_ong():
     cursor = conn.cursor()
 
     # Execute query
-    cursor.execute("select * from cliente_vendas where id_vendas not in (select id_cliente from calendar where hora_actual > '2024-07-23 00:00:00');")
+    cursor.execute("SELECT * FROM cliente_vendas WHERE ong = true ORDER BY nome;")
         
     dados=cursor.fetchall()
 
@@ -3173,8 +3173,6 @@ def depedencias(id):
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
     cont = request.form['cont']
-    print(cont)
-    print(id)
  
     for i in range(int(cont)):
         i = i+1
@@ -3256,7 +3254,6 @@ def add_call(id):
 @app.route('/tarefas_diarias_data/<string:data>', methods=['GET', 'POST'])
 @is_logged_in
 def tarefas_diarias_data(data):
-     print(data)
      return redirect(url_for('tarefas_diarias', data=data))    
 
 
