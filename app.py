@@ -118,7 +118,7 @@ TWILIO_PHONE_NUMBER = '+19495652625'
 
 
 # URLs of audio files for each question
-QUESTION_AUDIO_URLS = [
+audio_urls_URLS = [
     "https://insightsap.com/audio/conjutiviteintro.mp3",
     
     "https://insightsap.com/audio/conjutivitep1.mp3",
@@ -2372,14 +2372,17 @@ def buscar_Audio(id):
                      WHERE
                          cq.campanha_id = {id};                   
                      """)
-    audios = cursor.fetchall()
+    audio_files = [row[0] for row in cursor.fetchall()]
+
+
+    base_url = "https://insightsap.com/get_audio/"
+    audio_urls = [f"{base_url}{audio_file}" for audio_file in audio_files]
+
     conn.close()
 
-    for audio in audios:
-        data.append(audio[0])
     
     
-    return data
+    return audio_urls
 
 
 
@@ -3434,11 +3437,11 @@ def ivr_test():
 @app.route('/ivr/<string:campaign>', methods=['POST'])
 def ivr(campaign):
     response = VoiceResponse()
-    response.play(QUESTION_AUDIO_URLS[0])
+    response.play(audio_urls_URLS[0])
 
     current_question_index = request.args.get('current_question_index', default=1, type=int)
     with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
-        gather.play(QUESTION_AUDIO_URLS[current_question_index])
+        gather.play(audio_urls_URLS[current_question_index])
 
     return str(response), 200, {'Content-Type': 'application/xml'}
 
@@ -3453,7 +3456,7 @@ def handle_question():
 
     response = VoiceResponse()
 
-    if current_question_index < len(QUESTION_AUDIO_URLS) - 1:  # Not the concluding message
+    if current_question_index < len(audio_urls_URLS) - 1:  # Not the concluding message
         try:
             selected_option = int(selected_option)
             if selected_option < 1 or selected_option > 5:
@@ -3468,10 +3471,10 @@ def handle_question():
         # Continue with the next question
         next_question_index = current_question_index + 1
         with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=next_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
-            gather.play(QUESTION_AUDIO_URLS[next_question_index])
+            gather.play(audio_urls_URLS[next_question_index])
 
     else:  # Concluding message
-        response.play(QUESTION_AUDIO_URLS[-1])
+        response.play(audio_urls_URLS[-1])
 
     return str(response), 200, {'Content-Type': 'application/xml'}
 
@@ -5100,21 +5103,18 @@ def submit_inscricao(idioma):
 @app.route('/ivr2/<string:campaign>', methods=['POST'])
 def ivr2(campaign):
   try:  
-    audios = buscar_Audio(19077)
-    QUESTION_AUDIO = []
-    for audio in audios:
-        QUESTION_AUDIO.append(f"https://insightsap.com/get_audio/{audio}")
-    
-    logging.debug(f"IVR started for campaign: {campaign}")
-    print(QUESTION_AUDIO)
     response = VoiceResponse()
-    response.play(QUESTION_AUDIO[0])
+
+    audio_urls  = buscar_Audio(19077)
+
+    logging.debug(f"IVR started for campaign: {campaign}")
+    response.play(audio_urls[0])
 
     current_question_index = request.args.get('current_question_index', default=1, type=int)
     logging.debug(f"Current question index: {current_question_index}")
 
     with response.gather(num_digits=1, action=url_for('handle_question_teste', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
-        gather.play(QUESTION_AUDIO[current_question_index])
+        gather.play(audio_urls[current_question_index])
 
     return str(response), 200, {'Content-Type': 'application/xml'}
   except Exception as e:
@@ -5129,14 +5129,13 @@ def handle_question_teste():
     phone_number = request.form.get('To')
     current_question_index = int(request.args.get('current_question_index'))
     campaign=request.args.get('campaign')
-    audios = buscar_Audio(19077)
-    QUESTION_AUDIO = []
-    for audio in audios:
-        QUESTION_AUDIO.append(f"https://insightsap.com/get_audio/{audio}")
-
+    
     response = VoiceResponse()
 
-    if current_question_index < len(QUESTION_AUDIO) - 1:  # Not the concluding message
+    audio_urls = buscar_Audio(19077)
+    
+
+    if current_question_index < len(audio_urls) - 1:  # Not the concluding message
         if current_question_index == 2:
           try:
               selected_option = int(selected_option)
@@ -5152,10 +5151,10 @@ def handle_question_teste():
         # Continue with the next question
         next_question_index = current_question_index + 1
         with response.gather(num_digits=1, action=url_for('handle_question_teste', current_question_index=next_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
-            gather.play(QUESTION_AUDIO[next_question_index])
+            gather.play(audio_urls[next_question_index])
 
     else:  # Concluding message
-        response.play(QUESTION_AUDIO[-1])
+        response.play(audio_urls[-1])
 
     return str(response), 200, {'Content-Type': 'application/xml'}
 
@@ -5178,11 +5177,11 @@ def start_ivr_formacao(campaign):
      )
     
     audios = buscar_Audio(campaign)
-    QUESTION_AUDIO = []
+    audio_urls = []
     for audio in audios:
-        QUESTION_AUDIO.append(f"https://insightsap.com/get_audio/{audio}")
+        audio_urls.append(f"https://insightsap.com/get_audio/{audio}")
 
-    print(QUESTION_AUDIO)
+    print(audio_urls)
     return render_template('campaign_status.html')
   except Exception as e:
         logging.error(f"Error in start_ivr_campaign: {e}")
