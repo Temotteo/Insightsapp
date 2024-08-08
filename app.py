@@ -1627,6 +1627,7 @@ class addcredencialForm(Form):
     ipadress_router= StringField('Router Ipaddress:')
   
 
+
 class funcaoForm(Form):
     funcao= TextAreaField('Function:',[validators.Length(min=5),validators.DataRequired()])
     estado = SelectField('Estado:',coerce=str,choices=[("pendente","Pendente"),("resolvido","resolvido")])
@@ -3146,13 +3147,17 @@ def cadastro ():
         cursor = conn.cursor()
 
         # Execute query
-        cursor.execute("INSERT INTO cliente_vendas(nome, email, contato, contato_alternativo, city, residence_type, work_phase, sale_phase, ong, email2) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(form.name.data,form.email.data,form.contact1.data,form.contact2.data, form.city.data, form.residence.data,form.phase.data, form.sale.data, form.interested.data, form.email2.data))
-        
+        cursor.execute("INSERT INTO cliente_vendas(nome, email, contato, contato_alternativo, city, residence_type, work_phase, sale_phase, ong, email2) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id_vendas",
+                       (form.name.data,form.email.data,form.contact1.data,form.contact2.data, form.city.data, form.residence.data,form.phase.data, form.sale.data, form.interested.data, form.email2.data))
+        id = cursor.fetchone()[0]
         # Inserir na tabela actividades
         task_title = "Cadastro de novo cliente: " + form.name.data + " no Sistema"       
         insert_query = sql.SQL("INSERT INTO tasks (title, due_date, responsible, accepted_time, completed_time, accepted, completed) VALUES ({}, CURRENT_DATE,{}, now(),now(), 'TRUE','TRUE')")
         cursor.execute(insert_query.format(sql.Literal(task_title), sql.Literal(session['username'])))
 
+        cursor.execute("INSERT INTO Action_rel(usuario, descricao, action, data, cliente, cliente_id) VALUES (%s,%s,%s,%s,%s,%s)",
+                       (session['username'], "Cadastro de Novo Cliente",  "Register", datetime.now(), form.name.data,id))
+    
 
         # Commit to DB
         conn.commit()
@@ -3282,9 +3287,11 @@ def tarefas_diarias(data):
     call = 0
     meeting =0
     proposal=0
+
     calls = 0
     meetings =0
     proposals=0
+    register = 0
     categorias = ["Call","Meeting", "Submission proposal"] 
     for data in calendar_data:
 
@@ -3292,16 +3299,18 @@ def tarefas_diarias(data):
             call = sum(1 for calendar in calendar_data if calendar[3] == 'Call' and calendar[1]=='Marta')
             meeting = sum(1 for calendar in calendar_data if calendar[3] == "Meeting" and calendar[1]=="Marta")
             proposal = sum(1 for calendar in calendar_data if calendar[3] == "submission of proposal" and calendar[1]=="Marta")
-            
+            register = sum(1 for calendar in calendar_data if calendar[3] == "Register" and calendar[1]=="Marta")
+
 
         if data[1] == 'Sara':
             calls = sum(1 for calendar in calendar_data if calendar[3] == "Call" and calendar[1]=="Sara")
             meetings = sum(1 for calendar in calendar_data if calendar[3] == "Meeting" and calendar[1]=="Sara")
             proposals = sum(1 for calendar in calendar_data if calendar[3] == "submission of proposal" and calendar[1]=="Sara")
-     
+            register = sum(1 for calendar in calendar_data if calendar[3] == "Register" and calendar[1]=="Sara")
 
-    Marta = [call, meeting, proposal]
-    Sara = [calls, meetings, proposals]
+
+    Marta = [call, meeting, proposal,register]
+    Sara = [calls, meetings, proposals,register]
     print(Marta)
     print(Sara)
     return render_template('tarefas.html',datas=datas ,categorias=categorias, Marta=Marta ,Sara=Sara)
