@@ -3287,11 +3287,12 @@ def tarefas_diarias(data):
     call = 0
     meeting =0
     proposal=0
+    register = 0
 
     calls = 0
     meetings =0
     proposals=0
-    register = 0
+    registers = 0
     categorias = ["Call","Meeting", "Submission proposal"] 
     for data in calendar_data:
 
@@ -3306,11 +3307,11 @@ def tarefas_diarias(data):
             calls = sum(1 for calendar in calendar_data if calendar[3] == "Call" and calendar[1]=="Sara")
             meetings = sum(1 for calendar in calendar_data if calendar[3] == "Meeting" and calendar[1]=="Sara")
             proposals = sum(1 for calendar in calendar_data if calendar[3] == "submission of proposal" and calendar[1]=="Sara")
-            register = sum(1 for calendar in calendar_data if calendar[3] == "Register" and calendar[1]=="Sara")
+            registers = sum(1 for calendar in calendar_data if calendar[3] == "Register" and calendar[1]=="Sara")
 
 
     Marta = [call, meeting, proposal,register]
-    Sara = [calls, meetings, proposals,register]
+    Sara = [calls, meetings, proposals,registers]
     print(Marta)
     print(Sara)
     return render_template('tarefas.html',datas=datas ,categorias=categorias, Marta=Marta ,Sara=Sara)
