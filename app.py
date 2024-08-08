@@ -5173,7 +5173,7 @@ def start_ivr_formacao(campaign):
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
     call = client.calls.create(
          url=url,  # URL for handling IVR logic
-         to=258849109478,
+         to=258874496714,
          from_=TWILIO_PHONE_NUMBER
      )
     
