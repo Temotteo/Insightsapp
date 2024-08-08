@@ -5097,8 +5097,8 @@ def submit_inscricao(idioma):
       return render_template('inscricao_pastoral_PT.html', idioma = idioma)
    
 
-@app.route('/ivr_teste/<string:campaign>', methods=['POST'])
-def ivr_teste(campaign):
+@app.route('/ivr2/<string:campaign>', methods=['POST'])
+def ivr2(campaign):
   try:  
     audios = buscar_Audio(19077)
     QUESTION_AUDIO = []
@@ -5144,7 +5144,7 @@ def handle_question_teste():
                   raise ValueError()
           except ValueError:
             # Handle invalid input by redirecting back to /ivr with current_question_index
-            return redirect(url_for('ivr_teste', current_question_index=current_question_index))
+            return redirect(url_for('ivr2', current_question_index=current_question_index))
 
         # Save the survey response to the database
         save_survey_response2(phone_number, current_question_index, selected_option, campaign)
@@ -5167,7 +5167,7 @@ def start_ivr_formacao(campaign):
     #phone_numbers = request.form.getlist('numero')
    
     
-    url='https://insightsap.com/ivr_teste/'+campaign
+    url='https://insightsap.com/ivr2/'+campaign
 
    
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
