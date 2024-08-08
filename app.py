@@ -5160,7 +5160,7 @@ def handle_question_teste():
 
 
 # Start IVR campaign route
-@app.route('/start_ivr_teste/<campaign>', methods=['POST','GET'])
+@app.route('/start_ivr_teste/<string:campaign>', methods=['POST','GET'])
 def start_ivr_formacao(campaign):
   try:
     #phone_numbers = request.form.getlist('numero')
@@ -5188,13 +5188,11 @@ def start_ivr_formacao(campaign):
         return f"An error occurred while starting the IVR campaign. {e}"
 
 
-@app.route('/get_audio/<filename>')
+@app.route('/get_audio/<path:filename>')
 def get_audio(filename):
-    try:
-        return send_from_directory('static/audios', filename)
-    except FileNotFoundError as e:
-        return render_template('error.html', erro=f"An error occurred while starting the IVR campaign. {e}")
-
+    
+    return send_from_directory('audios', filename)
+    
         
 
 def save_survey_response2(phone_number, question_index, selected_option, campaign):

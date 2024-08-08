@@ -1,3 +1,5 @@
+import psycopg2
+
 def Articles():
     articles = [
         {
@@ -23,3 +25,38 @@ def Articles():
         }
     ]
     return articles
+
+
+def buscar_Audio(id):
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+    
+    data = []
+    cursor.execute(f"""
+                     SELECT
+                         ca.audio,
+                         cq.tipo,
+                         ca.idioma
+                     FROM
+                         campanha_question cq
+                     JOIN
+                         campanha_audio ca ON cq.questao_id = ca.questao_id
+                     WHERE
+                         cq.campanha_id = {id};                   
+                     """)
+    audio_files = [row[0] for row in cursor.fetchall()]
+
+
+    base_url = "https://insightsap.com/get_audio/"
+    audio_urls = [f"{base_url}{audio_file}" for audio_file in audio_files]
+
+    conn.close()
+
+    
+    
+    return audio_urls
+
+
+audio = buscar_Audio(19077)
+
+print(audio)
