@@ -58,14 +58,15 @@
       <input type="hidden" id="id" name="campanha" value="{{id}}">
 
       <fieldset>
-        <legend>{% if campanha == 'formacao' %}{% set campanha = 'Aula' %}Aula  {% elif  campanha == 'Inquerito %}{% set campanha = 'Inquerito' %} {% else %}{% set campanha = 'Campanha' %}{{Campanha}}{% endif %}- {{id}}</legend>
+        <legend>{% if campanha == "formacao" %} Aula {% elif campanha == "inquerito" %}
+           Inquerito{% else %} Campanha {% endif %}</legend>
         
         <label for="name">Tema:</label>
         {% if tema %}
         <input type="hidden" name="name" id="name" value="{{tema}}">
-        <input type="text"  class="input-custom" placeholder="Insira o tema para a/o {{campanha}}" value="{{tema}}" disabled>
+        <input type="text"  class="input-custom" placeholder="Insira o tema " value="{{tema}}" disabled>
         {% else %}
-        <input type="text" id="name" name="name" class="input-custom" placeholder="Insira o tema para a/o {{campanha}}" required>
+        <input type="text" id="name" name="name" class="input-custom" placeholder="Insira o tema para " required>
         {% endif %}
 
         
@@ -78,7 +79,7 @@
       </fieldset>
 
       <fieldset>
-        <legend>Descricão da/o {{campanha}}</legend>
+        <legend>Descricão </legend>
         
         <label for="question_audio" class="mt-4">Descricão da Introdução:</label>
         <div class="input-group mb-3">
@@ -95,10 +96,10 @@
           <audio id="audio-preview1" controls></audio>
         </div>
 
-        {% if campanha != 'inquerito' %}
-          {% if campanha == 'Aula' %}
+        {% if campanha != "inquerito" %}
+          {% if campanha == "Aula" %}
             <label for="audio">Áudio da Aula:</label>
-          {% else %}
+            {% else %}
             <label for="audio">Áudio da Campanha:</label>
           {% endif %}
           
@@ -138,43 +139,43 @@
   </div>
 
   <script>
-    document.getElementById('file-upload1').addEventListener('change', function(event) {
-      var audioPreview = document.getElementById('audio-preview1');
-      var audioInsert = document.getElementById('audio-insert1');
+    document.getElementById("file-upload1").addEventListener("change", function(event) {
+      var audioPreview = document.getElementById("audio-preview1");
+      var audioInsert = document.getElementById("audio-insert1");
       var file = event.target.files[0];
       if (file) {
         var reader = new FileReader();
         reader.onload = function(e) {
           audioPreview.src = e.target.result;
-          audioInsert.style.display = 'block';
+          audioInsert.style.display ="block";
         };
         reader.readAsDataURL(file);
       }
     });
 
     function audioPreviw() {
-      var audioPreview = document.getElementById('audio-preview');
-      var audioInsert = document.getElementById('audio-insert');
+      var audioPreview = document.getElementById("audio-preview");
+      var audioInsert = document.getElementById("audio-insert");
       var file = event.target.files[0];
       if (file) {
         var reader = new FileReader();
         reader.onload = function(e) {
           audioPreview.src = e.target.result;
-          audioInsert.style.display = 'block';
+          audioInsert.style.display = "block";
         };
         reader.readAsDataURL(file);
       }
     }
 
-    document.getElementById('file-upload2').addEventListener('change', function(event) {
-      var audioPreview = document.getElementById('audio-preview2');
-      var audioInsert = document.getElementById('audio-insert2');
+    document.getElementById("file-upload2").addEventListener("change", function(event) {
+      var audioPreview = document.getElementById("audio-preview2");
+      var audioInsert = document.getElementById("audio-insert2");
       var file = event.target.files[0];
       if (file) {
         var reader = new FileReader();
         reader.onload = function(e) {
           audioPreview.src = e.target.result;
-          audioInsert.style.display = 'block';
+          audioInsert.style.display = "block";
         };
         reader.readAsDataURL(file);
       }

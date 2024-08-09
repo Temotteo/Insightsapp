@@ -44,13 +44,79 @@ function carregarDados() {
                                 linha += `</select>
                                           </div>
                                           <button class="btn btn-primary btn-sm" onclick="enviar_sms_grupo()">
-                                              <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> enviar
-                                          </button>`;
+                                          <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> enviar
+                                      </button>`;
+                                         
             $('#modalBodySms').append(linha);
         
         // Abre o modal após carregar os dados
         $('#ModalSmsGroup').modal('show');
     });
+}
+
+function callOne(id) {
+   let idd = String(id)
+    $('#modalBodySms').empty();
+        var linha = `
+        <form action ="/start_ivr_teste" method="post">
+                 <input type="hidden" name="campaign" id="campaign" value="${id}">
+
+               <div class="form-group">
+                         <label for="country" class="form-label">Contacto:</label>
+                          <input class="form-control" id="call"  name ="numero" >
+                             </div> <div class="form-group">
+                         <label for="data" class="form-label">Data:</label>
+                             <input type="date" name="data" id="data" class="form-control-sm">
+                            </div>
+                                      <button class="btn btn-primary btn-sm" type='submit'>
+                                          <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> enviar
+                                      </button>
+                                      </form>
+                        `;
+                    
+                                     
+        $('#modalBodySms').append(linha);
+    
+    // Abre o modal após carregar os dados
+   
+};
+
+
+function callGrupo(id) {
+   
+    $('#modalBodySms').empty();
+        var linha = `
+         <form action ="/start_ivr_teste" method="post">
+         <input type="hidden" name="campaign" id="campaign" value="${id}">
+
+                <div class="form-group">
+                   </div><div class="form-group">
+                         <label for="country" class="form-label">Grupo</label>
+                          <select class="form-control" id="call"  name ="numero" >
+                            <option value="">selecione...</option>
+                            
+                        `;
+                        $.get('/selecionar_group', function(data) {
+                            data.forEach(function(item) {
+                                linha += `<option value="${item.id}">${item.nome}</option>`;
+                            });
+                    
+                            // Fecha a tag select e adiciona o botão de enviar
+                            linha += `</select>
+                                          </div> <div class="form-group">
+                         <label for="data" class="form-label">Data:</label>
+                             <input type="datetime" name="data" id="data" class="form-control-sm">
+                            </div>
+                                      <button class="btn btn-primary btn-sm" type='submit'>
+                                          <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> enviar
+                                      </button>
+                                      </form>
+                        `;
+        $('#modalBodySms').append(linha);
+    
+    // Abre o modal após carregar os dados
+   
+});
 }
 
 

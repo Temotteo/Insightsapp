@@ -4491,8 +4491,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def uploaded_file(filename):
     return send_from_directory(app.config['AUDIO_FOLDER'], filename)
 
-#(funcoes Adiconis, fora do contesto da plataforma)
-
+#funcoes de gerenciamento de videos da igreja
 @app.route('/videos/<type>', methods=['GET','POST'])
 def videos(type):
     if request.method == 'POST':
@@ -4747,7 +4746,7 @@ def resultado(usuario_id):
 
 
 
-
+# apaga todos os dados do usuario e reenicia os testes 
 @app.route('/reniciar/<int:usuario_id>')
 @is_logged_in
 def reniciar(usuario_id):
@@ -5054,37 +5053,39 @@ def submit_inscricao(idioma):
       return render_template('inscricao_pastoral_PT.html', idioma = idioma)
    
 
-@app.route('/ivr2/<campaign>', methods=['POST'])
+@app.route('/ivr2/<int:campaign>', methods=['POST','GET'])
 def ivr2(campaign):
    
     response = VoiceResponse()
 
     response.play(audio_urls[1])
 
-    save_survey_response2(" ", " ", campaign)
+    #save_survey_response2(" ", campaign)
 
-    return redirect(url_for('campanha_n', id=int(campaign), type="Simples"))
+    return save_survey_response2(" ", campaign)
 
 
 # Start IVR campaign route
-@app.route('/start_ivr_teste/<campaign>', methods=['POST','GET'])
-def start_ivr_formacao(campaign):
+@app.route('/start_ivr_teste', methods=['POST','GET'])
+def start_ivr_teste():
   try:
-    #phone_numbers = request.form.getlist('numero')
+    phone_numbers = request.form.getlist('numero')
+    campaign =  request.form['campaign']
+    data = request.form['data']
+    
+    print(data)
+    print(phone_numbers)
+    print(campaign)
    
-    
-    url='https://insightsap.com/ivr2/'+campaign
-
-   
-    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    call = client.calls.create(
-         url=url,  # URL for handling IVR logic
-         to=258849109478,
-         from_=TWILIO_PHONE_NUMBER
-     )
+    #client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    #call = client.calls.create(
+    #     url= f'http://127.0.0.1:5000/ivr2/{campaign}',  # URL for handling IVR logic
+    #     to=258849109478,
+    #     from_=TWILIO_PHONE_NUMBER
+    # )
     
     
-    return render_template('campaign_status.html')
+    return render_template('teste2.html', campaign =campaign,phone = phone_numbers[0], data=data)
   except Exception as e:
         logging.error(f"Error in start_ivr_campaign: {e}")
         return f"An error occurred while starting the IVR campaign. {e}"
@@ -5112,14 +5113,14 @@ def save_survey_response2(phone_number, campaign):
             campaign int references campanhas(id_campanha),
             data timestamp without time zone )
     """)
-
+    current_dateTime = datetime.now()
     current_dateTime = str(datetime.date(current_dateTime)) + " " + str(datetime.time(current_dateTime))
 
     # Insert survey response into the table
     cur.execute("""
         INSERT INTO simple_responses (phone_number,campaign, data)
         VALUES (%s, %s, %s)
-    """, ('258849109478', current_dateTime, str(campaign), current_dateTime ))
+    """, ('258849109478', campaign, current_dateTime ))
 
     conn.commit()
     conn.close()

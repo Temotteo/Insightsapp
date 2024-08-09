@@ -80,7 +80,29 @@
   <a class="btn btn-success" href="/add_question/{{id}}/{{type}}">Adicionar Pergunta</a>
   {% endif %}
   <a class="btn btn-success" href="/campanhas">Voltar a campanhas</a>
+  <button type="button" class="btn btn-success" onclick=" return  $('#ModalCallGroup').modal('show');"  value="Agendar Envio em Grupo" >Enviar</button>
   <a class="btn btn-success" href="/start_ivr_teste/{{id}}">Testar</a>
+
+
+    
+  <div class="modal fade" id="ModalCallGroup" tabindex="-1" aria-labelledby="ModalSmsGroupLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalSmsGroupLabel">Enviar Campanha</h5>
+                <button type="button" class="close" onclick="return $('#ModalCallGroup').modal('hide');" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+                <div class="modal-body" id="modalBodySms">
+                  <h4>Enviar como:</h4>
+                  <button type="button" class="btn btn-success" onclick=" callGrupo('{{id}}')"  value="Agendar Envio em Grupo" >Grupo</button>
+                  <button type="button" class="btn btn-success" onclick=" callOne('{{id}}')"  value="Agendar Envio em Grupo" >Singular</button>
+
+              </div>
+          </div>
+      </div>
+  </div>
   
   <div class="modal " id="ModalAudio" tabindex="-1"  aria-labelledby="ModalLabel" aria-hidden="true">
     <div class="modal-dialog">
