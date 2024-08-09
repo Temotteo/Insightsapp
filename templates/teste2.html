@@ -29,26 +29,7 @@
     </table>
     <script>
         // JavaScript to fetch call statuses and populate the table dynamically
-        function fetchCallStatuses() {
-            fetch('/get_call_status')
-                .then(response => response.json())
-                .then(callStatuses => {
-                    const tableBody = document.getElementById('call-status-table');
-                    tableBody.innerHTML = '';
-                    callStatuses.forEach(call => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${call.sid}</td>
-                            <td>${call.status}</td>
-                            <td>{{phone}}</td>
-                            
-                            <td>${call.duration_minutes}</td>
-                            <td>{{data}}</td>
-                        `;
-                        tableBody.appendChild(row);
-                    });
-                });
-        }
+       
 
         // Fetch call statuses every 3 seconds
        // setInterval(fetchCallStatuses, 3000);
