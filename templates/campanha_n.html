@@ -21,67 +21,57 @@
     {% for column in columns_list %}
       
       <tr>
-      {% if column[4] == 'Introducao '  or column[4] == 'campanha' or  column[4] == 'Aula'  %} 
-      <td>{{ column[4] }}</td>
-      {% elif column[4] == 'Pergunta' %}
+      {% if column[3] == 'Introducao '  or column[3] == 'campanha' or  column[3] == 'Aula'  %} 
+      <td>{{ column[3] }}</td>
+      {% elif column[3] == 'Pergunta' %}
         <td>pergunta {{loop.index -1 }}</td>
         {% else  %} 
-        <td>{{ column[4] }}</td>
+        <td>{{ column[3] }}</td>
         {% endif %}
 
 
-    <td>{{ column[2] }}</td>
+    <td>{{ column[1] }}</td>
        
 
-    {% if type == 'formacao' %} 
-    <td>
-      {% if column[3] !=0 %}
-      
-     <a href="/audios/{{column[0]}}/{{type}}" class="link link-dark">ver audios</a>
-      {% else %}
-        nenhum audio
-      
-       {% endif %}
-     </td>
-     {% if loop.index ==1 %}
-        <td><a href="#" class="btn btn-default pull-right">-------------</a></td>
-        {% else %}
-        <td><a href="/perguntas/{{column[0]}}/{{type}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
-        {% endif %}
-        <td><a href="/assign_question/{{id}}/{{column[0]}}/questao" class="btn btn-default pull-right">{% if column[4] == 'Introducao' or column[4] == 'Aula'  or column[4] == 'Conclusao' or column[4] == 'campanha'  %} Editar {{column[4]}} {% else %} Editar Pergunta {% endif %}</a></td>
-        <td><a href="#" class="btn btn-default pull-right"><strike>Adicionar Audio</strike></a></td>
-
-        {% else %}
         <td>
           
-          {% if column[3] %}
-           {% if column[3] == 1 %} 
-             <a href="/audios/{{column[1]}}/questoes" class="link link-dark">{{column[3]}} audio</a>
+       {% if column[2] %}
+
+           {% if column[2] == 1 %} 
+             <a href="/audios/{{column[0]}}/{{type}}" class="link link-dark">{{column[2]}} audio</a>
            {% else %}  
-           <a href="/audios/{{column[1]}}/questoes" class="link link-dark">{{column[3]}} audios</a>
+
+           <a href="/audios/{{column[0]}}/{{type}}" class="link link-dark">{{column[2]}} audios</a>
            {% endif %}
-          {% else %}
+
+       {% else %}
           nenhum audio
           
-        {% endif %}
+      {% endif %}
+
     </td>
     {% if id == 18512 %}
-    {% if loop.index ==1 %}
-        <td><a href="#" class="btn btn-default pull-right">-------------</a></td>
+
+         {% if loop.index ==1 %}
+        <td><a href="#" class="btn btn-default pull-right"></a></td>
+
         {% else %}
         <td><a href="/perguntas/{{id}}/campanha_32_pergunta_{{loop.index-1}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
         {% endif %}
-     {% else %}
-     {% if loop.index ==1 %}
-     <td><a href="#" class="btn btn-default pull-right">-------------</a></td>
-     {% else %}
-     <td><a href="/perguntas/{{column[1]}}/{{type}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
-     {% endif %}        
-     {% endif %}
-        <td><a href="/assign_question/{{id}}/{{column[1]}}/questao" class="btn btn-default pull-right">{% if column[4] == 'Introducao' or column[4] == 'Aula'  or column[4] == 'Conclusao' or column[4] == 'campanha'  %} Editar {{column[4]}} {% else %} Editar Pergunta {% endif %}</a></td>
-        <td><a href="/assign_question/{{id}}/{{column[1]}}/audio" class="btn btn-default pull-right" >Adicionar Audio</a></td>
+        
+    {% else %}
 
+        {% if loop.index ==1 %}
+        <td><a href="#" class="btn btn-default pull-right"></a></td>
+        {% else %}
+        <td><a href="/perguntas/{{column[0]}}/{{type}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
         {% endif %}
+
+    {% endif %}
+        <td><a href="/assign_question/{{id}}/{{column[0]}}/questao" class="btn btn-default pull-right">{% if column[4] == 'Introducao' or column[4] == 'Aula'  or column[4] == 'Conclusao' or column[4] == 'campanha'  %} Editar {{column[4]}} {% else %} Editar Pergunta {% endif %}</a></td>
+        <td><a href="/add_audio/{{column[0]}}/{{type}}" class="btn btn-default pull-right" >Adicionar Audio</a></td>
+
+
       </tr>
     {% endfor %}
     

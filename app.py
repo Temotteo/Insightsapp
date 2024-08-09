@@ -118,7 +118,7 @@ TWILIO_PHONE_NUMBER = '+19495652625'
 
 
 # URLs of audio files for each question
-audio_urls_URLS = [
+QUESTION_AUDIO_URLS = [
     "https://insightsap.com/audio/conjutiviteintro.mp3",
     
     "https://insightsap.com/audio/conjutivitep1.mp3",
@@ -127,6 +127,12 @@ audio_urls_URLS = [
 
     "https://insightsap.com/audio/conjutiviteconc.mp3"]
 
+audio_urls = [
+    "https://insightsap.com/audio/indroducao.mp3",
+    
+    "https://insightsap.com/audio/audio.mp3",
+
+    "https://insightsap.com/audio/campanhacon.mp3"]
 
 # Mock function to save survey responses to the database
 def save_survey_response(phone_number, question_index, selected_option, campaign):
@@ -2421,8 +2427,9 @@ def questoes(id):
   
     org_id = session['last_org']
     print(id)
-    
-    cursor.execute("SELECT * FROM display_ref WHERE id LIKE %s", (id + "_%",))
+   
+           
+    cursor.execute("SELECT * FROM display_ref WHERE id LIKE %s;", (id + "_%",))
     questoes = cursor.fetchall()
     conn.close()
     print(questoes)
@@ -2441,14 +2448,9 @@ def campanha_n(id, type):
         connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
         cursor = connection.cursor()
        
-        if type == 'formacao':
-            cursor.execute(f"SELECT * FROM aula_info WHERE aula = {id};")
-            result = cursor.fetchall()
-
-        else:
-            cursor.execute(f"SELECT * FROM campanha_question WHERE campanha_id = {id} ORDER BY CASE  WHEN tipo = 'Introducao' THEN 0 WHEN tipo = 'Conclusao' THEN 2 ELSE 1 END, tipo DESC;")
-            result = cursor.fetchall()
-           
+        # Executar uma função que retorna os resultados de acordo com o tipo de campanha e id fornecidos
+        cursor.execute(f"SELECT * FROM get_info_by_id_and_type({id}, '{type}');")
+        result = cursor.fetchall()
             
         return render_template('campanha_n.html', columns_list = result, id=id, type=type)
 
@@ -2489,22 +2491,11 @@ def audios(id, type):
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
 
-    # Executar uma função armazenada para verificar a tabela associada ao 'id' fornecido
-    cursor.execute("SELECT verificar_tabela_por_id(%s)", (id,))
-    result = cursor.fetchone()[0]
+    # Executar uma função que retorna os resultados de acordo com o tipo de campanha e id fornecidos
+    cursor.execute(f"SELECT * FROM get_audio_data({id}, '{type}');")
+    audios = cursor.fetchall()
+    print(id)
           
-    if result == 'campanha':
-        # Se a tabela associada é 'campanha', selecionar todos os áudios da tabela 'campanha_audio'
-        cursor.execute(f"SELECT * FROM campanha_audio WHERE questao_id = {id};")
-        audios = cursor.fetchall()
-        print(audios)  # Exibir os áudios no console (para depuração)
-
-    else:
-        # Se a tabela associada é 'aula', selecionar todos os áudios da tabela 'aula_audio'
-        cursor.execute(f"SELECT * FROM aula_audio WHERE questao_id = {id};")
-        audios = cursor.fetchall()
-        print(audios)  # Exibir os áudios no console (para depuração)
-
     # Fechar o cursor e a conexão com o banco de dados
     cursor.close()
     conn.close()
@@ -2514,8 +2505,8 @@ def audios(id, type):
 
 
 
-@app.route('/add_audio/<int:id>', methods=['GET', 'POST'])
-def add_audio(id):
+@app.route('/add_audio/<int:id>/<type>', methods=['GET', 'POST'])
+def add_audio(id,type):
     # Verifica se o método da requisição é POST
     if request.method == 'POST':
         try:
@@ -2525,6 +2516,8 @@ def add_audio(id):
             
             # Converte o id de string para inteiro
             id = int(id)
+            cursor.execute("SELECT campanha_id FROM campanha_question WHERE questao_id = %s", (id,))
+            campanha_id = cursor.fetchone()[0]
             
             # Obtém o arquivo de áudio enviado pelo usuário
             audio = request.files['audio']
@@ -2535,7 +2528,7 @@ def add_audio(id):
             audio.save(os.path.join(app.config['AUDIO_FOLDER'], audio_filename))
             
             # Verifica se já existem registros de áudio para a questão fornecida
-            cursor.execute("SELECT * FROM aula_audio WHERE questao_id = %s", (id,))
+            cursor.execute("SELECT * FROM campanha_audio WHERE questao_id = %s", (id,))
             dados = cursor.fetchall()
             
             # Determina o número da questão com base na quantidade de registros existentes
@@ -2546,7 +2539,7 @@ def add_audio(id):
             
             # Insere um novo registro de áudio na tabela aula_audio
             cursor.execute(
-                "INSERT INTO aula_audio (questao_id, questao_nr, audio, idioma) VALUES (%s, %s, %s, %s)",
+                "INSERT INTO campanha_audio (questao_id, questao_nr, audio, idioma) VALUES (%s, %s, %s, %s)",
                 (id, questao_nr, audio_filename, audio_lingua)
             )
             conn.commit()
@@ -2561,14 +2554,14 @@ def add_audio(id):
                 conn.close()
         
         # Redireciona para a página de campanha correspondente
-        return redirect(url_for('campanha_n', id=id, type=type))
+        return redirect(url_for('campanha_n', id=campanha_id, type=type))
     
     # Obtém as opções de idioma para o formulário
     choices = request_languge()
     print(choices)
     
     # Renderiza o template add_audio.html com as opções de idioma
-    return render_template('add_audio.html', id=id, options=choices)
+    return render_template('add_audio.html', id=id, options=choices, type=type)
 
 
 def criar_aula(id, tema, intro, base, con, audio_intro, audio_base, audio_con, audio_lingua):
@@ -3437,14 +3430,13 @@ def ivr_test():
 @app.route('/ivr/<string:campaign>', methods=['POST'])
 def ivr(campaign):
     response = VoiceResponse()
-    response.play(audio_urls_URLS[0])
+    response.play(QUESTION_AUDIO_URLS[0])
 
     current_question_index = request.args.get('current_question_index', default=1, type=int)
     with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
-        gather.play(audio_urls_URLS[current_question_index])
+        gather.play(QUESTION_AUDIO_URLS[current_question_index])
 
     return str(response), 200, {'Content-Type': 'application/xml'}
-
 
 # Handle question route
 @app.route('/handle_question', methods=['POST'])
@@ -3456,7 +3448,7 @@ def handle_question():
 
     response = VoiceResponse()
 
-    if current_question_index < len(audio_urls_URLS) - 1:  # Not the concluding message
+    if current_question_index < len(QUESTION_AUDIO_URLS) - 1:  # Not the concluding message
         try:
             selected_option = int(selected_option)
             if selected_option < 1 or selected_option > 5:
@@ -3471,10 +3463,10 @@ def handle_question():
         # Continue with the next question
         next_question_index = current_question_index + 1
         with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=next_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
-            gather.play(audio_urls_URLS[next_question_index])
+            gather.play(QUESTION_AUDIO_URLS[next_question_index])
 
     else:  # Concluding message
-        response.play(audio_urls_URLS[-1])
+        response.play(QUESTION_AUDIO_URLS[-1])
 
     return str(response), 200, {'Content-Type': 'application/xml'}
 
@@ -3613,43 +3605,7 @@ def assign_question(camp,id,type):
     pergunta = cursor.fetchone()
     
     if request.method == 'POST':
-        #verifica se o fromulario e da inserssao de audio
-        if type == 'audio':
-          idioma = request.form['idioma']
-          audio_file = request.files['audio']
-          filename = secure_filename(audio_file.filename)          
-
-          filepath = os.path.join(app.config['AUDIO_FOLDER'], filename)
-          audio_file.save(filepath)
-          
-          cursor = conn.cursor()
-           
-          cursor.execute(f"SELECT * FROM campanha_audio WHERE questao_id = {id};")
-
-          numero = cursor.fetchall() 
-
-          if numero:
-              questao_nr = len(numero) + 1
-
-          else:
-              questao_nr = 1    
-          
-          # Execute
-          cursor.execute(f"insert into campanha_audio(questao_id, questao_nr, audio, idioma) values({id},{questao_nr},'{filename}','{idioma}') ;")
-           
-          # Commit to DB
-          conn.commit()
-   
-          #Close connection
-          conn.close()
-
-          flash('Audio inserido com sucesso', 'success')
-          type ='inquerito'
-          print(type)
-          return redirect(url_for('campanha_n', id=camp, type=type))
-
-        else:
-         
+           #verifica se o fromulario e da inserssao de audio
            pergunta = request.form['pergunta']
            
            cursor.execute("UPDATE campanha_question SET descricao=%s WHERE questao_id = %s",(pergunta,id))
@@ -3664,12 +3620,10 @@ def assign_question(camp,id,type):
            type ='inquerito'
            return redirect(url_for('campanha_n', id=camp, type =type))
         
-    # Get form
-    if type == 'audio':
-       form = AudioForm()
-    else:   
-       form = PerguntaForm(request.form)
-       form.pergunta.data = pergunta[2]
+    
+  
+    form = PerguntaForm(request.form)
+    form.pergunta.data = pergunta[2]
 
     
     # Obtém os idiomas já utilizados para a questão atual
@@ -5100,67 +5054,20 @@ def submit_inscricao(idioma):
       return render_template('inscricao_pastoral_PT.html', idioma = idioma)
    
 
-@app.route('/ivr2/<string:campaign>', methods=['POST'])
+@app.route('/ivr2/<campaign>', methods=['POST'])
 def ivr2(campaign):
-  try:  
+   
     response = VoiceResponse()
 
-    audio_urls  = buscar_Audio(19077)
+    response.play(audio_urls[1])
 
-    logging.debug(f"IVR started for campaign: {campaign}")
-    response.play(audio_urls[0])
+    save_survey_response2(" ", " ", campaign)
 
-    current_question_index = request.args.get('current_question_index', default=1, type=int)
-    logging.debug(f"Current question index: {current_question_index}")
-
-    with response.gather(num_digits=1, action=url_for('handle_question_teste', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
-        gather.play(audio_urls[current_question_index])
-
-    return str(response), 200, {'Content-Type': 'application/xml'}
-  except Exception as e:
-        logging.error(f"Error in start_ivr_campaign: {e}")
-        return render_template('error.html', message="An error occurred while starting the IVR campaign.")
-
-
-
-@app.route('/handle_question_teste', methods=['POST'])
-def handle_question_teste():
-    selected_option = request.form.get('Digits')
-    phone_number = request.form.get('To')
-    current_question_index = int(request.args.get('current_question_index'))
-    campaign=request.args.get('campaign')
-    
-    response = VoiceResponse()
-
-    audio_urls = buscar_Audio(19077)
-    
-
-    if current_question_index < len(audio_urls) - 1:  # Not the concluding message
-        if current_question_index == 2:
-          try:
-              selected_option = int(selected_option)
-              if selected_option < 1 or selected_option > 5:
-                  raise ValueError()
-          except ValueError:
-            # Handle invalid input by redirecting back to /ivr with current_question_index
-            return redirect(url_for('ivr2', current_question_index=current_question_index))
-
-        # Save the survey response to the database
-        save_survey_response2(phone_number, current_question_index, selected_option, campaign)
-
-        # Continue with the next question
-        next_question_index = current_question_index + 1
-        with response.gather(num_digits=1, action=url_for('handle_question_teste', current_question_index=next_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
-            gather.play(audio_urls[next_question_index])
-
-    else:  # Concluding message
-        response.play(audio_urls[-1])
-
-    return str(response), 200, {'Content-Type': 'application/xml'}
+    return redirect(url_for('campanha_n', id=int(campaign), type="Simples"))
 
 
 # Start IVR campaign route
-@app.route('/start_ivr_teste/<string:campaign>', methods=['POST','GET'])
+@app.route('/start_ivr_teste/<campaign>', methods=['POST','GET'])
 def start_ivr_formacao(campaign):
   try:
     #phone_numbers = request.form.getlist('numero')
@@ -5172,16 +5079,11 @@ def start_ivr_formacao(campaign):
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
     call = client.calls.create(
          url=url,  # URL for handling IVR logic
-         to=258874496714,
+         to=258849109478,
          from_=TWILIO_PHONE_NUMBER
      )
     
-    audios = buscar_Audio(campaign)
-    audio_urls = []
-    for audio in audios:
-        audio_urls.append(f"https://insightsap.com/get_audio/{audio}")
-
-    print(audio_urls)
+    
     return render_template('campaign_status.html')
   except Exception as e:
         logging.error(f"Error in start_ivr_campaign: {e}")
@@ -5195,7 +5097,7 @@ def get_audio(filename):
     
         
 
-def save_survey_response2(phone_number, question_index, selected_option, campaign):
+def save_survey_response2(phone_number, campaign):
     # Connect to the database
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
@@ -5204,35 +5106,23 @@ def save_survey_response2(phone_number, question_index, selected_option, campaig
 
     # Create survey_responses table if not exists
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS survey_responses (
+        CREATE TABLE IF NOT EXISTS simple_responses (
             id SERIAL PRIMARY KEY,
             phone_number VARCHAR(20),
-            question_index INT,
-            selected_option INT,
-            campaign VARCHAR(40),
-            data timestamp without time zone   )
+            campaign int references campanhas(id_campanha),
+            data timestamp without time zone )
     """)
-    
+
+    current_dateTime = str(datetime.date(current_dateTime)) + " " + str(datetime.time(current_dateTime))
+
     # Insert survey response into the table
     cur.execute("""
-        INSERT INTO survey_responses (phone_number, question_index, selected_option, campaign)
-        VALUES (%s, %s, %s, %s)
-    """, (phone_number, question_index, selected_option, str(campaign) ))
+        INSERT INTO simple_responses (phone_number,campaign, data)
+        VALUES (%s, %s, %s)
+    """, ('258849109478', current_dateTime, str(campaign), current_dateTime ))
 
-    cur.execute(f"SELECT questao_id FROM campanha_questao  where campanha_id = {int(campaign)} ;")
-    
-    id = cur.fetchone()[0]
-
-
-    if selected_option == 1:
-       cur.execute(f"UPDATE campanha_opcao SET count= count + 1 where questao = {id} and opcao='Sim';")
-
-    elif selected_option == 2:
-       cur.execute(f"UPDATE campanha_opcao SET count= count + 1 where questao = {id} and opcao='Nao';")
-
-    elif selected_option == 3:
-        cur.execute(f"UPDATE campanha_opcao SET count= count + 1 where questao = {id} and opcao='Talvez';")
     conn.commit()
+    conn.close()
 
     
 if __name__ == '__main__':
