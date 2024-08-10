@@ -127,7 +127,7 @@ QUESTION_AUDIO_URLS = [
 
     "https://insightsap.com/audio/conjutiviteconc.mp3"]
 
-audio_urls = [
+AUDIO_URLS = [
     "https://insightsap.com/audio/indroducao.mp3",
     
     "https://insightsap.com/audio/audio.mp3",
@@ -137,6 +137,8 @@ audio_urls = [
 # Mock function to save survey responses to the database
 def save_survey_response(phone_number, question_index, selected_option, campaign):
     # Connect to the database
+    campaign ='campanha_32'
+
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
     # Create a cursor object
@@ -3430,11 +3432,16 @@ def ivr_test():
 @app.route('/ivr/<string:campaign>', methods=['POST'])
 def ivr(campaign):
     response = VoiceResponse()
-    response.play(QUESTION_AUDIO_URLS[0])
 
-    current_question_index = request.args.get('current_question_index', default=1, type=int)
-    with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
-        gather.play(QUESTION_AUDIO_URLS[current_question_index])
+    if campaign == 'campanha_32':
+       response.play(QUESTION_AUDIO_URLS[0])
+
+       current_question_index = request.args.get('current_question_index', default=1, type=int)
+       with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
+           gather.play(QUESTION_AUDIO_URLS[current_question_index])
+
+    else:
+        response.play(AUDIO_URLS[0])       
 
     return str(response), 200, {'Content-Type': 'application/xml'}
 
@@ -5058,7 +5065,7 @@ def ivr2(campaign):
    
     response = VoiceResponse()
 
-    response.play(audio_urls[1])
+    response.play(AUDIO_URLS[1])
 
     #save_survey_response2(" ", campaign)
 
@@ -5076,13 +5083,15 @@ def start_ivr_teste():
     print(data)
     print(phone_numbers)
     print(campaign)
-   
-    #client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    #call = client.calls.create(
-    #     url= f'http://127.0.0.1:5000/ivr2/{campaign}',  # URL for handling IVR logic
-    #     to=258849109478,
-    #     from_=TWILIO_PHONE_NUMBER
-    # )
+    #f'http://127.0.0.1:5000/ivr2/{campaign}',  # URL for handling IVR logic
+    url='https://insightsap.com/ivr/Simples' 
+
+    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    call = client.calls.create(
+         url= url ,
+         to=258849109478,
+         from_=TWILIO_PHONE_NUMBER
+     )
     
     
     return render_template('teste2.html', campaign =campaign,phone = phone_numbers[0], data=data)
