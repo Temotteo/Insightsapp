@@ -81,7 +81,7 @@
       <fieldset>
         <legend>Descricão </legend>
         
-        <label for="question_audio" class="mt-4">Descricão da Introdução:</label>
+        <label for="question_audio" class="mt-4">Introdução:</label>
         <div class="input-group mb-3">
           <input type="text" id="introducao" name="introducao" placeholder="" class="input-custom" name="intro_audio" required>
           <div class="file-upload">
@@ -98,9 +98,9 @@
 
         {% if campanha != "inquerito" %}
           {% if campanha == "Aula" %}
-            <label for="audio">Áudio da Aula:</label>
+            <label for="audio">Corpo:</label>
             {% else %}
-            <label for="audio">Áudio da Campanha:</label>
+            <label for="audio">Corpo:</label>
           {% endif %}
           
           <div class="input-group mb-3">
@@ -118,7 +118,7 @@
           </div>
         {% endif %}
         
-        <label for="question_audio">Descricão da Conclusão:</label>
+        <label for="question_audio">Conclusão:</label>
         <div class="input-group mb-3">
           <input type="text" id="con_audio" name="conclusao" class="input-custom" required>
           <div class="file-upload">

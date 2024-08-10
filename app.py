@@ -2450,11 +2450,13 @@ def campanha_n(id, type):
         connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
         cursor = connection.cursor()
        
+        cursor.execute(f"SELECT projecto FROM campanhas where id_campanha ={id});")
+        tema = cursor.fetchone()[0]
         # Executar uma função que retorna os resultados de acordo com o tipo de campanha e id fornecidos
         cursor.execute(f"SELECT * FROM get_info_by_id_and_type({id}, '{type}');")
         result = cursor.fetchall()
             
-        return render_template('campanha_n.html', columns_list = result, id=id, type=type)
+        return render_template('campanha_n.html', columns_list = result, id=id, type=type, tema=tema)
 
 
 @app.route('/add_question/<id>/<type>', methods=['GET', 'POST'])

@@ -105,7 +105,7 @@ function callGrupo(id) {
                             linha += `</select>
                                           </div> <div class="form-group">
                          <label for="data" class="form-label">Data:</label>
-                             <input type="datetime" name="data" id="data" class="form-control-sm">
+                             <input type="date" name="data" id="data" class="form-control-sm">
                             </div>
                                       <button class="btn btn-primary btn-sm" type='submit'>
                                           <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> enviar

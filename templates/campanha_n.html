@@ -4,14 +4,14 @@
 {% block body%}
 <div class="container my-5">
 
-  <h1>{% if type == 'formacao' %} Aula {% elif type == 'simples' %} Campanha Simples {% else %} Inquerito {% endif %}</h1>
+  <h1>{% if type == 'formacao' %} Aula {{tema}} {% elif type == 'simples' %} Campanha {{tema}} {% else %} Inquerito {{tema}} {% endif %}</h1>
   <hr>
   <table class="table table-striped" id="dataTable">
     <tr>
       
-      <th>ref </th>
+      <th>Sessao </th>
       <th>Conteudo</th>
-      <th>audio</th>
+      <th>Audios</th>
       
       <th></th>
       <th></th>
