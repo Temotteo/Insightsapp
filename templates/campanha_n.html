@@ -4,7 +4,7 @@
 {% block body%}
 <div class="container my-5">
 
-  <h1>{% if type == 'formacao' %} Aula {{tema}} {% elif type == 'simples' %} Campanha {{tema}} {% else %} Inquerito {{tema}} {% endif %}</h1>
+  <h1>{{tema}} </h1>
   <hr>
   <table class="table table-striped" id="dataTable">
     <tr>
@@ -52,7 +52,7 @@
     </td>
     {% if id == 18512 %}
 
-         {% if loop.index ==1 %}
+         {% if loop.index ==1 or column[3] == 'Conclusao' %}
         <td><a href="#" class="btn btn-default pull-right"></a></td>
 
         {% else %}
@@ -61,7 +61,7 @@
         
     {% else %}
 
-        {% if loop.index ==1 %}
+        {% if loop.index ==1 or column[3] == 'Conclusao' or type == 'simples' %}
         <td><a href="#" class="btn btn-default pull-right"></a></td>
         {% else %}
         <td><a href="/perguntas/{{column[0]}}/{{type}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>

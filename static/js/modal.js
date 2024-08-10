@@ -58,12 +58,11 @@ function callOne(id) {
    let idd = String(id)
     $('#modalBodySms').empty();
         var linha = `
-        <form action ="/start_ivr_teste" method="post">
-                 <input type="hidden" name="campaign" id="campaign" value="${id}">
+        <form action ="/start_ivr_campaign" method="post">
+        <textarea  name="campaign" rows="1" cols="40" placeholder="Enter Campaign"></textarea>
 
                <div class="form-group">
-                         <label for="country" class="form-label">Contacto:</label>
-                          <input class="form-control" id="call"  name ="numero" >
+                           <textarea name="phone_numbers" rows="1" cols="50" placeholder="Enter phone numbers: +258"></textarea>
                              </div> <div class="form-group">
                          <label for="data" class="form-label">Data:</label>
                              <input type="date" name="data" id="data" class="form-control-sm">

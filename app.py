@@ -57,33 +57,33 @@ import numpy as np
 app = Flask(__name__)
 
 
-logging.basicConfig(level=logging.INFO)
-
-@app.before_request
-def before_request():
-    # Código antes da requisição
-    pass
-
-@app.after_request
-def after_request(response):
-    # Código após a requisição
-    return response
-
-@app.teardown_request
-def teardown_request(exception):
-    if exception:
-        app.logger.error(f"Erro: {exception}")
-        usuario = session.get('username')
-        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-        return render_template('erro.html'), 500
-    
-# Tratamento global de exceções
-@app.errorhandler(Exception)
-def handle_exception(e):
-    app.logger.error(f"Erro inesperado: {e}")
-    usuario = session.get('username')
-    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-    return render_template('erro.html'), 500   
+#logging.basicConfig(level=logging.INFO)
+#
+#@app.before_request
+#def before_request():
+#    # Código antes da requisição
+#    pass
+#
+#@app.after_request
+#def after_request(response):
+#    # Código após a requisição
+#    return response
+#
+#@app.teardown_request
+#def teardown_request(exception):
+#    if exception:
+#        app.logger.error(f"Erro: {exception}")
+#        usuario = session.get('username')
+#        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+#        return render_template('erro.html'), 500
+#    
+## Tratamento global de exceções
+#@app.errorhandler(Exception)
+#def handle_exception(e):
+#    app.logger.error(f"Erro inesperado: {e}")
+#    usuario = session.get('username')
+#    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+#    return render_template('erro.html'), 500   
 
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -2450,13 +2450,13 @@ def campanha_n(id, type):
         connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
         cursor = connection.cursor()
        
-        #cursor.execute(f"SELECT projecto FROM campanhas where id_campanha ={id});")
-        #tema = cursor.fetchone()[0]
+        cursor.execute(f"SELECT projecto FROM campanhas where id_campanha ={id};")
+        tema = cursor.fetchone()[0]
         # Executar uma função que retorna os resultados de acordo com o tipo de campanha e id fornecidos
         cursor.execute(f"SELECT * FROM get_info_by_id_and_type({id}, '{type}');")
         result = cursor.fetchall()
             
-        return render_template('campanha_n.html', columns_list = result, id=id, type=type)
+        return render_template('campanha_n.html', columns_list = result, id=id, type=type, tema=tema)
 
 
 @app.route('/add_question/<id>/<type>', methods=['GET', 'POST'])
@@ -3443,7 +3443,7 @@ def ivr(campaign):
            gather.play(QUESTION_AUDIO_URLS[current_question_index])
 
     else:
-        response.play(AUDIO_URLS[0])       
+        response.play(QUESTION_AUDIO_URLS[0])       
 
     return str(response), 200, {'Content-Type': 'application/xml'}
 
@@ -3534,6 +3534,8 @@ def start_ivr_campaign():
     # Extract phone numbers from the HTML form
     phone_numbers = request.form.getlist('phone_numbers')
     campaign = request.form.get('campaign')
+
+    print(campaign)
     
     url='https://insightsap.com/ivr/'+campaign
 
@@ -5062,45 +5064,6 @@ def submit_inscricao(idioma):
       return render_template('inscricao_pastoral_PT.html', idioma = idioma)
    
 
-@app.route('/ivr2/<int:campaign>', methods=['POST','GET'])
-def ivr2(campaign):
-   
-    response = VoiceResponse()
-
-    response.play(AUDIO_URLS[1])
-
-    #save_survey_response2(" ", campaign)
-
-    return save_survey_response2(" ", campaign)
-
-
-# Start IVR campaign route
-@app.route('/start_ivr_teste', methods=['POST','GET'])
-def start_ivr_teste():
-  try:
-    phone_numbers = request.form.getlist('numero')
-    campaign =  request.form['campaign']
-    data = request.form['data']
-    
-    print(data)
-    print(phone_numbers)
-    print(campaign)
-    #f'http://127.0.0.1:5000/ivr2/{campaign}',  # URL for handling IVR logic
-    url='https://insightsap.com/ivr/Simples' 
-
-    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    call = client.calls.create(
-         url= url ,
-         to=258849109478,
-         from_=TWILIO_PHONE_NUMBER
-     )
-    
-    
-    return render_template('teste2.html', campaign =campaign,phone = phone_numbers[0], data=data)
-  except Exception as e:
-        logging.error(f"Error in start_ivr_campaign: {e}")
-        return f"An error occurred while starting the IVR campaign. {e}"
-
 
 @app.route('/get_audio/<path:filename>')
 def get_audio(filename):
@@ -5139,6 +5102,6 @@ def save_survey_response2(phone_number, campaign):
     
 if __name__ == '__main__':
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()
