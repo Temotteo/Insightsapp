@@ -4,16 +4,18 @@
     <h2>Call Status</h2>
     <div class="d-flex flex-row-reverse">
         <select name="day" id="day" onchange="fetchCallStatuses()">
-            <option value="7">7 dias</option>
+            <option value="{{day}}">{{day}}dias</option>
+            
             <option value="1">1 dia</option>
             <option value="2">2 dias</option>
             <option value="3">3 dias</option>
             <option value="4">4 dias</option>
             <option value="5">5 dias</option>
             <option value="6">6 dias</option>
+            <option value="7">7 dias</option>
             <option value="15">15 dias</option>
             <option value="30">30 dias</option>
-            <option value="30">* dias</option>
+            <option value="0">* dias</option>
         </select>
      <span for="days" class="mx-2">Registro dos ultimos:</span>
     </div>
@@ -45,6 +47,7 @@
                
                 <td>{{ status.duration_minutes }}</td>
                 <td>{{ status.status }}</td>
+                <td>{{ status.start_time }}</td>
             </tr>
         {% endfor %}
         </tbody>

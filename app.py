@@ -3534,11 +3534,7 @@ def get_call_status():
 def get_call_day(day):
    
 
-    if day == '0':
-        day = 7
-
-    else:
-        day = int(day)    
+    day = int(day)    
     
     return redirect(url_for('get_call_status2', day = day, csv = 0))
    
@@ -3584,11 +3580,8 @@ def gerar_csv(call_statuses, filename='call_statuses.csv'):
 @app.route('/get_call_status2/<day>/<csv>', methods=['GET'])
 @is_logged_in
 def get_call_status2(day,csv):
-    if day == '0':
-        day = 7
 
-    else:
-        day = int(day)    
+    
     # Initialize a list to store call statuses
     call_statuses = []
     dados = {}
@@ -3605,56 +3598,112 @@ def get_call_status2(day,csv):
     for key, dado in contacts[6].items():
             dados[key] = 'No data'
 
-            
-
-    # Fetch call status using Twilio REST API
     day = int(day)  
     print(day)
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    for call in client.calls.list( start_time=datetime.now() - timedelta(days=day) ):
-        # Calculate call duration in minutes
-        duration_minutes = 0
-        if call.start_time and call.end_time:
-            start_time = call.start_time
-            end_time = call.end_time
-            duration_minutes = (end_time - start_time).total_seconds() / 60
-            if call.status == 'busy' or call.status == 'no-answer':
-                duration_minutes = 0
-        
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-        cursor = conn.cursor()
-        numero = call.to[4:]
-        expected_length = 0
-        
-        cursor.execute(f"SELECT * FROM contacts WHERE phone = '{numero}';")
-        contact = cursor.fetchone()
-        conn.close()
-        
-       
-        # Extração de dados de contact[6] (assumindo que é um dicionário)
-        dados_contact = {}
-        if contact is not None:
-            # Certifique-se de que contact tem pelo menos 7 elementos (índice 6 existe)
-            if len(contact) > 6 and isinstance(contact[6], dict):
-                dados_contact = {}
-                for key, dado in contact[6].items():
-                    dados_contact[key] = dado
-                   
-        else:
-          # Definir valores padrão caso contact seja None
-           dados_contact = dados
+    
+    #else:
+    #  # Extrair todos os dados (sem filtro de data)
+    #  start_date = datetime.min  
+    if day > 0:
+      for i in range(day, 0, -1):
+          start_date = datetime.now() - timedelta(days=i)    
+          # Filtrar as chamadas desde a data de início até a data atual 
+          calls = client.calls.list(start_time=start_date)
 
-        # Criando o dicionário call_status
-        call_status = {
-             **dados_contact,  # Mescla os dados do dicionário dados_contact
-            'status': call.status,
-            'phone_number': call.to,
-            'start_time': call.start_time.strftime('%Y-%m-%d %H:%M:%S'),
-            'end_time': call.end_time.strftime('%Y-%m-%d %H:%M:%S'),
-            'duration_minutes': round(duration_minutes, 2)
-        }
-        call_statuses.append(call_status)
+          # Fetch call status using Twilio REST API
+          for call in calls:
+              # Calculate call duration in minutes
+              duration_minutes = 0
+              if call.start_time and call.end_time:
+                  start_time = call.start_time
+                  end_time = call.end_time
+                  duration_minutes = (end_time - start_time).total_seconds() / 60
+                  if call.status == 'busy' or call.status == 'no-answer':
+                      duration_minutes = 0
+              
+              conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+              cursor = conn.cursor()
+              numero = call.to[4:]
+              expected_length = 0
+              
+              cursor.execute(f"SELECT * FROM contacts WHERE phone = '{numero}';")
+              contact = cursor.fetchone()
+              conn.close()
+              
+             
+              # Extração de dados de contact[6] (assumindo que é um dicionário)
+              dados_contact = {}
+              if contact is not None:
+                  # Certifique-se de que contact tem pelo menos 7 elementos (índice 6 existe)
+                  if len(contact) > 6 and isinstance(contact[6], dict):
+                      dados_contact = {}
+                      for key, dado in contact[6].items():
+                          dados_contact[key] = dado
+                         
+              else:
+                # Definir valores padrão caso contact seja None
+                 dados_contact = dados
       
+              # Criando o dicionário call_status
+              call_status = {
+                   **dados_contact,  # Mescla os dados do dicionário dados_contact
+                  'status': call.status,
+                  'phone_number': call.to,
+                  'start_time': call.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+                  'end_time': call.end_time.strftime('%Y-%m-%d %H:%M:%S'),
+                  'duration_minutes': round(duration_minutes, 2)
+              }
+              call_statuses.append(call_status)
+    else:
+          # Extraindo todas as chamadas disponíveis 
+          calls = client.calls.list()
+
+          # Fetch call status using Twilio REST API
+          for call in calls:
+              # Calculate call duration in minutes
+              duration_minutes = 0
+              if call.start_time and call.end_time:
+                  start_time = call.start_time
+                  end_time = call.end_time
+                  duration_minutes = (end_time - start_time).total_seconds() / 60
+                  if call.status == 'busy' or call.status == 'no-answer':
+                      duration_minutes = 0
+              
+              conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+              cursor = conn.cursor()
+              numero = call.to[4:]
+              expected_length = 0
+              
+              cursor.execute(f"SELECT * FROM contacts WHERE phone = '{numero}';")
+              contact = cursor.fetchone()
+              conn.close()
+              
+             
+              # Extração de dados de contact[6] (assumindo que é um dicionário)
+              dados_contact = {}
+              if contact is not None:
+                  # Certifique-se de que contact tem pelo menos 7 elementos (índice 6 existe)
+                  if len(contact) > 6 and isinstance(contact[6], dict):
+                      dados_contact = {}
+                      for key, dado in contact[6].items():
+                          dados_contact[key] = dado
+                         
+              else:
+                # Definir valores padrão caso contact seja None
+                 dados_contact = dados
+      
+              # Criando o dicionário call_status
+              call_status = {
+                   **dados_contact,  # Mescla os dados do dicionário dados_contact
+                  'status': call.status,
+                  'phone_number': call.to,
+                  'start_time': call.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+                  'end_time': call.end_time.strftime('%Y-%m-%d %H:%M:%S'),
+                  'duration_minutes': round(duration_minutes, 2)
+              }
+              call_statuses.append(call_status)
+     
     if csv == '1':
       return  gerar_csv(call_statuses)
             
@@ -3696,7 +3745,7 @@ def start_ivr_campaign():
             from_=TWILIO_PHONE_NUMBER
         )
 
-    return redirect(url_for('get_call_status2', day = 0, csv = 0))
+    return redirect(url_for('get_call_status2', day = 1, csv = 0))
 
 @app.route('/audio/<path:filename>')
 def serve_audio(filename):
