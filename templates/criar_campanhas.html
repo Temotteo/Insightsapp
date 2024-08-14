@@ -83,7 +83,7 @@
         
         <label for="question_audio" class="mt-4">Introdução:</label>
         <div class="input-group mb-3">
-          <input type="text" id="introducao" name="introducao" placeholder="" class="input-custom" name="intro_audio" required>
+          <textarea rows="1" id="introducao" name="introducao" placeholder="" class="input-custom" name="intro_audio" required></textarea>
           <div class="file-upload">
             <label for="file-upload1" class="custom-file-upload">
               <i class="fas fa-cloud-upload-alt"></i> Upload
@@ -97,14 +97,14 @@
         </div>
 
         {% if campanha != "inquerito" %}
-          {% if campanha == "Aula" %}
+           {% if campanha == "Aula" %}
             <label for="audio">Corpo:</label>
             {% else %}
             <label for="audio">Corpo:</label>
           {% endif %}
           
           <div class="input-group mb-3">
-            <input type="text" id="audio" class="input-custom" name="aula_base" required>
+            <textarea rows="1" id="audio" class="input-custom" name="aula_base" required></textarea>
             <div class="file-upload">
               <label for="file-upload" class="custom-file-upload">
                 <i class="fas fa-cloud-upload-alt"></i> Upload
@@ -120,7 +120,7 @@
         
         <label for="question_audio">Conclusão:</label>
         <div class="input-group mb-3">
-          <input type="text" id="con_audio" name="conclusao" class="input-custom" required>
+          <textarea rows="1" id="con_audio" name="conclusao" class="input-custom" required></textarea>
           <div class="file-upload">
             <label for="file-upload2" class="custom-file-upload">
               <i class="fas fa-cloud-upload-alt"></i> Upload
@@ -137,6 +137,8 @@
       <button type="submit" class="custom-button mt-2">Criar </button>
     </form>
   </div>
+
+  
 
   <script>
     document.getElementById("file-upload1").addEventListener("change", function(event) {

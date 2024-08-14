@@ -3,39 +3,93 @@
 {% block body %}
     <h2>Call Status</h2>
     <table class="table table-striped">
-        <thead>
+        <thead class="text-uppercase">
+            
             <tr>
-                <th>Campanha_id</th>
+                
                 <th>Call SID</th>
                 <th>Status</th>
                 <th>Phone Number</th>
+                 
+      
+                {% for dados in contact[6] %}
+      
+               <th>{{dados}}</th>
+                 
+                 {% endfor %}
                 
                 <th>Duration (minutes)</th>
-                <th>Data</th>
+               
             </tr>
+           
         </thead>
         <tbody id="call-status-table">
-            <tr>
-                <td>{{campaign}}</td>
-                <td></td>
-                <td></td>
-                <td>{{phone}}</td>
-                
-                <td></td>
-                <td>{{data}}</td>
-            </tr>
             <!-- Table rows will be dynamically populated here -->
+            <tr>
+                <td>Null</td>
+                <td>Completed</td>
+                <td>{{phone_number}}</td>
+
+                  {% for key, dados in contact[6].items() %}
+                       <td>{{ dados }}</td>
+                   {% endfor %}
+                   
+                  
+                   <td>${item.duration_minutes}</td>
+            </tr>
+           
         </tbody>
     </table>
     <script>
         // JavaScript to fetch call statuses and populate the table dynamically
-       
+        function fetchCallStatus() {
+           $.get('/get_call_status', function(callStatuses) {
+            
+              var linha = `  
+                            <tr>
+                              <td>Null</td>
+                              <td>Completed</td>
+                              <td>{{phone_number}}</td>
+      
+                                {% for key, dados in contact[6].items() %}
+                                     <td>{{ dados }}</td>
+                                 {% endfor %}
+                                 
+                                
+                                 <td>${item.duration_minutes}</td>
+                          </tr>
+                         
+                          `;
+                      //    $('#call-status-table').append(linha);
+            })
+        
+        }
+
+        function fetchCallStatuses() {
+            fetch('/get_call_status')
+                .then(response => response.json())
+                .then(callStatuses => {
+                    const tableBody = document.getElementById('call-status-table');
+                    tableBody.innerHTML = '';
+                    callStatuses.forEach(call => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${call.sid}</td>
+                            <td>${call.status}</td>
+                            <td>${call.phone_number}</td>
+                            
+                            <td>${call.duration_minutes}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                });
+        }
 
         // Fetch call statuses every 3 seconds
-       // setInterval(fetchCallStatuses, 3000);
+        setInterval(fetchCallStatus, 3000);
 
         // Initial fetch
-       // fetchCallStatuses();
+        fetchCallStatus();
     </script>
 
 {% endblock %}

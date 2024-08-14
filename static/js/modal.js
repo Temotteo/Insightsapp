@@ -1,7 +1,7 @@
 function carregarDados() {
-      $.get('/saltar_org_id', function(data) {
+      $.get('/saltar_org_id', function(call_statuses) {
           $('#modalTableBody').empty();
-          data.forEach(function(item) {
+          call_statuses.forEach(function(item) {
               var linha = `<tr>
                               <td>${item.Org_id}</td>
                               <td>${item.Nome}</td>

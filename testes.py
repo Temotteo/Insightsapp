@@ -127,7 +127,7 @@ QUESTION_AUDIO_URLS = [
 
     "https://insightsap.com/audio/conjutiviteconc.mp3"]
 
-audio_urls = [
+AUDIO_URLS = [
     "https://insightsap.com/audio/indroducao.mp3",
     
     "https://insightsap.com/audio/audio.mp3",
@@ -137,6 +137,8 @@ audio_urls = [
 # Mock function to save survey responses to the database
 def save_survey_response(phone_number, question_index, selected_option, campaign):
     # Connect to the database
+    campaign ='campanha_32'
+
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
     # Create a cursor object
@@ -2448,11 +2450,13 @@ def campanha_n(id, type):
         connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
         cursor = connection.cursor()
        
+        cursor.execute(f"SELECT projecto FROM campanhas where id_campanha ={id};")
+        tema = cursor.fetchone()[0]
         # Executar uma função que retorna os resultados de acordo com o tipo de campanha e id fornecidos
         cursor.execute(f"SELECT * FROM get_info_by_id_and_type({id}, '{type}');")
         result = cursor.fetchall()
             
-        return render_template('campanha_n.html', columns_list = result, id=id, type=type)
+        return render_template('campanha_n.html', columns_list = result, id=id, type=type, tema=tema)
 
 
 @app.route('/add_question/<id>/<type>', methods=['GET', 'POST'])
@@ -3430,11 +3434,16 @@ def ivr_test():
 @app.route('/ivr/<string:campaign>', methods=['POST'])
 def ivr(campaign):
     response = VoiceResponse()
-    response.play(QUESTION_AUDIO_URLS[0])
 
-    current_question_index = request.args.get('current_question_index', default=1, type=int)
-    with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
-        gather.play(QUESTION_AUDIO_URLS[current_question_index])
+    if campaign == 'campanha_32':
+       response.play(QUESTION_AUDIO_URLS[0])
+
+       current_question_index = request.args.get('current_question_index', default=1, type=int)
+       with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
+           gather.play(QUESTION_AUDIO_URLS[current_question_index])
+
+    else:
+        response.play(QUESTION_AUDIO_URLS[0])       
 
     return str(response), 200, {'Content-Type': 'application/xml'}
 
@@ -3525,6 +3534,8 @@ def start_ivr_campaign():
     # Extract phone numbers from the HTML form
     phone_numbers = request.form.getlist('phone_numbers')
     campaign = request.form.get('campaign')
+
+    print(campaign)
     
     url='https://insightsap.com/ivr/'+campaign
 
@@ -5052,43 +5063,6 @@ def submit_inscricao(idioma):
     else:
       return render_template('inscricao_pastoral_PT.html', idioma = idioma)
    
-
-@app.route('/ivr2/<int:campaign>', methods=['POST','GET'])
-def ivr2(campaign):
-   
-    response = VoiceResponse()
-
-    response.play(audio_urls[1])
-
-    #save_survey_response2(" ", campaign)
-
-    return save_survey_response2(" ", campaign)
-
-
-# Start IVR campaign route
-@app.route('/start_ivr_teste', methods=['POST','GET'])
-def start_ivr_teste():
-  try:
-    phone_numbers = request.form.getlist('numero')
-    campaign =  request.form['campaign']
-    data = request.form['data']
-    
-    print(data)
-    print(phone_numbers)
-    print(campaign)
-   
-    #client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    #call = client.calls.create(
-    #     url= f'http://127.0.0.1:5000/ivr2/{campaign}',  # URL for handling IVR logic
-    #     to=258849109478,
-    #     from_=TWILIO_PHONE_NUMBER
-    # )
-    
-    
-    return render_template('teste2.html', campaign =campaign,phone = phone_numbers[0], data=data)
-  except Exception as e:
-        logging.error(f"Error in start_ivr_campaign: {e}")
-        return f"An error occurred while starting the IVR campaign. {e}"
 
 
 @app.route('/get_audio/<path:filename>')

@@ -1,4 +1,5 @@
 import os
+import csv
 from twilio.rest import Client
 from twilio.twiml.voice_response import VoiceResponse
 
@@ -127,7 +128,7 @@ QUESTION_AUDIO_URLS = [
 
     "https://insightsap.com/audio/conjutiviteconc.mp3"]
 
-AUDIO_URLS = [
+QUESTION_AUDIO_URL = [
     "https://insightsap.com/audio/indroducao.mp3",
     
     "https://insightsap.com/audio/audio.mp3",
@@ -3443,7 +3444,9 @@ def ivr(campaign):
            gather.play(QUESTION_AUDIO_URLS[current_question_index])
 
     else:
-        response.play(QUESTION_AUDIO_URLS[0])       
+        response.play(QUESTION_AUDIO_URL[0])       
+        response.play(QUESTION_AUDIO_URL[1])       
+        response.play(QUESTION_AUDIO_URL[2])       
 
     return str(response), 200, {'Content-Type': 'application/xml'}
 
@@ -3503,7 +3506,7 @@ def get_call_status():
 
     # Fetch call status using Twilio REST API
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    for call in client.calls.list( start_time=datetime.now() - timedelta(days=7)):
+    for call in client.calls.list( start_time=datetime.now() - timedelta(days=7) ):
         # Calculate call duration in minutes
         duration_minutes = 0
         if call.start_time and call.end_time:
@@ -3513,7 +3516,7 @@ def get_call_status():
             if call.status == 'busy' or call.status == 'no-answer':
                 duration_minutes = 0
         
-
+        
         # Append call status to the list
         call_status = {
             'sid': call.sid,
@@ -3525,8 +3528,139 @@ def get_call_status():
         }
         call_statuses.append(call_status)
 
-    # Return call statuses as JSON response
-    return jsonify(call_statuses)
+
+@app.route('/get_call_day/<day>', methods=['GET'])
+@is_logged_in
+def get_call_day(day):
+   
+
+    if day == '0':
+        day = 7
+
+    else:
+        day = int(day)    
+    
+    return redirect(url_for('get_call_status2', day = day, csv = 0))
+   
+
+def gerar_csv(call_statuses, filename='call_statuses.csv'):
+    # Verifica se há dados para escrever
+    if not call_statuses:
+        print("Nenhum dado disponível para escrever no CSV.")
+        return
+    
+    # Obtém as chaves do primeiro dicionário como cabeçalhos do CSV
+    output = io.BytesIO()
+    
+    # Usa o modo de texto e encoding para escrever no BytesIO
+    text_io = io.TextIOWrapper(output, encoding='utf-8', newline='')
+  
+    try: 
+        # Define os cabeçalhos
+        fieldnames = call_statuses[0].keys()
+        
+        # Cria o escritor do CSV
+        writer = csv.DictWriter(text_io, fieldnames=fieldnames)
+        
+        # Escreve os cabeçalhos e os dados
+        writer.writeheader()
+        for status in call_statuses:
+            writer.writerow(status)
+    
+        # Certifica-se de que todos os dados foram escritos
+        text_io.flush()
+    
+        # Move o cursor para o início do BytesIO
+        output.seek(0)
+        
+        # Envia o arquivo como uma resposta de download
+        return send_file(output, mimetype='text/csv', as_attachment=True, download_name='call_statuses.csv')
+    finally:
+        # Fecha o TextIOWrapper sem fechar o BytesIO
+        text_io.detach()
+
+
+
+@app.route('/get_call_status2/<day>/<csv>', methods=['GET'])
+@is_logged_in
+def get_call_status2(day,csv):
+    if day == '0':
+        day = 7
+
+    else:
+        day = int(day)    
+    # Initialize a list to store call statuses
+    call_statuses = []
+    dados = {}
+    org_id = session['last_org']
+
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+    expected_length = 0
+    
+    cursor.execute(f"SELECT * FROM contacts WHERE id in (select id_cont from contact_org where org_id = '{org_id}') Limit 1;")
+    contacts = cursor.fetchone()
+    conn.close()
+    expected_length = len(contacts[6])
+    for key, dado in contacts[6].items():
+            dados[key] = 'No data'
+
+            
+
+    # Fetch call status using Twilio REST API
+    day = int(day)  
+    print(day)
+    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    for call in client.calls.list( start_time=datetime.now() - timedelta(days=day) ):
+        # Calculate call duration in minutes
+        duration_minutes = 0
+        if call.start_time and call.end_time:
+            start_time = call.start_time
+            end_time = call.end_time
+            duration_minutes = (end_time - start_time).total_seconds() / 60
+            if call.status == 'busy' or call.status == 'no-answer':
+                duration_minutes = 0
+        
+        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        cursor = conn.cursor()
+        numero = call.to[4:]
+        expected_length = 0
+        
+        cursor.execute(f"SELECT * FROM contacts WHERE phone = '{numero}';")
+        contact = cursor.fetchone()
+        conn.close()
+        
+       
+        # Extração de dados de contact[6] (assumindo que é um dicionário)
+        dados_contact = {}
+        if contact is not None:
+            # Certifique-se de que contact tem pelo menos 7 elementos (índice 6 existe)
+            if len(contact) > 6 and isinstance(contact[6], dict):
+                dados_contact = {}
+                for key, dado in contact[6].items():
+                    dados_contact[key] = dado
+                   
+        else:
+          # Definir valores padrão caso contact seja None
+           dados_contact = dados
+
+        # Criando o dicionário call_status
+        call_status = {
+             **dados_contact,  # Mescla os dados do dicionário dados_contact
+            'status': call.status,
+            'phone_number': call.to,
+            'start_time': call.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'end_time': call.end_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'duration_minutes': round(duration_minutes, 2)
+        }
+        call_statuses.append(call_status)
+      
+    if csv == '1':
+      return  gerar_csv(call_statuses)
+            
+    else:
+       
+       return render_template('campaign_status.html',dados = dados, call_statuses=call_statuses, day=day)
 
 # Start IVR campaign route
 @app.route('/start_ivr_campaign', methods=['POST'])
@@ -3535,6 +3669,21 @@ def start_ivr_campaign():
     phone_numbers = request.form.getlist('phone_numbers')
     campaign = request.form.get('campaign')
 
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+
+    cursor.execute(f"SELECT * FROM contacts WHERE phone = '{phone_numbers[0]}';")
+    contact = cursor.fetchone()
+    conn.close()
+
+    #if contact is None:
+    #    
+    #    flash('Contacto inexistente', 'success')
+    #    return redirect(url_for('ivr_test'))
+
+    #else:   
+    print(contact) 
+    print(phone_numbers)
     print(campaign)
     
     url='https://insightsap.com/ivr/'+campaign
@@ -3547,8 +3696,7 @@ def start_ivr_campaign():
             from_=TWILIO_PHONE_NUMBER
         )
 
-    return render_template('campaign_status.html')
-
+    return redirect(url_for('get_call_status2', day = 0, csv = 0))
 
 @app.route('/audio/<path:filename>')
 def serve_audio(filename):
