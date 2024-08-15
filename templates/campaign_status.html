@@ -2,80 +2,47 @@
 
 {% block body %}
     <h2>Call Status</h2>
-    <div class="d-flex flex-row-reverse">
-        <select name="day" id="day" onchange="fetchCallStatuses()">
-            <option value="{{day}}">{{day}}dias</option>
-            
-            <option value="1">1 dia</option>
-            <option value="2">2 dias</option>
-            <option value="3">3 dias</option>
-            <option value="4">4 dias</option>
-            <option value="5">5 dias</option>
-            <option value="6">6 dias</option>
-            <option value="7">7 dias</option>
-            <option value="15">15 dias</option>
-            <option value="30">30 dias</option>
-            <option value="0">* dias</option>
-        </select>
-     <span for="days" class="mx-2">Registro dos ultimos:</span>
-    </div>
     <table class="table table-striped">
-        <thead class="text-uppercase">
+        <thead>
             <tr>
-                {% for key, dado in dados.items() if key not in ['sid', 'status',  'phone_number', 'start_time', 'end_time', 'duration_minutes'] %}
-                    <th>{{ key }}</th>
-                {% endfor %}
-                
+                <th>Call SID</th>
+                <th>Status</th>
                 <th>Phone Number</th>
                 
                 <th>Duration (minutes)</th>
-                <th>Status</th>
             </tr>
         </thead>
         <tbody id="call-status-table">
             <!-- Table rows will be dynamically populated here -->
-            {% for status in call_statuses %}
-            <tr>
-                {% for key, value in status.items() if key not in ['sid', 'status','phone_number', 'start_time', 'end_time', 'duration_minutes'] %}
-                    <td>{{ value }}</td>
-                {% endfor %}
-                
-                
-                <td>{{ status.phone_number }}</td>
-                <!-- Adicione valores adicionais aqui -->
-                
-               
-                <td>{{ status.duration_minutes }}</td>
-                <td>{{ status.status }}</td>
-                <td>{{ status.start_time }}</td>
-            </tr>
-        {% endfor %}
         </tbody>
     </table>
-
-    <a href="/get_call_status2/{{day}}/1" class="btn btn-success">Extrair csv</a>
     <script>
         // JavaScript to fetch call statuses and populate the table dynamically
         function fetchCallStatuses() {
-            var dias = document.getElementById('day').value
-            fetch(`/get_call_day/${dias}`, {
-              method: 'GET'
-          })
-          .then(response => {
-              if (response.redirected) {
-                  window.location.href = response.url;
-              }
-          })
-          .catch(error => {
-              console.error('Erro ao enviar dados:', error);
-          
-        })
-    }
+            fetch('/get_call_status')
+                .then(response => response.json())
+                .then(callStatuses => {
+                    const tableBody = document.getElementById('call-status-table');
+                    tableBody.innerHTML = '';
+                    callStatuses.forEach(call => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${call.sid}</td>
+                            <td>${call.status}</td>
+                            <td>${call.phone_number}</td>
+                            
+                            <td>${call.duration_minutes}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                });
+        }
+
         // Fetch call statuses every 3 seconds
-       // setInterval(fetchCallStatuses, 3000);
+        setInterval(fetchCallStatuses, 3000);
 
         // Initial fetch
-       // fetchCallStatuses();
+        fetchCallStatuses();
     </script>
 
 {% endblock %}

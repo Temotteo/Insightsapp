@@ -58,33 +58,33 @@ import numpy as np
 app = Flask(__name__)
 
 
-#logging.basicConfig(level=logging.INFO)
-#
-#@app.before_request
-#def before_request():
-#    # Código antes da requisição
-#    pass
-#
-#@app.after_request
-#def after_request(response):
-#    # Código após a requisição
-#    return response
-#
-#@app.teardown_request
-#def teardown_request(exception):
-#    if exception:
-#        app.logger.error(f"Erro: {exception}")
-#        usuario = session.get('username')
-#        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-#        return render_template('erro.html'), 500
-#    
-## Tratamento global de exceções
-#@app.errorhandler(Exception)
-#def handle_exception(e):
-#    app.logger.error(f"Erro inesperado: {e}")
-#    usuario = session.get('username')
-#    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-#    return render_template('erro.html'), 500   
+logging.basicConfig(level=logging.INFO)
+
+@app.before_request
+def before_request():
+    # Código antes da requisição
+    pass
+
+@app.after_request
+def after_request(response):
+    # Código após a requisição
+    return response
+
+@app.teardown_request
+def teardown_request(exception):
+    if exception:
+        app.logger.error(f"Erro: {exception}")
+        usuario = session.get('username')
+        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+        return render_template('erro.html'), 500
+    
+# Tratamento global de exceções
+@app.errorhandler(Exception)
+def handle_exception(e):
+    app.logger.error(f"Erro inesperado: {e}")
+    usuario = session.get('username')
+    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+    return render_template('erro.html'), 500   
 
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -3506,7 +3506,7 @@ def get_call_status():
 
     # Fetch call status using Twilio REST API
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    for call in client.calls.list( start_time=datetime.now() - timedelta(days=7) ):
+    for call in client.calls.list( start_time=datetime.now() - timedelta(days=7)):
         # Calculate call duration in minutes
         duration_minutes = 0
         if call.start_time and call.end_time:
@@ -3516,7 +3516,7 @@ def get_call_status():
             if call.status == 'busy' or call.status == 'no-answer':
                 duration_minutes = 0
         
-        
+
         # Append call status to the list
         call_status = {
             'sid': call.sid,
@@ -3527,6 +3527,9 @@ def get_call_status():
             'duration_minutes': round(duration_minutes, 2)
         }
         call_statuses.append(call_status)
+
+    # Return call statuses as JSON response
+    return jsonify(call_statuses)
 
 
 @app.route('/get_call_day/<day>', methods=['GET'])
@@ -3635,7 +3638,6 @@ def get_call_status2(day,csv):
               
               cursor.execute(f"SELECT * FROM contacts WHERE phone = '{numero}';")
               contact = cursor.fetchone()
-              conn.close()
               
              
               # Extração de dados de contact[6] (assumindo que é um dicionário)
@@ -3661,6 +3663,20 @@ def get_call_status2(day,csv):
                   'duration_minutes': round(duration_minutes, 2)
               }
               call_statuses.append(call_status)
+
+              cursor.execute("""
+               INSERT INTO call_logs (contact_id, status, phone_number, start_time, end_time, duration_minutes)
+               VALUES (%s, %s, %s, %s, %s, %s);
+               """,( contact[0],
+                     call_status['status'],
+                     call_status['phone_number'],
+                     call_status['start_time'],
+                     call_status['end_time'],
+                     call_status['duration_minutes']
+                    ) )
+              conn.commit()
+              cursor.close()
+              conn.close()
     else:
           # Extraindo todas as chamadas disponíveis 
           calls = client.calls.list()
@@ -3715,7 +3731,7 @@ def get_call_status2(day,csv):
             
     else:
        
-       return render_template('campaign_status.html',dados = dados, call_statuses=call_statuses, day=day)
+       return render_template('teste2.html',dados = dados, call_statuses=call_statuses, day=day)
 
 # Start IVR campaign route
 @app.route('/start_ivr_campaign', methods=['POST'])
@@ -3751,7 +3767,7 @@ def start_ivr_campaign():
             from_=TWILIO_PHONE_NUMBER
         )
 
-    return redirect(url_for('get_call_status2', day = 1, csv = 0))
+    return render_template('campaign_status.html')
 
 @app.route('/audio/<path:filename>')
 def serve_audio(filename):
@@ -5305,6 +5321,6 @@ def save_survey_response2(phone_number, campaign):
     
 if __name__ == '__main__':
     app.secret_key='secret123'
-    app.run(debug=True)
-    #http_server = WSGIServer(('', 5000), app)
-    #http_server.serve_forever()
+    #app.run(debug=True)
+    http_server = WSGIServer(('', 5000), app)
+    http_server.serve_forever()
