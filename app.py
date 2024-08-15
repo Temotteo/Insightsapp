@@ -58,33 +58,33 @@ import numpy as np
 app = Flask(__name__)
 
 
-logging.basicConfig(level=logging.INFO)
-
-@app.before_request
-def before_request():
-    # Código antes da requisição
-    pass
-
-@app.after_request
-def after_request(response):
-    # Código após a requisição
-    return response
-
-@app.teardown_request
-def teardown_request(exception):
-    if exception:
-        app.logger.error(f"Erro: {exception}")
-        usuario = session.get('username')
-        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-        return render_template('erro.html'), 500
-    
-# Tratamento global de exceções
-@app.errorhandler(Exception)
-def handle_exception(e):
-    app.logger.error(f"Erro inesperado: {e}")
-    usuario = session.get('username')
-    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-    return render_template('erro.html'), 500   
+#logging.basicConfig(level=logging.INFO)
+#
+#@app.before_request
+#def before_request():
+#    # Código antes da requisição
+#    pass
+#
+#@app.after_request
+#def after_request(response):
+#    # Código após a requisição
+#    return response
+#
+#@app.teardown_request
+#def teardown_request(exception):
+#    if exception:
+#        app.logger.error(f"Erro: {exception}")
+#        usuario = session.get('username')
+#        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+#        return render_template('erro.html'), 500
+#    
+## Tratamento global de exceções
+#@app.errorhandler(Exception)
+#def handle_exception(e):
+#    app.logger.error(f"Erro inesperado: {e}")
+#    usuario = session.get('username')
+#    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+#    return render_template('erro.html'), 500   
 
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -3613,6 +3613,12 @@ def get_call_status2(day,csv):
 
           # Fetch call status using Twilio REST API
           for call in calls:
+
+              if call.end_time:
+                end_time_str = call.end_time.strftime('%Y-%m-%d %H:%M:%S')
+              else:
+                end_time_str = 'N/A'
+
               # Calculate call duration in minutes
               duration_minutes = 0
               if call.start_time and call.end_time:
@@ -5299,6 +5305,6 @@ def save_survey_response2(phone_number, campaign):
     
 if __name__ == '__main__':
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()
