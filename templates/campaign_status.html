@@ -3,41 +3,53 @@
 {% block body %}
     <h2>Call Status</h2>
     <table class="table table-striped">
-        <thead>
+        <thead class="text-uppercase">
             <tr>
-                <th>Call SID</th>
-                <th>Status</th>
+                {% for key, dado in dados.items() if key not in ['sid', 'status',  'phone_number', 'start_time', 'end_time', 'duration_minutes'] %}
+                    <th>{{ key }}</th>
+                {% endfor %}
+                
                 <th>Phone Number</th>
                 
                 <th>Duration (minutes)</th>
+                <th>Status</th>
+                <th>Data</th>
             </tr>
         </thead>
         <tbody id="call-status-table">
             <!-- Table rows will be dynamically populated here -->
+            {% for status in call_statuses %}
+            <tr>
+                {% for key, value in status.items() if key not in ['sid', 'status','phone_number', 'start_time', 'end_time', 'duration_minutes'] %}
+                    <td>{{ value }}</td>
+                {% endfor %}
+                
+                
+                <td>{{ status.phone_number }}</td>
+                <!-- Adicione valores adicionais aqui -->
+                <td>{{ status.duration_minutes }}</td>
+                <td>{{ status.status }}</td>
+                <td>{{ status.start_time }}</td>
+            </tr>
+        {% endfor %}
         </tbody>
     </table>
     <script>
         // JavaScript to fetch call statuses and populate the table dynamically
         function fetchCallStatuses() {
-            fetch('/get_call_status')
-                .then(response => response.json())
-                .then(callStatuses => {
-                    const tableBody = document.getElementById('call-status-table');
-                    tableBody.innerHTML = '';
-                    callStatuses.forEach(call => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${call.sid}</td>
-                            <td>${call.status}</td>
-                            <td>${call.phone_number}</td>
-                            
-                            <td>${call.duration_minutes}</td>
-                        `;
-                        tableBody.appendChild(row);
-                    });
-                });
-        }
-
+            fetch(`/get_call`, {
+              method: 'GET'
+          })
+          .then(response => {
+              if (response.redirected) {
+                  window.location.href = response.url;
+              }
+          })
+          .catch(error => {
+              console.error('Erro ao enviar dados:', error);
+          
+        })
+    }
         // Fetch call statuses every 3 seconds
         setInterval(fetchCallStatuses, 3000);
 

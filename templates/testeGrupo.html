@@ -1,0 +1,46 @@
+{% extends 'layout.html'%}
+
+
+{% block body%}
+
+
+
+  
+<hr>
+<div class="container">
+<h2>Contact List</h2>
+{% if sucesso %}
+  <div class="alert alert-danger">{{erro}}</div>
+ {% endif %}
+ <form action="/delete" method="post">
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      {% for contact in contacts %} 
+      {% if loop.index ==1 %}
+      {% for key in contact[6] %}
+      
+        <th>{{key}}</th>
+        
+        {% endfor %}
+        {% endif %}
+        
+        
+        {% endfor %}
+        <th>phone</th>
+    </tr>
+</thead>
+<tbody>
+    {% for contact in contacts %}
+    <tr>
+      {% for key, dados in contact[6].items() %}
+        <td>{{ dados }}</td>
+        {% endfor %}
+        <td> {{ contact[3] }}</td>
+
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

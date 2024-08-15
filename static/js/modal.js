@@ -59,17 +59,26 @@ function callOne(id) {
     $('#modalBodySms').empty();
         var linha = `
         <form action ="/start_ivr_campaign" method="post">
-        <textarea  name="campaign" rows="1" cols="40" placeholder="Enter Campaign"></textarea>
-
-               <div class="form-group">
-                           <textarea name="phone_numbers" rows="1" cols="50" placeholder="Enter phone numbers: +258"></textarea>
-                             </div> <div class="form-group">
-                         <label for="data" class="form-label">Data:</label>
-                             <input type="date" name="data" id="data" class="form-control-sm">
+        <input  type = "hidden" name="campaign"  placeholder="Enter Campaign"></input>
+         
+               <div class="form-group my-2">
+                    <label for="data" ">Number:</label>
+                           <textarea name="phone_numbers" class="form-control" rows="1"  placeholder="Enter phone numbers: +258"></textarea>
+                             </div> 
+                <div class="form-row">
+                    <div class="form-group mx-2">
+                         <label for="data" >Data:</label>
+                             <input type="date" name="data" id="data" class="form-control">
                             </div>
+                        <div class="form-group">
+                           <label for="time" class="form-label">Time:</label>
+                             <input type="time" name="time" id="time" class="form-control">
+                            </div>
+                          </div>
                                       <button class="btn btn-primary btn-sm" type='submit'>
                                           <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> enviar
                                       </button>
+                                        <button type="button" class="btn btn-success" onclick=" callGrupo('{{id}}')"  value="Agendar Envio em Grupo" >Grupo</button>
                                       </form>
                         `;
                     
@@ -85,13 +94,13 @@ function callGrupo(id) {
    
     $('#modalBodySms').empty();
         var linha = `
-         <form action ="/start_ivr_teste" method="post">
+         <form action ="/start_ivr_group" method="post">
          <input type="hidden" name="campaign" id="campaign" value="${id}">
 
                 <div class="form-group">
                    </div><div class="form-group">
                          <label for="country" class="form-label">Grupo</label>
-                          <select class="form-control" id="call"  name ="numero" >
+                          <select class="form-control" id="call"  name ="grupo" >
                             <option value="">selecione...</option>
                             
                         `;
@@ -102,13 +111,20 @@ function callGrupo(id) {
                     
                             // Fecha a tag select e adiciona o botão de enviar
                             linha += `</select>
-                                          </div> <div class="form-group">
-                         <label for="data" class="form-label">Data:</label>
-                             <input type="date" name="data" id="data" class="form-control-sm">
+                        <div class="form-row">
+                          <div class="form-group mx-2">
+                             <label for="data" >Data:</label>
+                             <input type="date" name="data" id="data" class="form-control">
+                            </div>
+                           <div class="form-group">
+                             <label for="time" class="form-label">Time:</label>
+                             <input type="time" name="time" id="time" class="form-control">
+                            </div>
                             </div>
                                       <button class="btn btn-primary btn-sm" type='submit'>
                                           <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> enviar
                                       </button>
+                                      <button type="button" class="btn btn-success" onclick=" callOne('{{id}}')"  value="Agendar Envio em Grupo" >Singular</button>
                                       </form>
                         `;
         $('#modalBodySms').append(linha);

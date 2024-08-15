@@ -58,33 +58,33 @@ import numpy as np
 app = Flask(__name__)
 
 
-logging.basicConfig(level=logging.INFO)
-
-@app.before_request
-def before_request():
-    # Código antes da requisição
-    pass
-
-@app.after_request
-def after_request(response):
-    # Código após a requisição
-    return response
-
-@app.teardown_request
-def teardown_request(exception):
-    if exception:
-        app.logger.error(f"Erro: {exception}")
-        usuario = session.get('username')
-        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-        return render_template('erro.html'), 500
-    
-# Tratamento global de exceções
-@app.errorhandler(Exception)
-def handle_exception(e):
-    app.logger.error(f"Erro inesperado: {e}")
-    usuario = session.get('username')
-    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
-    return render_template('erro.html'), 500   
+#logging.basicConfig(level=logging.INFO)
+#
+#@app.before_request
+#def before_request():
+#    # Código antes da requisição
+#    pass
+#
+#@app.after_request
+#def after_request(response):
+#    # Código após a requisição
+#    return response
+#
+#@app.teardown_request
+#def teardown_request(exception):
+#    if exception:
+#        app.logger.error(f"Erro: {exception}")
+#        usuario = session.get('username')
+#        #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+#        return render_template('erro.html'), 500
+#    
+## Tratamento global de exceções
+#@app.errorhandler(Exception)
+#def handle_exception(e):
+#    app.logger.error(f"Erro inesperado: {e}")
+#    usuario = session.get('username')
+#    #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transação', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
+#    return render_template('erro.html'), 500   
 
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -3503,10 +3503,26 @@ def campaign_status():
 def get_call_status():
     # Initialize a list to store call statuses
     call_statuses = []
+    dados = {}
+    org_id = session['last_org']
+
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+    
+    cursor.execute(f"SELECT * FROM contacts WHERE id in (select id_cont from contact_org where org_id = '{org_id}') Limit 1;")
+    contacts = cursor.fetchone()
+    conn.close()
+    for key, dado in contacts[6].items():
+            dados[key] = 'No data'
 
     # Fetch call status using Twilio REST API
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    for call in client.calls.list( start_time=datetime.now() - timedelta(days=7)):
+    for call in client.calls.list( start_time=datetime.now()):
+
+        if call.end_time:
+            end_time = call.end_time.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            end_time = 'N/A'
         # Calculate call duration in minutes
         duration_minutes = 0
         if call.start_time and call.end_time:
@@ -3516,9 +3532,31 @@ def get_call_status():
             if call.status == 'busy' or call.status == 'no-answer':
                 duration_minutes = 0
         
+        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        cursor = conn.cursor()
+        numero = call.to[4:]
+        
+        cursor.execute(f"SELECT * FROM contacts WHERE phone = '{numero}';")
+        contact = cursor.fetchone()
+        conn.close()
+        
+        
+        # Extração de dados de contact[6] (assumindo que é um dicionário)
+        dados_contact = {}
+        if contact is not None:
+            # Certifique-se de que contact tem pelo menos 7 elementos (índice 6 existe)
+            if len(contact) > 6 and isinstance(contact[6], dict):
+                dados_contact = {}
+                for key, dado in contact[6].items():
+                    dados_contact[key] = dado
+                   
+        else:
+          # Definir valores padrão caso contact seja None
+           dados_contact = dados
 
         # Append call status to the list
         call_status = {
+             **dados_contact,
             'sid': call.sid,
             'status': call.status,
             'phone_number': call.to,
@@ -3527,20 +3565,51 @@ def get_call_status():
             'duration_minutes': round(duration_minutes, 2)
         }
         call_statuses.append(call_status)
+        print(call_statuses)
+        
+        try:
+           conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+           cursor = conn.cursor()
+           numero = call.to[4:]
+                 
+           cursor.execute(f"SELECT * FROM contacts WHERE phone = '{numero}';")
+           contact = cursor.fetchone()
+    
+           if contact is not None:
+            cursor.execute("""
+              INSERT INTO call_logs (contact_id, status, phone_number, start_time, end_time, duration_minutes)
+              VALUES (%s, %s, %s, %s, %s, %s);
+              """,( contact[0],
+                    call_status['status'],
+                    call_status['phone_number'],
+                    call_status['start_time'],
+                    call_status['end_time'],
+                    call_status['duration_minutes']
+                   ) )
+           conn.commit()
+           cursor.close()
+           conn.close()
+        except psycopg2.Error as e:
+          pass 
 
     # Return call statuses as JSON response
-    return jsonify(call_statuses)
+    return render_template('campaign_status.html', call_statuses=call_statuses, dados=dados)
 
 
 @app.route('/get_call_day/<day>', methods=['GET'])
 @is_logged_in
 def get_call_day(day):
    
-
     day = int(day)    
     
     return redirect(url_for('get_call_status2', day = day, csv = 0))
-   
+
+@app.route('/get_call', methods=['GET'])
+@is_logged_in
+def get_call():
+      
+    return redirect(url_for('get_call_status'))
+
 
 def gerar_csv(call_statuses, filename='call_statuses.csv'):
     # Verifica se há dados para escrever
@@ -3592,12 +3661,12 @@ def get_call_status2(day,csv):
 
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
-    expected_length = 0
     
     cursor.execute(f"SELECT * FROM contacts WHERE id in (select id_cont from contact_org where org_id = '{org_id}') Limit 1;")
     contacts = cursor.fetchone()
+    cursor.close()
     conn.close()
-    expected_length = len(contacts[6])
+
     for key, dado in contacts[6].items():
             dados[key] = 'No data'
 
@@ -3605,129 +3674,47 @@ def get_call_status2(day,csv):
     print(day)
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
     
-    #else:
-    #  # Extrair todos os dados (sem filtro de data)
-    #  start_date = datetime.min  
+    
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()  
     if day > 0:
-      for i in range(day, 0, -1):
-          start_date = datetime.now() - timedelta(days=i)    
-          # Filtrar as chamadas desde a data de início até a data atual 
-          calls = client.calls.list(start_time=start_date)
+      start_date = datetime.now() - timedelta(days=day)
 
-          # Fetch call status using Twilio REST API
-          for call in calls:
+      # Filtrar as chamadas desde a data de início até a data atual  
+      cursor.execute(f"SELECT * FROM call_logs cl join contacts ct on cl.contact_id = ct.id WHERE cl.start_time > '{start_date}';")
+      calls = cursor.fetchall()
 
-              if call.end_time:
-                end_time_str = call.end_time.strftime('%Y-%m-%d %H:%M:%S')
-              else:
-                end_time_str = 'N/A'
-
-              # Calculate call duration in minutes
-              duration_minutes = 0
-              if call.start_time and call.end_time:
-                  start_time = call.start_time
-                  end_time = call.end_time
-                  duration_minutes = (end_time - start_time).total_seconds() / 60
-                  if call.status == 'busy' or call.status == 'no-answer':
-                      duration_minutes = 0
-              
-              conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-              cursor = conn.cursor()
-              numero = call.to[4:]
-              expected_length = 0
-              
-              cursor.execute(f"SELECT * FROM contacts WHERE phone = '{numero}';")
-              contact = cursor.fetchone()
-              
-             
-              # Extração de dados de contact[6] (assumindo que é um dicionário)
-              dados_contact = {}
-              if contact is not None:
-                  # Certifique-se de que contact tem pelo menos 7 elementos (índice 6 existe)
-                  if len(contact) > 6 and isinstance(contact[6], dict):
-                      dados_contact = {}
-                      for key, dado in contact[6].items():
-                          dados_contact[key] = dado
-                         
-              else:
-                # Definir valores padrão caso contact seja None
-                 dados_contact = dados
+    else:    
+      cursor.execute(f"SELECT * FROM call_logs cl join contacts ct on cl.contact_id = ct.id;")
+      calls = cursor.fetchall()
       
-              # Criando o dicionário call_status
-              call_status = {
-                   **dados_contact,  # Mescla os dados do dicionário dados_contact
-                  'status': call.status,
-                  'phone_number': call.to,
-                  'start_time': call.start_time.strftime('%Y-%m-%d %H:%M:%S'),
-                  'end_time': call.end_time.strftime('%Y-%m-%d %H:%M:%S'),
-                  'duration_minutes': round(duration_minutes, 2)
-              }
-              call_statuses.append(call_status)
+      # Extração de dados de contact[6] (assumindo que é um dicionário)
+    dados_contact = {}
+    if calls is not None:
+      for call in calls:
+    
+        # Certifique-se de que contact tem pelo menos 7 elementos (índice 6 existe)
+        if len(call) > 6 and isinstance(call[13], dict):
+            dados_contact = {}
+            for key, dado in call[13].items():
+                dados_contact[key] = dado
+               
+    
+        # Criando o dicionário call_status
+        call_status = {
+             **dados_contact,  # Mescla os dados do dicionário dados_contact
+            'status': call[2],
+            'phone_number': call[3],
+            'start_time': call[4],
+            'end_time': call[5],
+            'duration_minutes': call[6]
+        }
+        call_statuses.append(call_status) 
+       
 
-              cursor.execute("""
-               INSERT INTO call_logs (contact_id, status, phone_number, start_time, end_time, duration_minutes)
-               VALUES (%s, %s, %s, %s, %s, %s);
-               """,( contact[0],
-                     call_status['status'],
-                     call_status['phone_number'],
-                     call_status['start_time'],
-                     call_status['end_time'],
-                     call_status['duration_minutes']
-                    ) )
-              conn.commit()
-              cursor.close()
-              conn.close()
-    else:
-          # Extraindo todas as chamadas disponíveis 
-          calls = client.calls.list()
-
-          # Fetch call status using Twilio REST API
-          for call in calls:
-              # Calculate call duration in minutes
-              duration_minutes = 0
-              if call.start_time and call.end_time:
-                  start_time = call.start_time
-                  end_time = call.end_time
-                  duration_minutes = (end_time - start_time).total_seconds() / 60
-                  if call.status == 'busy' or call.status == 'no-answer':
-                      duration_minutes = 0
-              
-              conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-              cursor = conn.cursor()
-              numero = call.to[4:]
-              expected_length = 0
-              
-              cursor.execute(f"SELECT * FROM contacts WHERE phone = '{numero}';")
-              contact = cursor.fetchone()
-              conn.close()
-              
-             
-              # Extração de dados de contact[6] (assumindo que é um dicionário)
-              dados_contact = {}
-              if contact is not None:
-                  # Certifique-se de que contact tem pelo menos 7 elementos (índice 6 existe)
-                  if len(contact) > 6 and isinstance(contact[6], dict):
-                      dados_contact = {}
-                      for key, dado in contact[6].items():
-                          dados_contact[key] = dado
-                         
-              else:
-                # Definir valores padrão caso contact seja None
-                 dados_contact = dados
-      
-              # Criando o dicionário call_status
-              call_status = {
-                   **dados_contact,  # Mescla os dados do dicionário dados_contact
-                  'status': call.status,
-                  'phone_number': call.to,
-                  'start_time': call.start_time.strftime('%Y-%m-%d %H:%M:%S'),
-                  'end_time': call.end_time.strftime('%Y-%m-%d %H:%M:%S'),
-                  'duration_minutes': round(duration_minutes, 2)
-              }
-              call_statuses.append(call_status)
-     
+    
     if csv == '1':
-      return  gerar_csv(call_statuses)
+       return  gerar_csv(call_statuses)
             
     else:
        
@@ -3737,15 +3724,17 @@ def get_call_status2(day,csv):
 @app.route('/start_ivr_campaign', methods=['POST'])
 def start_ivr_campaign():
     # Extract phone numbers from the HTML form
-    phone_numbers = request.form.getlist('phone_numbers')
+    phone_numbers = request.form.get('phone_numbers')
     campaign = request.form.get('campaign')
 
+    print(phone_numbers)
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
     cursor = conn.cursor()
 
-    cursor.execute(f"SELECT * FROM contacts WHERE phone = '{phone_numbers[0]}';")
+    cursor.execute(f"SELECT * FROM contacts WHERE phone = '{phone_numbers}';")
     contact = cursor.fetchone()
     conn.close()
+    tamanho = 4 
 
     #if contact is None:
     #    
@@ -3767,7 +3756,48 @@ def start_ivr_campaign():
             from_=TWILIO_PHONE_NUMBER
         )
 
-    return render_template('campaign_status.html')
+    return redirect(url_for('get_call_status'))
+
+
+@app.route('/start_ivr_group', methods=['POST'])
+def start_ivr_group():
+    # Extract phone numbers from the HTML form
+    grupo = request.form['grupo']
+    #campaign = request.form.get('campaign')
+
+    campaign = 'teste'
+    
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
+
+    cursor.execute(f"SELECT * FROM contacts JOIN contact_org ON contacts.id = contact_org.id_cont WHERE contact_org.grupo_id = {grupo};")
+    contact = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    print(contact)
+    print(grupo)
+
+    #if contact is None:
+    #    
+    #    flash('Contacto inexistente', 'success')
+    #    return redirect(url_for('ivr_test'))
+
+    #else:   
+    print(campaign)
+    
+    url='https://insightsap.com/ivr/'+campaign
+
+    for number in contact:
+        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        call = client.calls.create(
+            url=url,  # URL for handling IVR logic
+            to=number[3],
+            from_=TWILIO_PHONE_NUMBER
+        )
+
+    return redirect(url_for('get_call_status'))
+
+
 
 @app.route('/audio/<path:filename>')
 def serve_audio(filename):
@@ -5321,6 +5351,6 @@ def save_survey_response2(phone_number, campaign):
     
 if __name__ == '__main__':
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()
