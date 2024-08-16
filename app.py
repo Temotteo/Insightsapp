@@ -128,12 +128,17 @@ QUESTION_AUDIO_URLS = [
 
     "https://insightsap.com/audio/conjutiviteconc.mp3"]
 
-QUESTION_AUDIO_URL = [
-    "https://insightsap.com/audio/indroducao.mp3",
+CAMPANHA_AUDIO_URL = [
     
-    "https://insightsap.com/audio/audio.mp3",
+    "https://insightsap.com/audio/campanha_vacinacao_pt.mp3",
 
-    "https://insightsap.com/audio/campanhacon.mp3"]
+]
+
+FORMACAO_AUDIO_URL = [
+    
+    "https://insightsap.com/audio/campanha_vacinacao_pt.mp3",
+
+]
 
 # Mock function to save survey responses to the database
 def save_survey_response(phone_number, question_index, selected_option, campaign):
@@ -2450,9 +2455,15 @@ def campanha_n(id, type):
         # Connect to the PostgreSQL database
         connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
         cursor = connection.cursor()
-       
-        cursor.execute(f"SELECT projecto FROM campanhas where id_campanha ={id};")
-        tema = cursor.fetchone()[0]
+        tema = 'Aula'
+        if type != 'formacao':
+           cursor.execute(f"SELECT projecto FROM campanhas where id_campanha ={id};")
+           tema = cursor.fetchone()[0]
+
+        else:
+           cursor.execute(f"SELECT tema FROM aulas where id ={id};")
+           tema = cursor.fetchone()[0]
+
         # Executar uma função que retorna os resultados de acordo com o tipo de campanha e id fornecidos
         cursor.execute(f"SELECT * FROM get_info_by_id_and_type({id}, '{type}');")
         result = cursor.fetchall()
@@ -2586,7 +2597,7 @@ def criar_aula(id, tema, intro, base, con, audio_intro, audio_base, audio_con, a
         conn.commit()
 
         # Insere um novo registro na tabela 'aula_info' para o conteúdo da aula e retorna o 'questao_id' gerado
-        cursor.execute(f"INSERT INTO aula_info(aula, descricao, audios, tipo) VALUES ('{aula_id}', '{base}', 0, 'aula') RETURNING questao_id;")
+        cursor.execute(f"INSERT INTO aula_info(aula, descricao, audios, tipo) VALUES ('{aula_id}', '{base}', 0, 'Corpo') RETURNING questao_id;")
         tema_id = cursor.fetchone()[0]
         conn.commit()
 
@@ -2629,7 +2640,7 @@ def criar_campanha(id, tema ,intro, base, con, audio_intro, audio_base, audio_co
             conn.commit()
             intro_id = cursor.fetchone()[0]
 
-            cursor.execute(f"INSERT INTO campanha_question(campanha_id, descricao, audios, tipo) VALUES ({id}, '{base}', 0, 'campanha') RETURNING questao_id ;")
+            cursor.execute(f"INSERT INTO campanha_question(campanha_id, descricao, audios, tipo) VALUES ({id}, '{base}', 0, 'Corpo') RETURNING questao_id ;")
             conn.commit()
             audio_id = cursor.fetchone()[0]
 
@@ -3436,17 +3447,18 @@ def ivr_test():
 def ivr(campaign):
     response = VoiceResponse()
 
-    if campaign == 'campanha_32':
-       response.play(QUESTION_AUDIO_URLS[0])
+    if campaign == 'Simples':
+       response.play(CAMPANHA_AUDIO_URL[0]) 
 
-       current_question_index = request.args.get('current_question_index', default=1, type=int)
-       with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
-           gather.play(QUESTION_AUDIO_URLS[current_question_index])
-
+    elif campaign == 'formacao':     
+       response.play(CAMPANHA_AUDIO_URL[0])
     else:
-        response.play(QUESTION_AUDIO_URL[0])       
-        response.play(QUESTION_AUDIO_URL[1])       
-        response.play(QUESTION_AUDIO_URL[2])       
+        response.play(QUESTION_AUDIO_URLS[0])
+
+        current_question_index = request.args.get('current_question_index', default=1, type=int)
+        with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
+           gather.play(QUESTION_AUDIO_URLS[current_question_index])     
+          
 
     return str(response), 200, {'Content-Type': 'application/xml'}
 

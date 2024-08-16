@@ -21,7 +21,7 @@
     {% for column in columns_list %}
       
       <tr>
-      {% if column[3] == 'Introducao '  or column[3] == 'campanha' or  column[3] == 'Aula'  %} 
+      {% if column[3] == 'Introducao '  or column[3] == 'Corpo'   %} 
       <td>{{ column[3] }}</td>
       {% elif column[3] == 'Pergunta' %}
         <td>pergunta {{loop.index -1 }}</td>
@@ -61,14 +61,14 @@
         
     {% else %}
 
-        {% if loop.index ==1 or column[3] == 'Conclusao' or type == 'simples' %}
+        {% if loop.index ==1 or column[3] == 'Conclusao' or column[3] == 'Corpo' or type == 'simples' %}
         <td><a href="#" class="btn btn-default pull-right"></a></td>
         {% else %}
         <td><a href="/perguntas/{{column[0]}}/{{type}}" class="btn btn-default pull-right">Opcoes de Resposta</a></td>
         {% endif %}
 
     {% endif %}
-        <td><a href="/assign_question/{{id}}/{{column[0]}}/questao" class="btn btn-default pull-right">{% if column[4] == 'Introducao' or column[4] == 'Aula'  or column[4] == 'Conclusao' or column[4] == 'campanha'  %} Editar {{column[4]}} {% else %} Editar Pergunta {% endif %}</a></td>
+        <td><a href="/assign_question/{{id}}/{{column[0]}}/questao" class="btn btn-default pull-right"> Editar {{column[3]}} </a></td>
         <td><a href="/add_audio/{{column[0]}}/{{type}}" class="btn btn-default pull-right" >Adicionar Audio</a></td>
 
 

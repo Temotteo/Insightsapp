@@ -59,7 +59,7 @@ function callOne(id) {
     $('#modalBodySms').empty();
         var linha = `
         <form action ="/start_ivr_campaign" method="post">
-        <input  type = "hidden" name="campaign"  placeholder="Enter Campaign"></input>
+        <input type = "hidden" name="campaign"  placeholder="Enter Campaign" value="Simples"></input>
          
                <div class="form-group my-2">
                     <label for="data" ">Number:</label>
