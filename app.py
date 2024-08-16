@@ -2612,7 +2612,7 @@ def criar_aula(id, tema, intro, base, con, audio_intro, audio_base, audio_con, a
         conn.commit()
 
         # Insere um novo registro na tabela 'aula_info' para a introdução da aula e retorna o 'questao_id' gerado
-        cursor.execute(f"INSERT INTO aula_info(aula, descricao, audios, tipo) VALUES ('{aula_id}', '{intro}', 0, 'Introducao') RETURNING questao_id;")
+        cursor.execute(f"INSERT INTO aula_info(aula, descricao, audios, tipo) VALUES ('{aula_id}', '{intro}', 0, 'Introdução') RETURNING questao_id;")
         intro_id = cursor.fetchone()[0]
         conn.commit()
 
@@ -2622,7 +2622,7 @@ def criar_aula(id, tema, intro, base, con, audio_intro, audio_base, audio_con, a
         conn.commit()
 
         # Insere um novo registro na tabela 'aula_info' para a conclusão da aula e retorna o 'questao_id' gerado
-        cursor.execute(f"INSERT INTO aula_info(aula, descricao, audios, tipo) VALUES ('{aula_id}', '{con}', 0, 'Conclusao') RETURNING questao_id;")
+        cursor.execute(f"INSERT INTO aula_info(aula, descricao, audios, tipo) VALUES ('{aula_id}', '{con}', 0, 'Conclusão') RETURNING questao_id;")
         con_id = cursor.fetchone()[0]
         conn.commit()
 
@@ -2656,7 +2656,7 @@ def criar_campanha(id, tema ,intro, base, con, audio_intro, audio_base, audio_co
             cursor.execute(f" UPDATE campanhas set projecto = '{tema}' where id_campanha = {id}")
             conn.commit()
 
-            cursor.execute(f"INSERT INTO campanha_question(campanha_id, descricao, audios, tipo) VALUES ({id}, '{intro}', 0, 'Introducao') RETURNING questao_id ;")
+            cursor.execute(f"INSERT INTO campanha_question(campanha_id, descricao, audios, tipo) VALUES ({id}, '{intro}', 0, 'Introdução') RETURNING questao_id ;")
             conn.commit()
             intro_id = cursor.fetchone()[0]
 
@@ -2664,7 +2664,7 @@ def criar_campanha(id, tema ,intro, base, con, audio_intro, audio_base, audio_co
             conn.commit()
             audio_id = cursor.fetchone()[0]
 
-            cursor.execute(f"INSERT INTO campanha_question(campanha_id, descricao, audios, tipo) VALUES ({id}, '{con}', 0, 'Conclusao') RETURNING questao_id;")
+            cursor.execute(f"INSERT INTO campanha_question(campanha_id, descricao, audios, tipo) VALUES ({id}, '{con}', 0, 'Conclusão') RETURNING questao_id;")
             conn.commit()
             con_id = cursor.fetchone()[0]
             
@@ -2692,11 +2692,11 @@ def inquerito(id, tema ,intro,  con, audio_intro,  audio_con,audio_lingua ):
             cursor.execute(f" UPDATE campanhas set projecto = '{tema}' where id_campanha = {id}")
             conn.commit()
 
-            cursor.execute(f"INSERT INTO campanha_question(campanha_id, descricao, audios, tipo) VALUES ({id}, '{intro}', 0, 'Introducao') RETURNING questao_id ;")
+            cursor.execute(f"INSERT INTO campanha_question(campanha_id, descricao, audios, tipo) VALUES ({id}, '{intro}', 0, 'Introdução') RETURNING questao_id ;")
             conn.commit()
             intro_id = cursor.fetchone()[0]
 
-            cursor.execute(f"INSERT INTO campanha_question(campanha_id, descricao, audios, tipo) VALUES ({id}, '{con}', 0, 'Conclusao') RETURNING questao_id;")
+            cursor.execute(f"INSERT INTO campanha_question(campanha_id, descricao, audios, tipo) VALUES ({id}, '{con}', 0, 'Conclusão') RETURNING questao_id;")
             conn.commit()
             con_id = cursor.fetchone()[0]
             
@@ -2725,8 +2725,8 @@ def criar_campanhas(type, id):
         # Obter dados do formulário
         tema = request.form['name']
         audio_lingua = request.form['idioma']
-        introducao = request.form['introducao']
-        conclusao = request.form['conclusao']
+        Introdução = request.form['Introdução']
+        Conclusão = request.form['Conclusão']
         intro= request.files['intro']
         con = request.files['con']
         audio_intro = ""
@@ -2759,7 +2759,7 @@ def criar_campanhas(type, id):
         # Inserir dados na tabela correspondente, dependendo do tipo de campanha
         if type == 'inquerito':
            print("escreva"+str(id)) 
-           inquerito(id, tema ,introducao, conclusao, audio_intro, audio_con,audio_lingua )
+           inquerito(id, tema ,Introdução, Conclusão, audio_intro, audio_con,audio_lingua )
         
         else:
            base = request.form['aula_base']
@@ -2768,9 +2768,9 @@ def criar_campanhas(type, id):
               audio_base = secure_filename(audio.filename)
               audio.save(os.path.join(app.config['AUDIO_FOLDER'], audio_base))
            if type == 'formacao':
-              id = criar_aula(id, tema ,introducao, base , conclusao, audio_intro,audio_base, audio_con,audio_lingua )         
+              id = criar_aula(id, tema ,Introdução, base , Conclusão, audio_intro,audio_base, audio_con,audio_lingua )         
            else:
-              criar_campanha(id, tema ,introducao, base , conclusao, audio_intro,audio_base, audio_con,audio_lingua )
+              criar_campanha(id, tema ,Introdução, base , Conclusão, audio_intro,audio_base, audio_con,audio_lingua )
 
 
 
@@ -3482,7 +3482,7 @@ def ivr(campaign):
        current_question_index = request.args.get('current_question_index', default=2, type=int)
        with response.gather(num_digits=1, action=url_for('handle_question_fromacao', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
            gather.play(FORMACAO_AUDIO_URL[current_question_index]) 
-
+             
     if campaign == 'campanha_32': 
         response.play(QUESTION_AUDIO_URLS[0])
         current_question_index = request.args.get('current_question_index', default=1, type=int)
@@ -3552,7 +3552,7 @@ def handle_question_fromacao():
             gather.play(FORMACAO_AUDIO_URL[next_question_index])
 
     else:  # Concluding message
-        response.play(handle_question_fromacao[-1])
+        response.play(FORMACAO_AUDIO_URL[-1])
 
     return str(response), 200, {'Content-Type': 'application/xml'}
 
@@ -4190,7 +4190,7 @@ for p in set(provincia):
     completado_por_provincia[p] = {'Completado': sum((p == provincia) & completado), 'Não Completado': sum((p == provincia) & ~completado)}
 
 # Calcular taxa de conclusão geral da campanha
-taxa_conclusao_geral = sum(completado) / num_registros
+taxa_Conclusão_geral = sum(completado) / num_registros
 
 # Calcular porcentagem de conclusão por província
 porcentagens_por_provincia = {p: completado_por_provincia[p]['Completado'] / (completado_por_provincia[p]['Completado'] + completado_por_provincia[p]['Não Completado']) * 100 for p in completado_por_provincia}
@@ -4221,19 +4221,19 @@ grafico_provincia = figura_provincia.to_html(full_html=False)
 # Gerar gráfico para a taxa de conclusão geral
 figura_geral = go.Figure(data=go.Indicator(
     mode="gauge+number",
-    value=taxa_conclusao_geral,
+    value=taxa_Conclusão_geral,
     title={'text': "Taxa de Conclusão Geral"},
     gauge={'axis': {'range': [0, 1]}, 'threshold': {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 0.5}}))
 grafico_geral = figura_geral.to_html(full_html=False)
 
 # Calcular taxas de conclusão por faixa etária
-taxas_conclusao_faixa = {faixa: round(completado_por_faixa[faixa]['Completado'] / (completado_por_faixa[faixa]['Completado'] + completado_por_faixa[faixa]['Não Completado']) * 100, 2) for faixa in completado_por_faixa}
+taxas_Conclusão_faixa = {faixa: round(completado_por_faixa[faixa]['Completado'] / (completado_por_faixa[faixa]['Completado'] + completado_por_faixa[faixa]['Não Completado']) * 100, 2) for faixa in completado_por_faixa}
 
 # Gerar gráfico de barras para a porcentagem de conclusão por faixa etária
 figura_faixa_etaria = go.Figure(data=go.Bar(
-    x=list(taxas_conclusao_faixa.keys()),
-    y=list(taxas_conclusao_faixa.values()),
-    text=list(taxas_conclusao_faixa.values()),
+    x=list(taxas_Conclusão_faixa.keys()),
+    y=list(taxas_Conclusão_faixa.values()),
+    text=list(taxas_Conclusão_faixa.values()),
     textposition='auto',
     marker_color='green'
 ))
@@ -5272,12 +5272,12 @@ def atribuir_ticket(ticket_id):
     funcionarios =[]
     if request.method == 'POST':
         funcionario_id = request.form['funcionario']
-        prazo_conclusao = request.form['prazo_conclusao']
+        prazo_Conclusão = request.form['prazo_Conclusão']
 
         conn = connect_to_db()
         try:
           cur = conn.cursor()
-          cur.execute("UPDATE ticket SET prazo_conclusao = %s, funcionario_id = %s WHERE id =%s ;",(prazo_conclusao, funcionario_id, ticket_id,))
+          cur.execute("UPDATE ticket SET prazo_Conclusão = %s, funcionario_id = %s WHERE id =%s ;",(prazo_Conclusão, funcionario_id, ticket_id,))
           conn.commit()
         except psycopg2.Error as e:
           error_msg = f"Erro ao fazer a transação: {e}"
