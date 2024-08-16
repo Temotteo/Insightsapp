@@ -20,7 +20,7 @@
             <ul class="list-group list-group-flush">
                 {% for aula in formacao %} 
                 {% if aula[1] == modulo[1] %} 
-                <li class="list-group-item lead"><strong>Aula {{ loop.index }}</strong>: <a href="/campanha/{{aula[3]}}/formacao">{{ aula[4] }}</a></li>
+                <li class="list-group-item lead"><strong>Aula {{ loop.index }}</strong>: <a href="/campanha_n/{{aula[3]}}/formacao">{{ aula[4] }}</a></li>
                 
                 {% endif %}
                 {% endfor %}

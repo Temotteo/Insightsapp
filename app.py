@@ -89,6 +89,7 @@ def handle_exception(e):
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
+
 AUDIO_FOLDER = 'static/audios'
 app.config['AUDIO_FOLDER'] = AUDIO_FOLDER
 # Criação do diretório de uploads se não existir
@@ -1405,7 +1406,7 @@ def campanhas():
 
     cursor = conn.cursor()
 
-    cursor.execute(f"SELECT * FROM campanhas where orgid='{org_id}'")
+    cursor.execute(f"SELECT * FROM campanhas where orgid='{org_id}' and tipo ='simples' ")
 
     dados=cursor.fetchall()
 
@@ -1423,7 +1424,7 @@ def campanhas_ativas():
 
     cursor = conn.cursor()
 
-    cursor.execute(f"SELECT * FROM campanhas where orgid='{org_id}' and status = 'ativo';")
+    cursor.execute(f"SELECT * FROM campanhas where orgid='{org_id}' and status = 'ativo' and status = 'ativo' and tipo ='simples';")
 
     dados=cursor.fetchall()
 
@@ -2335,9 +2336,9 @@ def del_tiket(id):
     return redirect(url_for('pendentes'))
 
 
-@app.route('/addoption/<string:id>', methods=['GET', 'POST'])
+@app.route('/addoption/<string:id>/<type>', methods=['GET', 'POST'])
 @is_logged_in
-def addoption(id):
+def addoption(id,type):
     form = OptionForm(request.form)
     id = int(id)
     if request.method == 'POST':
@@ -2348,14 +2349,15 @@ def addoption(id):
         #query = sql.SQL("INSERT INTO {} (opcao) VALUES (%s)").format(sql.Identifier(id))
 
         # Execute query with parameterized value
-        if type == 'inquerito':
-           cursor.execute(f"Insert into campanha_option values({id},'{opcao}');")
+        if type != 'formacao':
+           cursor.execute(f"Insert into campanha_option(questao, opcao,count) values({id},'{opcao}', 0);")
 
            # Commit to DB
            conn.commit()
 
-        else:   
-           cursor.execute(f"Insert into questoes_opcoes values({id},'{opcao}');")
+        else:
+              
+           cursor.execute(f"Insert into aula_opcoes(questao, opcao, count) values({id},'{opcao}',0);")
 
            # Commit to DB
            conn.commit()
@@ -2364,7 +2366,7 @@ def addoption(id):
 
         flash('Opcao adicionada com Successo', 'success')
 
-        return redirect(url_for('perguntas', id=id))
+        return redirect(url_for('perguntas', id=id, type =type))
 
     return render_template('addoption.html', form=form)
 
@@ -2456,20 +2458,27 @@ def campanha_n(id, type):
         # Connect to the PostgreSQL database
         connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
         cursor = connection.cursor()
-        tema = 'Aula'
+        tema = '<Tema>'
+        referencia = 'campanha_36'
         if type != 'formacao':
-           cursor.execute(f"SELECT projecto FROM campanhas where id_campanha ={id};")
+           cursor.execute(f"SELECT projecto, campanha_ref FROM campanhas where id_campanha ={id};")
            tema = cursor.fetchone()[0]
+           cursor.execute(f"SELECT campanha_ref FROM campanhas where id_campanha ={id};")
+           referencia = cursor.fetchone()[0]
 
         else:
            cursor.execute(f"SELECT tema FROM aulas where id ={id};")
            tema = cursor.fetchone()[0]
+           cursor.execute(f"""select campanha_ref from campanhas where id_campanha in 
+                              (select campanha from modulos where modulo in
+                               (select modulo from aulas where id = {id})) ;""")
+           referencia = cursor.fetchone()[0]           
 
         # Executar uma função que retorna os resultados de acordo com o tipo de campanha e id fornecidos
         cursor.execute(f"SELECT * FROM get_info_by_id_and_type({id}, '{type}');")
         result = cursor.fetchall()
-            
-        return render_template('campanha_n.html', columns_list = result, id=id, type=type, tema=tema)
+        conn.close()    
+        return render_template('campanha_n.html', columns_list = result, id=id, type=type, tema=tema, referencia=referencia)
 
 
 @app.route('/add_question/<id>/<type>', methods=['GET', 'POST'])
@@ -2532,9 +2541,7 @@ def add_audio(id,type):
             cursor = conn.cursor()
             
             # Converte o id de string para inteiro
-            id = int(id)
-            cursor.execute("SELECT campanha_id FROM campanha_question WHERE questao_id = %s", (id,))
-            campanha_id = cursor.fetchone()[0]
+            campanha_id = 0
             
             # Obtém o arquivo de áudio enviado pelo usuário
             audio = request.files['audio']
@@ -2544,23 +2551,35 @@ def add_audio(id,type):
             audio_filename = secure_filename(audio.filename)
             audio.save(os.path.join(app.config['AUDIO_FOLDER'], audio_filename))
             
-            # Verifica se já existem registros de áudio para a questão fornecida
-            cursor.execute("SELECT * FROM campanha_audio WHERE questao_id = %s", (id,))
-            dados = cursor.fetchall()
-            
-            # Determina o número da questão com base na quantidade de registros existentes
-            if dados:
-                questao_nr = len(dados) + 1
-            else:
-                questao_nr = 1
-            
-            # Insere um novo registro de áudio na tabela aula_audio
-            cursor.execute(
-                "INSERT INTO campanha_audio (questao_id, questao_nr, audio, idioma) VALUES (%s, %s, %s, %s)",
-                (id, questao_nr, audio_filename, audio_lingua)
-            )
-            conn.commit()
-        
+            if type != 'formacao':
+                cursor.execute("SELECT campanha_id FROM campanha_question WHERE questao_id = %s", (id,))
+                campanha_id = cursor.fetchone()[0]
+                # Verifica se já existem registros de áudio para a questão fornecida
+                cursor.execute("SELECT * FROM campanha_audio WHERE questao_id = %s", (id,))
+                dados = cursor.fetchall()
+                
+                # Determina o número da questão com base na quantidade de registros existentes
+                if dados:
+                    questao_nr = len(dados) + 1
+                else:
+                    questao_nr = 1
+                
+                # Insere um novo registro de áudio na tabela aula_audio
+                cursor.execute(
+                    "INSERT INTO campanha_audio (questao_id, questao_nr, audio, idioma) VALUES (%s, %s, %s, %s)",
+                    (id, questao_nr, audio_filename, audio_lingua)
+                )
+                
+
+            else: 
+                 cursor.execute("SELECT aula FROM aula_info WHERE questao_id = %s", (id,))
+                 campanha_id = cursor.fetchone()[0]
+                 cursor.execute(
+                     "INSERT INTO aula_audio (questao_id, audio, idioma) VALUES (%s, %s, %s)",
+                     (id, audio_filename, audio_lingua)
+                 )  
+
+            conn.commit()   
         except (Exception, psycopg2.DatabaseError) as error:
             # Imprime o erro, se houver
             print(f"Erro ao executar a query: {error}")
@@ -3004,7 +3023,7 @@ def perguntas(id, type):
     else:
         # Se o tipo for 'formacao', selecionar todas as entradas da tabela 'questoes_opcoes' onde a questão é igual ao ID
         if type == 'formacao':
-            cursor.execute(f"SELECT * FROM questoes_opcoes WHERE questao = {id}")
+            cursor.execute(f"SELECT * FROM aula_opcoes WHERE questao = {id}")
             dados = cursor.fetchall()
         else:
             # Para outros tipos, selecionar todas as entradas da tabela 'campanha_option' onde a questão é igual ao ID
@@ -3038,15 +3057,21 @@ def dashboard2(id, type):
         table_name = cursor.fetchone()[0]
         
 
-    else:    
+    elif type !='formacao':    
        cursor.execute(f"SELECT opcao, count FROM campanha_option where questao ={id}")
        rows = cursor.fetchall()
-       cursor.execute(f"SELECT questao FROM campanha_question where questao_nr={id}")
-       rows = cursor.fetchone()
-       table_name = rows[0]
+       cursor.execute(f"SELECT descricao FROM campanha_question where questao_id={id}")
+       table_name = cursor.fetchone()
+
+    else:
+       cursor.execute(f"SELECT opcao, count FROM aula_opcoes where questao ={id}")
+       rows = cursor.fetchall()[0]
+       cursor.execute(f"SELECT descricao FROM aula_info where questao_id={id}")
+       table_name = cursor.fetchone()[0]
+        
 
     
-    print(rows[0])
+    print(rows[1])
 
        
 
@@ -3448,16 +3473,17 @@ def ivr_test():
 def ivr(campaign):
     response = VoiceResponse()
 
-    if campaign == 'simples':
+    if campaign == 'campanha_51':
        response.play(CAMPANHA_AUDIO_URL[0]) 
 
-    elif campaign == 'formacao':     
+    if campaign == 'campanha_40':     
        response.play(FORMACAO_AUDIO_URL[0])
        response.play(FORMACAO_AUDIO_URL[1])
        current_question_index = request.args.get('current_question_index', default=2, type=int)
        with response.gather(num_digits=1, action=url_for('handle_question_fromacao', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
-           gather.play(FORMACAO_AUDIO_URL[current_question_index])   
-    else:
+           gather.play(FORMACAO_AUDIO_URL[current_question_index]) 
+
+    if campaign == 'campanha_32': 
         response.play(QUESTION_AUDIO_URLS[0])
         current_question_index = request.args.get('current_question_index', default=1, type=int)
         with response.gather(num_digits=1, action=url_for('handle_question', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
@@ -3518,7 +3544,7 @@ def handle_question_fromacao():
             return redirect(url_for('ivr', current_question_index=current_question_index))
 
         # Save the survey response to the database
-        # save_survey_response2(phone_number, current_question_index, selected_option, campaign)
+        save_survey_response2(phone_number, current_question_index, selected_option, campaign)
 
         # Continue with the next question
         next_question_index = current_question_index + 1
@@ -3565,31 +3591,29 @@ def get_call_status():
 
     # Fetch call status using Twilio REST API
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    ongoing_calls = client.calls.list(status='in-progress')
+    calls = client.calls.list(limit=2)
 
-    if ongoing_calls:
-      for call in ongoing_calls:
+    # Ordena as chamadas manualmente pelo `start_time` em ordem decrescente
+    calls = sorted(calls, key=lambda call: call.start_time, reverse=True)
+
+
+    if calls:
+      for call in calls:
         
         # Verifica se end_time está disponível
         if call.end_time:
           end_time = call.end_time.strftime('%Y-%m-%d %H:%M:%S')
-          # Calcula a duração da chamada
-          duration_minutes = 0
-          if call.start_time and call.end_time:
-              start_time = call.start_time
-              end_time = call.end_time
-              duration_minutes = (end_time - start_time).total_seconds() / 60
-              if call.status == 'busy' or call.status == 'no-answer':
-                  duration_minutes = 0
         else:
-           end_time = 'N/A'
-           # Para chamadas em andamento, calcule a duração usando o tempo atual
-           duration_minutes = 0
-           if call.start_time:
-               start_time = call.start_time
-               end_time = datetime.now()
-               duration_minutes = (end_time - start_time).total_seconds() / 60
-
+          end_time = 'N/A'
+          # Calcula a duração da chamada
+        duration_minutes = 0
+        if call.start_time and call.end_time:
+            start_time = call.start_time
+            end_time = call.end_time
+            duration_minutes = (end_time - start_time).total_seconds() / 60
+            if call.status == 'busy' or call.status == 'no-answer':
+                duration_minutes = 0
+        
         conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
         cursor = conn.cursor()
         numero = call.to[4:]
@@ -3619,7 +3643,6 @@ def get_call_status():
             'status': call.status,
             'phone_number': call.to,
             'start_time': call.start_time.strftime('%Y-%m-%d %H:%M:%S'),
-            'end_time': call.end_time.strftime('%Y-%m-%d %H:%M:%S'),
             'duration_minutes': round(duration_minutes, 2)
         }
         call_statuses.append(call_status)
@@ -3635,13 +3658,12 @@ def get_call_status():
     
            if contact is not None:
             cursor.execute("""
-              INSERT INTO call_logs (contact_id, status, phone_number, start_time, end_time, duration_minutes)
-              VALUES (%s, %s, %s, %s, %s, %s);
+              INSERT INTO call_logs (contact_id, status, phone_number, start_time, duration_minutes)
+              VALUES (%s, %s, %s, %s, %s);
               """,( contact[0],
                     call_status['status'],
                     call_status['phone_number'],
                     call_status['start_time'],
-                    call_status['end_time'],
                     call_status['duration_minutes']
                    ) )
            conn.commit()
@@ -3825,7 +3847,7 @@ def start_ivr_campaign():
             from_=TWILIO_PHONE_NUMBER
         )
 
-    return render_template('campaign_status.html',  dados=dados)
+    return redirect(url_for('get_call_status'))
 
 
 @app.route('/start_ivr_group', methods=['POST'])
@@ -5390,7 +5412,7 @@ def get_audio(filename):
     
         
 
-def save_survey_response2(phone_number, campaign):
+def save_survey_response2(phone_number, selected_option, campaign):
     # Connect to the database
     conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
 
@@ -5413,6 +5435,15 @@ def save_survey_response2(phone_number, campaign):
         INSERT INTO simple_responses (phone_number,campaign, data)
         VALUES (%s, %s, %s)
     """, ('258849109478', campaign, current_dateTime ))
+
+    cur.exucute(f'select * from aulas where campanha_ref = {campaign}')
+    camp = cur.fetchone()
+
+    if camp[5] !='formacao':
+      cur.execute(f"UPDATE campanha_option SET count=count+1 where digitos={int(selected_option)}")
+    
+    else:
+      cur.execute(f"UPDATE aula_opcoes SET count=count+1 where digitos={int(selected_option)}")
 
     conn.commit()
     conn.close()
