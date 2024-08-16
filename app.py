@@ -135,9 +135,10 @@ CAMPANHA_AUDIO_URL = [
 ]
 
 FORMACAO_AUDIO_URL = [
-    
-    "https://insightsap.com/audio/campanha_vacinacao_pt.mp3",
-
+    "https://insightsap.com/audio/formacao_intro.mp3",
+    "https://insightsap.com/audio/formacao_corpo.mp3",
+    "https://insightsap.com/audio/formacao_questao.mp3",
+    "https://insightsap.com/audio/formacao_con.mp3"
 ]
 
 # Mock function to save survey responses to the database
@@ -3447,11 +3448,15 @@ def ivr_test():
 def ivr(campaign):
     response = VoiceResponse()
 
-    if campaign == 'Simples':
+    if campaign == 'simples':
        response.play(CAMPANHA_AUDIO_URL[0]) 
 
     elif campaign == 'formacao':     
-       response.play(CAMPANHA_AUDIO_URL[0])
+       response.play(FORMACAO_AUDIO_URL[0])
+       response.play(FORMACAO_AUDIO_URL[1])
+       current_question_index = request.args.get('current_question_index', default=1, type=int)
+       with response.gather(num_digits=1, action=url_for('handle_question_fromacao', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
+           gather.play(FORMACAO_AUDIO_URL[current_question_index])   
     else:
         response.play(QUESTION_AUDIO_URLS[0])
 
@@ -3495,6 +3500,38 @@ def handle_question():
     return str(response), 200, {'Content-Type': 'application/xml'}
 
 
+@app.route('/handle_question_fromacao', methods=['POST'])
+def handle_question_fromacao():
+    selected_option = request.form.get('Digits')
+    phone_number = request.form.get('To')
+    current_question_index = int(request.args.get('current_question_index'))
+    campaign=request.args.get('campaign')
+
+    response = VoiceResponse()
+
+    if current_question_index < len(FORMACAO_AUDIO_URL) - 1:  # Not the concluding message
+        try:
+            selected_option = int(selected_option)
+            if selected_option < 1 or selected_option > 5:
+                raise ValueError()
+        except ValueError:
+            # Handle invalid input by redirecting back to /ivr with current_question_index
+            return redirect(url_for('ivr', current_question_index=current_question_index))
+
+        # Save the survey response to the database
+        # save_survey_response2(phone_number, current_question_index, selected_option, campaign)
+
+        # Continue with the next question
+        next_question_index = current_question_index + 1
+        with response.gather(num_digits=1, action=url_for('handle_question_fromacao', current_question_index=next_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
+            gather.play(FORMACAO_AUDIO_URL[next_question_index])
+
+    else:  # Concluding message
+        response.play(handle_question_fromacao[-1])
+
+    return str(response), 200, {'Content-Type': 'application/xml'}
+
+
 def get_call_duration(start_time_str, end_time_str):
     if start_time_str and end_time_str:
         start_time = datetime.strptime(start_time_str, '%a, %d %b %Y %H:%M:%S %z')
@@ -3529,21 +3566,31 @@ def get_call_status():
 
     # Fetch call status using Twilio REST API
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    for call in client.calls.list( start_time=datetime.now()):
+    ongoing_calls = client.calls.list(status='in-progress')
 
-        if call.end_time:
-            end_time = call.end_time.strftime('%Y-%m-%d %H:%M:%S')
-        else:
-            end_time = 'N/A'
-        # Calculate call duration in minutes
-        duration_minutes = 0
-        if call.start_time and call.end_time:
-            start_time = call.start_time
-            end_time = call.end_time
-            duration_minutes = (end_time - start_time).total_seconds() / 60
-            if call.status == 'busy' or call.status == 'no-answer':
-                duration_minutes = 0
+    if ongoing_calls:
+      for call in ongoing_calls:
         
+        # Verifica se end_time está disponível
+        if call.end_time:
+          end_time = call.end_time.strftime('%Y-%m-%d %H:%M:%S')
+          # Calcula a duração da chamada
+          duration_minutes = 0
+          if call.start_time and call.end_time:
+              start_time = call.start_time
+              end_time = call.end_time
+              duration_minutes = (end_time - start_time).total_seconds() / 60
+              if call.status == 'busy' or call.status == 'no-answer':
+                  duration_minutes = 0
+        else:
+           end_time = 'N/A'
+           # Para chamadas em andamento, calcule a duração usando o tempo atual
+           duration_minutes = 0
+           if call.start_time:
+               start_time = call.start_time
+               end_time = datetime.now()
+               duration_minutes = (end_time - start_time).total_seconds() / 60
+
         conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
         cursor = conn.cursor()
         numero = call.to[4:]
@@ -3735,13 +3782,14 @@ def get_call_status2(day,csv):
 # Start IVR campaign route
 @app.route('/start_ivr_campaign', methods=['POST'])
 def start_ivr_campaign():
+    org_id = session['last_org']
     # Extract phone numbers from the HTML form
     phone_numbers = request.form.getlist('phone_numbers')
     campaign = request.form.get('campaign')
 
     print(phone_numbers)
-    #conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
-    #cursor = conn.cursor()
+    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    cursor = conn.cursor()
 
     #cursor.execute(f"SELECT * FROM contacts WHERE phone = '{phone_numbers}';")
     #contact = cursor.fetchone()
@@ -3755,6 +3803,15 @@ def start_ivr_campaign():
 
     #else:   
     #print(contact) 
+    dados = {}
+    cursor.execute(f"SELECT * FROM contacts WHERE id in (select id_cont from contact_org where org_id = '{org_id}') Limit 1;")
+    contacts = cursor.fetchone()
+    conn.close()
+    for key, dado in contacts[6].items():
+            dados[key] = 'No data'
+
+
+
     print(phone_numbers)
     print(campaign)
     
@@ -3769,7 +3826,7 @@ def start_ivr_campaign():
             from_=TWILIO_PHONE_NUMBER
         )
 
-    return redirect(url_for('get_call_status'))
+    return render_template('campaign_status.html',  dados=dados)
 
 
 @app.route('/start_ivr_group', methods=['POST'])

@@ -18,6 +18,7 @@
         </thead>
         <tbody id="call-status-table">
             <!-- Table rows will be dynamically populated here -->
+            {% if call_statuses %} 
             {% for status in call_statuses %}
             <tr>
                 {% for key, value in status.items() if key not in ['sid', 'status','phone_number', 'start_time', 'end_time', 'duration_minutes'] %}
@@ -32,6 +33,7 @@
                 <td>{{ status.start_time }}</td>
             </tr>
         {% endfor %}
+        {% endif %}
         </tbody>
     </table>
     <script>
