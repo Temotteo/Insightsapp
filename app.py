@@ -3480,7 +3480,7 @@ def ivr(campaign):
        response.play(FORMACAO_AUDIO_URL[0])
        response.play(FORMACAO_AUDIO_URL[1])
        current_question_index = request.args.get('current_question_index', default=2, type=int)
-       with response.gather(num_digits=2, action=url_for('handle_question_fromacao', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
+       with response.gather(num_digits=1, action=url_for('handle_question_fromacao', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
            gather.play(FORMACAO_AUDIO_URL[current_question_index]) 
              
     if campaign == 'campanha_32': 
@@ -3530,7 +3530,7 @@ def handle_question_fromacao():
     selected_option = request.form.get('Digits')
     phone_number = request.form.get('To')
     current_question_index = int(request.args.get('current_question_index'))
-    campaign=request.args.get('campaign')
+    campaign='campanha_40'
 
     response = VoiceResponse()
 
@@ -3544,7 +3544,7 @@ def handle_question_fromacao():
             return redirect(url_for('ivr', current_question_index=current_question_index))
 
         # Save the survey response to the database
-        save_survey_response2(phone_number, current_question_index, selected_option, campaign)
+        #save_survey_response2(phone_number, current_question_index, selected_option, campaign)
 
         # Continue with the next question
         next_question_index = current_question_index + 1
@@ -5436,7 +5436,7 @@ def save_survey_response2(phone_number, selected_option, campaign):
         VALUES (%s, %s, %s)
     """, (phone_number, campaign, current_dateTime ))
 
-    cur.exucute(f'select * from aulas where campanha_ref = {campaign}')
+    cur.exucute(f"select * from aulas where campanha_ref = '{campaign}'")
     camp = cur.fetchone()
 
     if camp[5] !='formacao':
