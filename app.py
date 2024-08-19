@@ -3480,7 +3480,7 @@ def ivr(campaign):
        response.play(FORMACAO_AUDIO_URL[0])
        response.play(FORMACAO_AUDIO_URL[1])
        current_question_index = request.args.get('current_question_index', default=2, type=int)
-       with response.gather(num_digits=1, action=url_for('handle_question_fromacao', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
+       with response.gather(num_digits=2, action=url_for('handle_question_fromacao', current_question_index=current_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
            gather.play(FORMACAO_AUDIO_URL[current_question_index]) 
              
     if campaign == 'campanha_32': 
