@@ -3512,7 +3512,7 @@ def handle_question():
             return redirect(url_for('ivr', current_question_index=current_question_index))
 
         # Save the survey response to the database
-        save_survey_response(phone_number, current_question_index, selected_option, campaign)
+        #save_survey_response(phone_number, current_question_index, selected_option, campaign)
 
         # Continue with the next question
         next_question_index = current_question_index + 1
@@ -5434,7 +5434,7 @@ def save_survey_response2(phone_number, selected_option, campaign):
     cur.execute("""
         INSERT INTO simple_responses (phone_number,campaign, data)
         VALUES (%s, %s, %s)
-    """, ('258849109478', campaign, current_dateTime ))
+    """, (phone_number, campaign, current_dateTime ))
 
     cur.exucute(f'select * from aulas where campanha_ref = {campaign}')
     camp = cur.fetchone()
