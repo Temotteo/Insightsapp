@@ -3548,7 +3548,7 @@ def handle_question_fromacao():
 
         # Continue with the next question
         next_question_index = current_question_index + 1
-        with response.gather(num_digits=2, action=url_for('handle_question_fromacao', current_question_index=next_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
+        with response.gather(num_digits=1, action=url_for('handle_question_fromacao', current_question_index=next_question_index,campaign=campaign), method='POST', input='dtmf') as gather:
             gather.play(FORMACAO_AUDIO_URL[next_question_index])
 
     else:  # Concluding message
