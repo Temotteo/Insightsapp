@@ -111,13 +111,10 @@ survey_responses = [
 ]
 
 
-
-
-# Replace these values with your actual Twilio credentials
-TWILIO_ACCOUNT_SID = "AC952933e9303a9c0021be3c0ce432caec"
-TWILIO_AUTH_TOKEN = "5e14a5105201307f6d9a77af3fd81853"
-TWILIO_PHONE_NUMBER = '+19495652625'
-
+TWILIO_ACCOUNT_SID = os.getenv('APP_CONFIGS__TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = os.getenv('APP_CONFIGS__TWILIO_AUTH_TOKEN')
+TWILIO_PHONE_NUMBER = os.getenv('APP_CONFIGS__TWILIO_PHONE_NUMBER')
+POSTGRES_URL = os.getenv('APP_CONFIGS__POSTGRES_URL')
 
 # URLs of audio files for each question
 QUESTION_AUDIO_URLS = [
@@ -147,7 +144,7 @@ def save_survey_response(phone_number, question_index, selected_option, campaign
     # Connect to the database
     campaign ='campanha_32'
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     # Create a cursor object
     cur = conn.cursor()
@@ -197,7 +194,7 @@ def save_survey_response(phone_number, question_index, selected_option, campaign
 
 
 def get_phone_numbers_from_database():
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
    
     cursor = conn.cursor()
     cursor.execute("SELECT phone_number FROM phone_numbers_table")
@@ -213,7 +210,7 @@ def authenticate_twilio_request():
     return True
 
 def criar_tabela():
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cur = conn.cursor()
     cur.execute("""
     CREATE TABLE IF NOT EXISTS respostas (
@@ -239,7 +236,7 @@ def criar_tabela():
     conn.close()
 
 def obter_respostas():
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cur = conn.cursor()
     cur.execute("SELECT * FROM respostas")
     respostas = cur.fetchall()
@@ -472,7 +469,7 @@ A4_WIDTH, A4_HEIGHT = letter
 
 # Function to retrieve the last 10 transactions with balances and evidence links
 def get_last_10_transactions():
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cur = conn.cursor()
     cur.execute("SELECT tipo, valor, saldo, evidencia FROM transacoes ORDER BY id DESC LIMIT 10")
     rows = cur.fetchall()
@@ -480,7 +477,7 @@ def get_last_10_transactions():
     return rows
 
 def calculate_total(tipo):
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cur = conn.cursor()
     cur.execute("SELECT SUM(valor) FROM transacoes WHERE tipo = %s", (tipo,))
     total = cur.fetchone()[0] or 0.0
@@ -491,7 +488,7 @@ def calculate_total(tipo):
 
 # Function to create the 'transacoes' table if it doesn't exist
 def create_transactions_table():
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cur = conn.cursor()
     cur.execute("""
         CREATE TABLE IF NOT EXISTS transacoes (
@@ -508,7 +505,7 @@ def create_transactions_table():
 
 # Function to calculate the balance
 def calculate_balance():
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     total_entradas = calculate_total('Entrada')
     total_saidas = calculate_total('Saída')
     saldo = Decimal(total_entradas) - Decimal(total_saidas)
@@ -519,7 +516,7 @@ def calculate_balance():
 # Function to retrieve the last 10 transactions with balances and evidence links
 def get_last_10_transactions():
     
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     
     cur = conn.cursor()
@@ -544,7 +541,7 @@ def format_currency_mzn(value):
 def initialize_sales_data():
     try:
         # Connect to PostgreSQL
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
 
         cursor = conn.cursor()
 
@@ -578,7 +575,7 @@ dia_actual= datetime.now()
 data1=dia_actual.strftime("%Y/%m/%d, %H:%M:%S")
 
 
-conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+conn = psycopg2.connect(POSTGRES_URL)
 
 # Create cursor
 cursor = conn.cursor()
@@ -652,7 +649,7 @@ for y in dados1:
 conn.close()
 
 def relatorio_obra_db_connection():
-    connection_string = "postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy"
+    connection_string = POSTGRES_URL
     return psycopg2.connect(connection_string)
 
 def create_table_if_not_exists(connection):
@@ -709,7 +706,7 @@ def before_request():
 
 def request_languge():
     org_id = session.get('last_org')
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cur = conn.cursor()
     cur.execute(f"SELECT * FROM org_linguas where org_id = '{org_id}'")
     organizations = cur.fetchall()
@@ -736,7 +733,7 @@ def add_contact():
     
     try:
         # Conectar ao banco de dados PostgreSQL
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
         cursor = conn.cursor()
         
         # Recuperar todos os contatos associados à organização
@@ -766,7 +763,7 @@ def add_contact():
         if file:
             # Se um arquivo for enviado, processa o arquivo Excel
             df = pd.read_excel(file)
-            conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+            conn = psycopg2.connect(POSTGRES_URL)
             cur = conn.cursor()
             
             # Iterar sobre as linhas do DataFrame e inserir os dados no banco de dados
@@ -789,7 +786,7 @@ def add_contact():
         else:
             # Se não for um arquivo, trata a atualização de contatos
             grupo_id = request.form['grupo']
-            conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+            conn = psycopg2.connect(POSTGRES_URL)
             cursor = conn.cursor()
             
             # Recuperar o primeiro contato da organização
@@ -810,7 +807,7 @@ def add_contact():
             
             try:
                 # Conectar ao banco de dados para verificação e inserção
-                conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+                conn = psycopg2.connect(POSTGRES_URL)
                 cursor = conn.cursor()
                 
                 # Verifica se o contato já existe
@@ -890,7 +887,7 @@ def grupos():
       categoria = request.form['categoria']
       referencia = request.form['referencia']
       
-      conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+      conn = psycopg2.connect(POSTGRES_URL)
       cur = conn.cursor()
       # Iterar sobre as linhas do DataFrame e inserir os dados no banco de dados
       cur.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where  contact_org.org_id = '{org_id}';")
@@ -928,7 +925,7 @@ def grupos():
       redirect(url_for('grupos'))
                
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
     # Iterar sobre as linhas do DataFrame e inserir os dados no banco de dados
     cursor.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where  contact_org.org_id = '{org_id}' LIMIT 1;")
@@ -944,7 +941,7 @@ def grupos():
 @is_logged_in
 def edit_contact(id):
     org_id = session['last_org']
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cur = conn.cursor() 
     cur.execute(f"SELECT * FROM contacts where id = {id};")
     contactos = cur.fetchone() 
@@ -981,7 +978,7 @@ def edit_contact(id):
 def delete_contact(id):
    org_id = session['last_org']
    try:
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cur = conn.cursor()  
     cur.execute("DELETE FROM contacts WHERE id = %s",(id,))
     conn.commit()
@@ -1004,7 +1001,7 @@ def delete_contact(id):
 def contact_info(id):
    org_id = session['last_org']
    try:
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cur = conn.cursor()  
     query = f"""
         SELECT *
@@ -1032,7 +1029,7 @@ def add_group(id):
    grupo_id = request.form['group']
    org_id = session['last_org']
    try:
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
     insert_query = f"insert into contact_org values( {id},'{org_id}',{grupo_id});"
 
@@ -1047,7 +1044,7 @@ def add_group(id):
 @app.route('/remove_group/<int:id>', methods=['GET','POST'])
 def remove_group(id):
    try:
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
     cursor.execute('DELETE FROM contact_group WHERE id_cont=%s;', (id,))
     conn.commit()
@@ -1173,7 +1170,7 @@ def generate_pdf(invoice_data):
 
 def tasks():
     
-    connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    connection = psycopg2.connect(POSTGRES_URL)
 
     create_table_if_not_exists(connection)
     
@@ -1204,7 +1201,7 @@ def add_task():
     due_date = request.form.get('due_date')
     selected_agent = request.form.get('agent')
 
-    connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    connection = psycopg2.connect(POSTGRES_URL)
 
     cursor = connection.cursor()
 
@@ -1222,7 +1219,7 @@ def add_task():
 @is_logged_in
 
 def complete_task(task_id):
-    connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    connection = psycopg2.connect(POSTGRES_URL)
 
     cursor = connection.cursor()
 
@@ -1241,7 +1238,7 @@ def complete_task(task_id):
 @app.route('/accept_task/<int:task_id>')
 @is_logged_in
 def accept_task(task_id):
-    connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    connection = psycopg2.connect(POSTGRES_URL)
 
     cursor = connection.cursor()
 
@@ -1268,7 +1265,7 @@ def sales():
     initialize_sales_data()
 
     # Connect to PostgreSQL
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
 
     # Fetch data from the database
@@ -1287,7 +1284,7 @@ def sales():
 @is_logged_in
 def plot_graph():
     # Connect to PostgreSQL
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
 
     # Fetch data from the database
@@ -1328,8 +1325,8 @@ def plot_graph():
 def send_sms(msg,dst,sender_id):
   
   print(sender_id)
-  account_sid = "AC952933e9303a9c0021be3c0ce432caec"
-  auth_token = "5e14a5105201307f6d9a77af3fd81853"
+  account_sid = TWILIO_ACCOUNT_SID
+  auth_token = TWILIO_AUTH_TOKEN
 
   client = Client(account_sid, auth_token)
   message = client.messages.create(body=msg,from_=sender_id,to=dst)
@@ -1337,7 +1334,7 @@ def send_sms(msg,dst,sender_id):
   
   print('SMS Sent:'+msg+'para o numero:'+dst+' sender_id:'+sender_id) 
  
-  conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+  conn = psycopg2.connect(POSTGRES_URL)
 
   cursor= conn.cursor()
   cursor.execute("""INSERT INTO sms("from",dst,body,account_sid,auth_token,data) VALUES ('%s','%s','%s','%s','%s','%s')""" %(sender_id, dst, msg, account_sid, auth_token, data1))
@@ -1363,7 +1360,7 @@ def registrar_entrada():
     valor = float(request.form['valor'])
 
     # Insert the entry into the database with the updated cumulative balance
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cur = conn.cursor()
     cur.execute("INSERT INTO transacoes (tipo, valor, saldo) VALUES (%s, %s, %s)", ("Entrada", valor, calculate_balance() + Decimal(valor)))
     conn.commit()
@@ -1377,7 +1374,7 @@ def registrar_saida():
     valor = float(request.form['valor'])
 
     # Insert the withdrawal into the database with the updated cumulative balance
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cur = conn.cursor()
     cur.execute("INSERT INTO transacoes (tipo, valor, saldo, evidencia) VALUES (%s, %s, %s, %s)", ("Saída", valor, calculate_balance() -  Decimal(valor),request.form['evidencia']))
     conn.commit()
@@ -1402,7 +1399,7 @@ def db():
 @is_logged_in
 def campanhas():
     org_id = session['last_org']
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     cursor = conn.cursor()
 
@@ -1420,7 +1417,7 @@ def campanhas():
 @is_logged_in
 def campanhas_ativas():
     org_id = session['last_org']
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     cursor = conn.cursor()
 
@@ -1438,7 +1435,7 @@ def campanhas_ativas():
 @is_logged_in
 def inquerito_ativo():
     org_id = session['last_org']
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     cursor = conn.cursor()
 
@@ -1455,7 +1452,7 @@ def inquerito_ativo():
 @is_logged_in
 def formacao_ativa():
     org_id = session['last_org']
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     cursor = conn.cursor()
 
@@ -1474,7 +1471,7 @@ def formacao_ativa():
 @is_logged_in
 def pendentes():
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     cursor = conn.cursor()
 
@@ -1492,7 +1489,7 @@ def pendentes():
 @is_logged_in
 def sms():
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
  
     cursor = conn.cursor()
 
@@ -1510,7 +1507,7 @@ def sms():
 @is_logged_in
 def requisicoes():
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     cursor = conn.cursor()
 
@@ -1527,7 +1524,7 @@ def requisicoes():
 @app.route('/cobrancas')
 @is_logged_in
 def cobrancas():
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     cursor = conn.cursor()
 
@@ -1670,7 +1667,7 @@ def aprocida():
         #current_dateTime = datetime.now()
         #current_dateTime = str(datetime.date(current_dateTime))+" "+str(datetime.time(current_dateTime))
 
-        #conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        #conn = psycopg2.connect(POSTGRES_URL)
 
         #cursor = conn.cursor()
 
@@ -1702,7 +1699,7 @@ def addproposal():
         current_dateTime = datetime.now()
         current_dateTime = str(datetime.date(current_dateTime))+" "+str(datetime.time(current_dateTime))
 
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
 
         cursor = conn.cursor()
 
@@ -1733,7 +1730,7 @@ def addticket():
         current_dateTime = datetime.now()
         current_dateTime = str(datetime.date(current_dateTime))+" "+str(datetime.time(current_dateTime))
 
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
 
         cursor = conn.cursor()
 
@@ -1760,7 +1757,7 @@ def add_update(invoice_id):
         update_text = request.form['update_text']
         sales_team_member = session['username']  # Replace with actual user information
 
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
         cursor = conn.cursor()
 
         # Insert update into the updates table
@@ -1780,7 +1777,7 @@ def add_update(invoice_id):
 @is_logged_in
 def invoices():
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     cursor = conn.cursor()
 
@@ -1832,7 +1829,7 @@ def addcrentes():
     
     if request.method == 'POST':
 
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
 
         cursor = conn.cursor() 
 
@@ -1871,7 +1868,7 @@ def addinvoices():
     
     if request.method == 'POST':
 
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
 
         cursor = conn.cursor() 
 
@@ -1902,7 +1899,7 @@ def addrequest():
         current_dateTime = datetime.now()
         current_dateTime = str(datetime.date(current_dateTime))+" "+str(datetime.time(current_dateTime))
 
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
 
         cursor = conn.cursor()
 
@@ -1926,7 +1923,7 @@ def addrequest():
 @is_logged_in
 def edit_request(id):
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     
     # Create cursor
     cursor = conn.cursor()
@@ -1982,7 +1979,7 @@ def testes():
     form = SmsForm(request.form)
     if request.method == 'POST':
 
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
 
         
         # Create cursor
@@ -1993,8 +1990,8 @@ def testes():
         
         # Send SMS
         sid= send_sms(form.sms.data,str("+258"+form.contacto.data),form.site.data)
-        account_sid = "AC952933e9303a9c0021be3c0ce432caec"
-        auth_token = "5e14a5105201307f6d9a77af3fd81853"
+        account_sid = TWILIO_ACCOUNT_SID
+        auth_token = TWILIO_AUTH_TOKEN
         
         #message_sid = 'SMbc7fc62463f463c39ba12f9be200802a'
         client = Client(account_sid, auth_token)
@@ -2031,7 +2028,7 @@ def enviar_sms_grupo():
         Sender_id = data.get('Sender_id')
         
         print(mensagem)
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
 
         cursor = conn.cursor()
 
@@ -2039,8 +2036,8 @@ def enviar_sms_grupo():
         
         sms_grupo=cursor.fetchall()
 
-        account_sid = "AC952933e9303a9c0021be3c0ce432caec"
-        auth_token = "5e14a5105201307f6d9a77af3fd81853"
+        account_sid = TWILIO_ACCOUNT_SID
+        auth_token = TWILIO_AUTH_TOKEN
         
         #message_sid = 'SMbc7fc62463f463c39ba12f9be200802a'
     
@@ -2077,12 +2074,12 @@ def manage_privileges():
     if request.method == 'POST':
         user_id = request.form['user_id']
         privileges = request.form.getlist('privileges')
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
         cursor = conn.cursor()
         cursor.execute('UPDATE usuarios SET privileges = %s WHERE "user" = %s', (','.join(privileges), user_id))
         conn.commit()
         return redirect(url_for('manage_privileges'))
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
     cursor.execute('SELECT id_usuarios, "user" FROM usuarios')
     users = cursor.fetchall()
@@ -2110,7 +2107,7 @@ def login():
         username_check = 'nok'
         pass_check = 'nok'
 
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
 
         # Create cursor
         cursor = conn.cursor()
@@ -2213,7 +2210,7 @@ def login():
 @is_logged_in
 def edit_ticket(id):
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     
     # Create cursor
     cursor = conn.cursor()
@@ -2263,7 +2260,7 @@ def edit_ticket(id):
 @is_logged_in
 def assign_ticket(id):
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     
     # Create cursor
     cursor = conn.cursor()
@@ -2318,7 +2315,7 @@ def assign_ticket(id):
 @is_logged_in
 def del_tiket(id):
     # Create cursor
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     cursor = conn.cursor()
 
@@ -2342,7 +2339,7 @@ def addoption(id,type):
     form = OptionForm(request.form)
     id = int(id)
     if request.method == 'POST':
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
         cursor = conn.cursor()
         opcao = form.opcao.data
         # Query
@@ -2373,7 +2370,7 @@ def addoption(id,type):
 
 
 def buscar_Audio(id):
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
     
     data = []
@@ -2406,7 +2403,7 @@ def buscar_Audio(id):
 @app.route('/deletar_audio/<string:id>', methods=['GET'])
 @is_logged_in
 def deletar_audio(id):
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
   
     print(id)
@@ -2433,7 +2430,7 @@ def carragar_questoes(id):
 
 
 def questoes(id):
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
   
     org_id = session['last_org']
@@ -2456,7 +2453,7 @@ def questoes(id):
 def campanha_n(id, type):
         print(id)
         # Connect to the PostgreSQL database
-        connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        connection = psycopg2.connect(POSTGRES_URL)
         cursor = connection.cursor()
         tema = '<Tema>'
         referencia = 'campanha_36'
@@ -2484,7 +2481,7 @@ def campanha_n(id, type):
 @app.route('/add_question/<id>/<type>', methods=['GET', 'POST'])
 def add_question(id, type):
       # Conecte-se ao banco de dados PostgreSQL
-      conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+      conn = psycopg2.connect(POSTGRES_URL)
       cursor = conn.cursor()
       
       # Converta o id de string para inteiro
@@ -2514,7 +2511,7 @@ def audios(id, type):
     form = AudioForm()
     
     # Conectar ao banco de dados dentro de um bloco 'with' para garantir que a conexão seja fechada
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
 
     # Executar uma função que retorna os resultados de acordo com o tipo de campanha e id fornecidos
@@ -2537,7 +2534,7 @@ def add_audio(id,type):
     if request.method == 'POST':
         try:
             # Conecta ao banco de dados PostgreSQL usando as credenciais fornecidas
-            conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+            conn = psycopg2.connect(POSTGRES_URL)
             cursor = conn.cursor()
             
             # Converte o id de string para inteiro
@@ -2603,7 +2600,7 @@ def add_audio(id,type):
 def criar_aula(id, tema, intro, base, con, audio_intro, audio_base, audio_con, audio_lingua):
     try:
         # Estabelece uma conexão com o banco de dados PostgreSQL usando psycopg2
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
         cursor = conn.cursor()
         
         # Insere um novo registro na tabela 'Aulas' e retorna o 'id' gerado
@@ -2651,7 +2648,7 @@ def criar_aula(id, tema, intro, base, con, audio_intro, audio_base, audio_con, a
         
 def criar_campanha(id, tema ,intro, base, con, audio_intro, audio_base, audio_con,audio_lingua ):
         try:
-            conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+            conn = psycopg2.connect(POSTGRES_URL)
             cursor = conn.cursor()
             cursor.execute(f" UPDATE campanhas set projecto = '{tema}' where id_campanha = {id}")
             conn.commit()
@@ -2687,7 +2684,7 @@ def criar_campanha(id, tema ,intro, base, con, audio_intro, audio_base, audio_co
 
 def inquerito(id, tema ,intro,  con, audio_intro,  audio_con,audio_lingua ):
           try:
-            conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+            conn = psycopg2.connect(POSTGRES_URL)
             cursor = conn.cursor()
             cursor.execute(f" UPDATE campanhas set projecto = '{tema}' where id_campanha = {id}")
             conn.commit()
@@ -2745,7 +2742,7 @@ def criar_campanhas(type, id):
 
          # Conectar ao banco de dados e inserir nova campanha se id for 0
         if id == 0:
-           conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+           conn = psycopg2.connect(POSTGRES_URL)
            cursor = conn.cursor()
            cursor.execute("SELECT * FROM campanhas;")
            ref = 36 + len(cursor.fetchall())
@@ -2792,7 +2789,7 @@ def criar_modulo(id):
     # Se o método da solicitação for POST, processar o formulário
     if request.method == 'POST':
         # Conectar ao banco de dados
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
         org_id = session['last_org']
         cursor = conn.cursor()
         
@@ -2823,7 +2820,7 @@ def criar_modulo(id):
 @is_logged_in
 def ver_campanha(type):
     # Conectar ao banco de dados
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
     
     # Selecionar campanhas do tipo especificado
@@ -2840,7 +2837,7 @@ def ver_campanha(type):
 @is_logged_in
 def ver_formacao(id):
     # Conectar ao banco de dados
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
     
     # Selecionar módulos da formacao
@@ -2861,7 +2858,7 @@ def ver_formacao(id):
 @is_logged_in
 def ativar_campanha(id):
     # Conectar ao banco de dados
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
     
     # Atualizar o status da campanha para 'ativo'
@@ -2887,7 +2884,7 @@ def campanha(id, type):
     print(id)
     
     # Conectar ao banco de dados
-    connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    connection = psycopg2.connect(POSTGRES_URL)
     cursor = connection.cursor()
     
     # Se o tipo for 'formacao', selecionar as aulas associadas
@@ -2911,7 +2908,7 @@ def create_camp():
         
 
         # Connect to the PostgreSQL database
-        connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        connection = psycopg2.connect(POSTGRES_URL)
         cursor = connection.cursor()
 
 
@@ -2958,7 +2955,7 @@ def create_col(id):
     try:
         
         # Connect to the PostgreSQL database
-        connection = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        connection = psycopg2.connect(POSTGRES_URL)
         cursor = connection.cursor()
 
         
@@ -3012,7 +3009,7 @@ def perguntas(id, type):
     print(id)
     
     # Conectar ao banco de dados
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
 
     # Verificar o ID
@@ -3046,7 +3043,7 @@ def survey_dashboard():
 @is_logged_in
 def dashboard2(id, type):
     # Connect to the database
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
 
     
@@ -3090,7 +3087,7 @@ def dashboard2(id, type):
 @app.route('/survey/<string:survey_name>')
 def survey(survey_name):
     # Connect to the database
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
     
     # Fetch survey title and column titles from the database
@@ -3115,7 +3112,7 @@ def logout():
 @is_logged_in
 def clientecad():
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     cursor = conn.cursor()
 
@@ -3134,7 +3131,7 @@ def clientecad():
 @is_logged_in
 def cliente_srv():
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     cursor = conn.cursor()
 
@@ -3153,7 +3150,7 @@ def cliente_srv():
 @is_logged_in
 def cliente_ong():
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     cursor = conn.cursor()
 
@@ -3180,7 +3177,7 @@ def cadastro ():
         current_dateTime = datetime.now()
         current_dateTime = str(datetime.date(current_dateTime))+" "+str(datetime.time(current_dateTime))
 
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
 
         cursor = conn.cursor()
 
@@ -3213,7 +3210,7 @@ def cadastro ():
 @app.route('/depedencias/<int:id>', methods=['GET', 'POST'])
 @is_logged_in
 def depedencias(id):
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
     cont = request.form['cont']
  
@@ -3238,7 +3235,7 @@ def depedencias(id):
 @app.route('/add_call/<string:id>', methods=['GET', 'POST'])
 @is_logged_in
 def add_call(id):
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
 
     cursor.execute('SELECT * FROM cliente_vendas WHERE id_vendas = %s', (id,))
@@ -3312,7 +3309,7 @@ def tarefas_diarias(data):
 
     print(data)     
    
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
     today = datetime.now().date()
     yesterday = today - timedelta(days=2)
@@ -3360,7 +3357,7 @@ def tarefas_diarias(data):
 def pagamento(id):
         
 
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
 
         cursor = conn.cursor()
 
@@ -3399,7 +3396,7 @@ def pagamento(id):
 @is_logged_in
 def credencial():
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     cursor = conn.cursor()
 
@@ -3416,7 +3413,7 @@ def credencial():
 @is_logged_in
 def propostas():
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     cursor = conn.cursor()
 
@@ -3442,7 +3439,7 @@ def addcredencial():
         current_dateTime = str(datetime.date(current_dateTime))+" "+str(datetime.time(current_dateTime))
         print(current_dateTime)
 
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
 
         cursor = conn.cursor()
 
@@ -3580,7 +3577,7 @@ def get_call_status():
     dados = {}
     org_id = session['last_org']
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
     
     cursor.execute(f"SELECT * FROM contacts WHERE id in (select id_cont from contact_org where org_id = '{org_id}') Limit 1;")
@@ -3614,7 +3611,7 @@ def get_call_status():
             if call.status == 'busy' or call.status == 'no-answer':
                 duration_minutes = 0
         
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
         cursor = conn.cursor()
         numero = call.to[4:]
         
@@ -3649,7 +3646,7 @@ def get_call_status():
         print(call_statuses)
         
         try:
-           conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+           conn = psycopg2.connect(POSTGRES_URL)
            cursor = conn.cursor()
            numero = call.to[4:]
                  
@@ -3739,7 +3736,7 @@ def get_call_status2(day,csv):
     dados = {}
     org_id = session['last_org']
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
     
     cursor.execute(f"SELECT * FROM contacts WHERE id in (select id_cont from contact_org where org_id = '{org_id}') Limit 1;")
@@ -3755,7 +3752,7 @@ def get_call_status2(day,csv):
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
     
     
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()  
     if day > 0:
       start_date = datetime.now() - timedelta(days=day)
@@ -3809,7 +3806,7 @@ def start_ivr_campaign():
     campaign = request.form.get('campaign')
 
     print(phone_numbers)
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
 
     #cursor.execute(f"SELECT * FROM contacts WHERE phone = '{phone_numbers}';")
@@ -3858,7 +3855,7 @@ def start_ivr_group():
 
     campaign = 'teste'
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
 
     cursor.execute(f"SELECT * FROM contacts JOIN contact_org ON contacts.id = contact_org.id_cont WHERE contact_org.grupo_id = {grupo};")
@@ -3902,7 +3899,7 @@ def serve_audio(filename):
 @is_logged_in
 def assign_camp(id):
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     
     # Create cursor
     cursor = conn.cursor()
@@ -3945,7 +3942,7 @@ def assign_camp(id):
 @is_logged_in
 def assign_question(camp,id,type):
 
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     
     # Create cursor
     cursor = conn.cursor()   
@@ -4009,7 +4006,7 @@ def addfunction():
         current_dateTime = str(datetime.date(current_dateTime))+" "+str(datetime.time(current_dateTime))
         print(current_dateTime)
 
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
 
         cursor = conn.cursor()
 
@@ -4034,7 +4031,7 @@ def formulario():
 @app.route('/submit', methods=['POST'])
 def submit():
     criar_tabela()
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
     cur = conn.cursor()
     cur.execute("""
     INSERT INTO respostas (nome, pergunta1, pergunta2, pergunta3, pergunta4, pergunta5, pergunta6, pergunta7, pergunta8, pergunta9, pergunta10, pergunta11, pergunta12, pergunta13, pergunta14, pergunta15)
@@ -4072,7 +4069,7 @@ def contacts_by_collaborator():
         print(end_date)
 
         # Connect to the database
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
         cur = conn.cursor()
         
         # Query the database
@@ -4121,7 +4118,7 @@ def cadastro_clientes():
 def submit_srv():
     if request.method == 'POST':
 
-        conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+        conn = psycopg2.connect(POSTGRES_URL)
         cur = conn.cursor()
 
         # Verificar se a tabela clientes existe, se não, criar
@@ -4568,7 +4565,7 @@ def gerar_pdf(id):
 
 def get_db_connection():
     #Função para obter uma conexão com o banco de dados
-    return psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    return psycopg2.connect(POSTGRES_URL)
 
 @app.route('/saltar_org_id', methods=['GET'])
 @is_logged_in
@@ -5414,7 +5411,7 @@ def get_audio(filename):
 
 def save_survey_response2(phone_number, selected_option, campaign):
     # Connect to the database
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect(POSTGRES_URL)
 
     # Create a cursor object
     cur = conn.cursor()
