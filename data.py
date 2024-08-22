@@ -28,7 +28,7 @@ def Articles():
 
 
 def buscar_Audio(id):
-    conn = psycopg2.connect('postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy')
+    conn = psycopg2.connect('postgresql')
     cursor = conn.cursor()
     
     data = []
@@ -57,6 +57,24 @@ def buscar_Audio(id):
     return audio_urls
 
 
-audio = buscar_Audio(19077)
+#audio = buscar_Audio(19077)
 
-print(audio)
+#print(audio)
+
+
+import ast
+
+def extract_function_names(filename):
+    with open(filename, 'r') as file:
+        tree = ast.parse(file.read(), filename=filename)
+    
+    function_names = [node.name for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)]
+    return function_names
+
+# Substitua 'seuarquivo.py' pelo nome do seu arquivo Python
+filename = 'app.py'
+function_names = extract_function_names(filename)
+
+print("Funções encontradas:")
+for name in function_names:
+    print(name)

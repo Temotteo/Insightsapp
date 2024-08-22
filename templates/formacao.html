@@ -1,13 +1,6 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formação</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+{% extends 'layout.html'%}
+{% block body%}
     <link rel="stylesheet" href="styles.css">
-</head>
-<body>
     <div class="container mt-5">
         <h2 class="text-center mb-4">Lista de Módulos da Formação</h2>
 
@@ -15,7 +8,7 @@
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center"> 
                 <h4><span>Módulo {{loop.index}}: {{modulo[2] }}</span></h4>
-                <a class="btn btn-success btn-sm" href="/criar_campanhas/formacao/{{modulo[1]}}">Adicionar Aula</a>
+                <a class="btn btn-success btn-sm" href="/create_campaign/formacao/{{modulo[1]}}">Adicionar Aula</a>
             </div>
             <ul class="list-group list-group-flush">
                 {% for aula in formacao %} 
@@ -30,7 +23,7 @@
         
 
         <div class="text-center">
-            <a class="btn btn-primary"href="/criar_modulo/{{ id }}">Adicionar Módulo</a>
+            <a class="btn btn-primary"href="/create_module/{{ id }}">Adicionar Módulo</a>
         </div>
     </div>
 
@@ -43,5 +36,4 @@
             alert('Adicionar Novo Módulo');
         }
     </script>
-</body>
-</html>
+{% endblock %}

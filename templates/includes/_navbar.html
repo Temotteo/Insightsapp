@@ -12,22 +12,22 @@
               {% for privileges in session.privileges %}
                  {% if privileges == 'Automação' %}
               <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle"  href="#" id="navbarDropdown1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Automação <span class="caret-down"></span></a>
+                  <a class="nav-link dropdown-toggle"  href="#" id="navbarDropdown1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Automation <span class="caret-down"></span></a>
                   <ul class="dropdown-menu" aria-labelledby="navbarDropdown1">
-                      <li class="dropdown-header">Relatórios</li>
-                      <li><a class="dropdown-item" href="/Relatorio_obra">Relatório de Obra</a></li>
-                      <li><a class="dropdown-item" href="/Relatorio_camera">Relatório de Câmeras</a></li>
-                      <li><a class="dropdown-item" href="/pdf_obra">Gerir Relatórios</a></li>
-                      <li><a class="dropdown-item" href="/Gerir_clientes">Gerir Clientes</a></li>
+                      <li class="dropdown-header">Reports</li>
+                      <li><a class="dropdown-item" href="/Relatorio_obra">Construction Report</a></li>
+                      <li><a class="dropdown-item" href="/Relatorio_camera">Camera Report</a></li>
+                      <li><a class="dropdown-item" href="/pdf_obra">Manage Reports</a></li>
+                      <li><a class="dropdown-item" href="/Gerir_clientes">Manage Clients</a></li>
                   </ul>
               </li>
               {% endif %}
               {% if privileges == 'Testes' %}
               <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Testes <span class="caret-down"></span></a>
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tests <span class="caret-down"></span></a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown2">
-                    <a class="dropdown-item " href="/submit_inscricao/pt">Inscricao Pastoral</a>
-                    <li class="dropdown-header">Texto</li>
+                   <!--  <a class="dropdown-item " href="/submit_inscricao/pt">Inscricao Pastoral</a>-->
+                    <li class="dropdown-header">Text</li>
                     <li><a class="dropdown-item" href="/testes">SMS</a></li>
                     <li class="dropdown-divider"></li>
                     <li class="dropdown-header">Voz</li>
@@ -52,31 +52,31 @@
             </li>-->
             {% if privileges == 'Campanhas' %}
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown4" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Campanhas <span class="caret-down"></span></a>
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown4" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Campaigns <span class="caret-down"></span></a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown4">
-                    <li class="dropdown-header">Campanhas</li>
-                    <li><a class="dropdown-item" href="/campanhas_ativas">Ativas</a></li>
-                    <li><a class="dropdown-item" href="/campanhas">ver todas</a></li>
-                    <li><a class="dropdown-item "  href="/criar_campanhas/simples/0"> Criar</a></li>
+                    <li class="dropdown-header">Campaigns</li>
+                    <li><a class="dropdown-item" href="/activate_campaign">Active</a></li>
+                    <li><a class="dropdown-item" href="/campanhas">View All</a></li>
+                    <li><a class="dropdown-item "  href="/create_campaign/simples/0"> Create</a></li>
                     <li class="dropdown-divider"></li>
                     <!--
                     <li class="dropdown-header">Mensagem de voz</li>
-                    <li><a class="dropdown-item" href="/audios_ativos">Ativas</a></li>
-                    <li><a class="dropdown-item" href="/audios">Criar</a></li>
+                    <li><a class="dropdown-item" href="/audios_ativos">Active</a></li>
+                    <li><a class="dropdown-item" href="/audios">Create</a></li>
                     <li class="dropdown-divider"></li>
                     -->
                     <li class="dropdown-header">Survey</li>
-                    <li><a class="dropdown-item" href="/inquerito_ativo">Ativas</a></li>
-                    <li><a class="dropdown-item" href="/ver_campanha/inquerito">ver todas</a></li>
-                    <li><a class="dropdown-item" href="/criar_campanhas/inquerito/0">Criar</a></li>
+                    <li><a class="dropdown-item" href="/active_survey">Active</a></li>
+                    <li><a class="dropdown-item" href="/view_campaign/inquerito">View All</a></li>
+                    <li><a class="dropdown-item" href="/create_campaign/inquerito/0">Create</a></li>
                     <li class="dropdown-divider"></li>
-                    <li class="dropdown-header">Formação Remota</li>
-                    <li><a class="dropdown-item" href="/formacao_ativa">Ativas</a></li>
-                    <li><a class="dropdown-item" href="/ver_campanha/formacao">ver todas</a></li>
-                    <li><a class="dropdown-item" href="/criar_modulo/0">Criar</a></li>
+                    <li class="dropdown-header">Remote Training</li>
+                    <li><a class="dropdown-item" href="/active_training">Active</a></li>
+                    <li><a class="dropdown-item" href="/view_campaign/formacao">View All</a></li>
+                    <li><a class="dropdown-item" href="/create_module/0">Create</a></li>
                     <li class="dropdown-divider"></li>
-                    <li class="dropdown-header">Histórico de chamadas</li>
-                    <li><a class="dropdown-item " href="/get_call_status2/15/0"  >Ver</a></li>
+                    <li class="dropdown-header">Call History</li>
+                    <li><a class="dropdown-item " href="/call_status/15/0" >View</a></li>
                 </ul>
             </li>
             {% endif %}
@@ -101,15 +101,15 @@
             {% endif %}
             {% if privileges == 'Contactos' %}
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown6" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Contactos <span class="caret-down"></span></a>
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown6" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Contacts <span class="caret-down"></span></a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown6">
-                    <li class="dropdown-header">Contactos</li>
-                    <li><a class="dropdown-item" href="/cliente">Visualizar</a></li>
-                    <li><a class="dropdown-item" href="/add_contact">Criar Contacto</a></li>
+                    <li class="dropdown-header">Contacts</li>
+                    <li><a class="dropdown-item" href="/cliente">Preview</a></li>
+                    <li><a class="dropdown-item" href="/add_contact">Add Contact</a></li>
                     <li class="dropdown-divider"></li>
-                    <li class="dropdown-header">Grupos</li>
-                    <li><a class="dropdown-item" href="/cliente">Visualizar</a></li>
-                    <li><a class="dropdown-item" href="/grupos">Criar Grupo</a></li>
+                    <li class="dropdown-header">Groups</li>
+                    <li><a class="dropdown-item" href="/cliente">Preview</a></li>
+                    <li><a class="dropdown-item" href="/grupos">Add Group</a></li>
                 </ul>
             </li>
             {% endif %}
@@ -133,17 +133,17 @@
                     Login como <strong>{{session.username}}</strong> na Org: <strong>{% if session.org_id %}{{ session.org_id }}{% else %}{{session.last_org}}{% endif %}</strong> <span class="caret-down"></span>
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown8">
-                    <a class="dropdown-item" href="/tasks">Minhas Atividades</a>
-                    <a class="dropdown-item" href="/db">Meu Dashboard</a>
+                    <a class="dropdown-item" href="/tasks">My Activities</a>
+                    <a class="dropdown-item" href="/db">My Dashboard</a>
                     <a class="dropdown-item" href="/tickets">Tickets</a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item disabled" href="#">Meus Dados</a>
+                    <a class="dropdown-item disabled" href="#">My Data</a>
                     {% if session.username == 'Shelton' or session.username == 'Temoteo' or session.username == 'Marta' %} 
                     <a class="dropdown-item " href="/tarefas_diarias/today">Tarefas Dashboard{% endif %}</a>
                     {% if session.username == 'Shelton' or session.username == 'Temoteo'  %} 
                     <a class="dropdown-item" href="/manage_privileges">Manage privileges</a>{% endif %}
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#" onclick="carregarDados('session.org_id')">Mudar de Org.</a>
+                    <a class="dropdown-item" href="#" onclick="carregarDados('session.org_id')">Switch Organization</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="/adicionar_lingua">Org information</a>
                     <a class="dropdown-item" href="/logout">Logout</a>

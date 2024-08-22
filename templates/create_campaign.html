@@ -54,14 +54,14 @@
   </style>
 
   <div class="content">
-    <form action="/criar_campanhas/{{campanha}}/{{id}}" method="post" enctype="multipart/form-data">
+    <form action="/create_campaign/{{campanha}}/{{id}}" method="post" enctype="multipart/form-data">
       <input type="hidden" id="id" name="campanha" value="{{id}}">
 
       <fieldset>
-        <legend>{% if campanha == "formacao" %} Aula {% elif campanha == "inquerito" %}
-           Inquerito{% else %} Campanha {% endif %}</legend>
+        <legend>{% if campanha == "formacao" %} Lesson {% elif campanha == "inquerito" %}
+           Inquerito{% else %} Campaign {% endif %}</legend>
         
-        <label for="name">Tema:</label>
+        <label for="name">Topic:</label>
         {% if tema %}
         <input type="hidden" name="name" id="name" value="{{tema}}">
         <input type="text"  class="input-custom" placeholder="Insira o tema " value="{{tema}}" disabled>
@@ -70,7 +70,7 @@
         {% endif %}
 
         
-        <label for="type" class="mt-4">Idioma:</label>
+        <label for="type" class="mt-4">Language:</label>
         <select id="type" name="idioma" class="input-custom">
           {% for option in options %}
             <option value="{{option[1]}}">{{option[1]}}</option>
@@ -79,16 +79,17 @@
       </fieldset>
 
       <fieldset>
-        <legend>Descricão </legend>
+        <legend>Description </legend>
         
-        <label for="question_audio" class="mt-4">Introdução:</label>
+        <label for="question_audio" class="mt-4">Introduction:</label>
         <div class="input-group mb-3">
-          <textarea rows="1" id="introducao" name="introducao" placeholder="" class="input-custom" name="intro_audio" required></textarea>
+          <textarea rows="1" id="introducao" name="introducao"  class="form-control" placeholder=""  required>Enter the description of the introduction
+          </textarea>
           <div class="file-upload">
             <label for="file-upload1" class="custom-file-upload">
               <i class="fas fa-cloud-upload-alt"></i> Upload
             </label>
-            <input id="file-upload1" type="file" name="intro" accept="audio/mpeg" class="file-upload-input"/>
+            <input id="file-upload1" type="file" name="intro_audio" accept="audio/mpeg" class="file-upload-input"/>
           </div>
         </div>
         <div class="audio-preview-container" id="audio-insert1">
@@ -100,11 +101,12 @@
            {% if campanha == "Aula" %}
             <label for="audio">Corpo:</label>
             {% else %}
-            <label for="audio">Corpo:</label>
+            <label for="audio">Body:</label>
           {% endif %}
           
           <div class="input-group mb-3">
-            <textarea rows="1" id="audio" class="input-custom" name="aula_base" required></textarea>
+            <textarea rows="1" id="audio" class="form-control" name="aula_base" placeholder="" required>Enter the description of the Body
+            </textarea>
             <div class="file-upload">
               <label for="file-upload" class="custom-file-upload">
                 <i class="fas fa-cloud-upload-alt"></i> Upload
@@ -118,14 +120,15 @@
           </div>
         {% endif %}
         
-        <label for="question_audio">Conclusão:</label>
+        <label for="question_audio">Conclusion:</label>
         <div class="input-group mb-3">
-          <textarea rows="1" id="con_audio" name="conclusao" class="input-custom" required></textarea>
+          <textarea rows="1" id="con_audio" name="conclusao" class="form-control" placeholder="" required>Enter the description of the Conclusion
+          </textarea>
           <div class="file-upload">
             <label for="file-upload2" class="custom-file-upload">
               <i class="fas fa-cloud-upload-alt"></i> Upload
             </label>
-            <input id="file-upload2" type="file" name="con" accept="audio/*" class="file-upload-input px-2"/>
+            <input id="file-upload2" type="file" name="con_audio" accept="audio/*" class="file-upload-input px-2"/>
           </div>
         </div>
         <div class="audio-preview-container" id="audio-insert2">
@@ -134,7 +137,7 @@
         </div>
       </fieldset>
 
-      <button type="submit" class="custom-button mt-2">Criar </button>
+      <button type="submit" class="custom-button mt-2">Create </button>
     </form>
   </div>
 

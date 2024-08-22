@@ -4,10 +4,11 @@
 {% block body%}
 <div class="container my-5">
 
+  
+  {% if campanhas %}
   <h1>{{type}}</h1>
   
   <hr>
-  {% if campanhas %}
   <table class="table table-striped">
     <tr>
       <th>ID</th>
@@ -29,22 +30,28 @@
         <td>{% if pendente[4] == 'ativo' %}<span class="badge badge-success">Ativa</span>
           {% else %}
           <span class="badge badge-secondary">inativa</span>{% endif %}</td>
+       <td>
         {% if pendente[5] == 'formacao'  %} 
-        <td><a href="/ver_formacao/{{pendente[0]}}" class="btn btn-primary pull-right" data-toggle="tooltip" data-placement="top" title="ver formacao"><i class="fas fa-eye" ></i></a>
+        <a href="/view_training/{{pendente[0]}}" class="btn btn-primary " data-toggle="tooltip" data-placement="top" title="ver formacao"><i class="fas fa-eye" ></i></a>
 
         {% else %} 
-        <td><a href="/campanha/{{pendente[0]}}/{{pendente[5]}}" class="btn btn-primary pull-right" data-toggle="tooltip" data-placement="top" title="ver inquerito"><i class="fas fa-eye" ></i></a>
+        <a href="/campanha/{{pendente[0]}}/{{pendente[5]}}" class="btn btn-primary " data-toggle="tooltip" data-placement="top" title="ver inquerito"><i class="fas fa-eye" ></i></a>
         {% endif %}
-          <form action="{{url_for('del_tiket', id=pendente[1])}}" method="post">
-            <input type="hidden" name="_method" value="DELETE">
-            <button type="submit"  class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="deletar campanha"><i class="fa fa-trash" aria-hidden="true"></i></button>
-          </form>
+          
+        <a href="/del_tiket/{{pendente[1]}}"   class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="deletar campanha"><i class="fa fa-trash" aria-hidden="true"></i></a>
+          
         </td>
       </tr>
     {% endfor %}    
  
   </table>
-  <a class="btn btn-success" href="/criar_campanhas/{{campanhas[0][5]}}/0">Add Camp</a>
+  <a class="btn btn-success" href="/create_campaign/{{campanhas[0][5]}}/0">Add Camp</a>
+
+  {% else %}
+    <div class="d-flex justify-content-center align-content-center">
+      <p class="lead"> No Campaigns Found</p>
+    </div>
+
   {% endif %}
  
 
