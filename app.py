@@ -729,6 +729,7 @@ class ProformaInvoiceForm(FlaskForm):
 
 
 # """
+# Service:
 #     Função para adicionar contatos à organização.
     
 #     - Método GET: Recupera todos os contatos e grupos associados à organização e exibe o formulário de adição de contatos.
@@ -874,7 +875,8 @@ def add_contact():
   
 
 #---------------------------------
-# Service: Deletion of Contacts
+# Service: Generete
+# Function: Deletion of Contacts
 # input: delete_ids (list of contact IDs to delete)
 # output: deletes selected contacts from the database
 #---------------------------------------------
@@ -901,7 +903,8 @@ def delete():
 
 
 #---------------------------------
-# Service: Group Management
+# Service: all
+# Function: Group Management
 # Input: 
 #   - Form data: `grupo`, `categoria`, `referencia`
 # Output: 
@@ -976,133 +979,189 @@ def grupos():
 
 
 
+#---------------------------------
+# Service: all
+# Function: Edit Contact
+# input: contact ID
+# output: updates the contact's information in the database and displays a success message
+#---------------------------------------------
 @app.route('/edit_contact/<int:id>', methods=['GET','POST'])
 @is_logged_in
 def edit_contact(id):
     org_id = session['last_org']
     conn = psycopg2.connect(POSTGRES_URL)
-    cur = conn.cursor() 
-    cur.execute(f"SELECT * FROM contacts where id = {id};")
-    contactos = cur.fetchone() 
+    cur = conn.cursor()
+    
+    # Fetching the contact information from the database
+    cur.execute(f"SELECT * FROM contacts WHERE id = {id};")
+    contactos = cur.fetchone()
+    
     dados = {}
     for contact in contactos[6]:  
-             # Pegando o nome do campo a ser atualizado
-             field = contact
-             print(field)
-             dados[field] = []
+        # Getting the name of the field to be updated
+        field = contact
+        print(field)
+        dados[field] = []
 
-             if field:
-                # Atualizando o campo específico com o valor do formulário
-                field_to_update = request.form[field]
-                print(field_to_update)
-               
-                dados[field] = field_to_update
+        if field:
+            # Updating the specific field with the form value
+            field_to_update = request.form[field]
+            print(field_to_update)
+            dados[field] = field_to_update
         
-    cur.execute("UPDATE contacts SET dados_contactos = %s WHERE id = %s ;",(extras.Json(dados), id,))
+    # Updating the contacts table with the new data
+    cur.execute("UPDATE contacts SET dados_contactos = %s WHERE id = %s;", (extras.Json(dados), id,))
     conn.commit()
     cur.close()
+    
+    # Fetching updated contact information to display
     cur = conn.cursor()
-    cur.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contact_org.org_id = '{org_id}';")
-    contacts = cur.fetchall() 
-    cur.execute("SELECT * FROM grupo ;")
+    cur.execute(f"SELECT * FROM contacts JOIN contact_org ON contacts.id = contact_org.id_cont WHERE contact_org.org_id = '{org_id}';")
+    contacts = cur.fetchall()
+    
+    # Fetching group information
+    cur.execute("SELECT * FROM grupo;")
     grupo = cur.fetchall()
     conn.close()
-    sucesso = "Contacto Atualizado com sucesso"
-    return render_template('add_contat.html', contacts=contacts,grupo = grupo,sucesso = sucesso)
-   
+    
+    sucesso = "Contact updated successfully"
+    return render_template('add_contat.html', contacts=contacts, grupo=grupo, sucesso=sucesso)
 
 
+
+#---------------------------------
+# Service: all
+# Function: Delete Contact
+# input: contact ID
+# output: removes the contact from the database and displays a success or error message
+#---------------------------------------------
 @app.route('/delete_contact/<int:id>', methods=['GET','POST'])
 @is_logged_in
 def delete_contact(id):
-   org_id = session['last_org']
-   try:
-    conn = psycopg2.connect(POSTGRES_URL)
-    cur = conn.cursor()  
-    cur.execute("DELETE FROM contacts WHERE id = %s",(id,))
-    conn.commit()
-    cur.close()
-    cur = conn.cursor()
-    cur.execute(f"SELECT * FROM contacts join contact_org on contacts.id = contact_org.id_cont where contact_org.org_id = '{org_id}';")
-    contacts = cur.fetchall() 
-    cur.execute("SELECT * FROM grupo ;")
-    grupo = cur.fetchall()
-    conn.close()
-    sucesso = "Contacto Removido com sucesso"
-    return render_template('add_contat.html', contacts=contacts,grupo = grupo,sucesso = sucesso)
-   except psycopg2.Error as e:
-        error_msg = f"Erro ao fazer a transacao: {e}"
-        return render_template('erro.html', error=error_msg) 
+    org_id = session['last_org']
+    try:
+        # Connecting to the database and deleting the contact by ID
+        conn = psycopg2.connect(POSTGRES_URL)
+        cur = conn.cursor()
+        cur.execute("DELETE FROM contacts WHERE id = %s", (id,))
+        conn.commit()
+        cur.close()
 
+        # Fetching updated contact list after deletion
+        cur = conn.cursor()
+        cur.execute(f"SELECT * FROM contacts JOIN contact_org ON contacts.id = contact_org.id_cont WHERE contact_org.org_id = '{org_id}';")
+        contacts = cur.fetchall()
 
+        # Fetching group information
+        cur.execute("SELECT * FROM grupo;")
+        grupo = cur.fetchall()
+        conn.close()
+
+        sucesso = "Contact removed successfully"
+        return render_template('add_contat.html', contacts=contacts, grupo=grupo, sucesso=sucesso)
+    except psycopg2.Error as e:
+        error_msg = f"Error while performing transaction: {e}"
+        return render_template('erro.html', error=error_msg)
+
+#---------------------------------
+# Service: all
+# Function: Display Contact Information
+# input: contact ID
+# output: displays detailed information of a specific contact
+#---------------------------------------------
 @app.route('/contact_info/<int:id>', methods=['GET','POST'])
 @is_logged_in
 def contact_info(id):
-   org_id = session['last_org']
-   try:
-    conn = psycopg2.connect(POSTGRES_URL)
-    cur = conn.cursor()  
-    query = f"""
-        SELECT *
-        FROM contacts c
-        JOIN contact_org r ON c.id = r.id_cont
-        JOIN grupo g ON r.grupo_id = g.id
-        WHERE c.id = {id};
-         """
-    cur.execute(query)
-    contacts= cur.fetchone() 
-    cur.execute(f"select * from grupo where id in (select grupo_id from contact_org where org_id = '{org_id}');")
-    grupos= cur.fetchall() 
-    cur.execute(f"select * from grupo where id in (select grupo_id from contact_org where id_cont = {id});")
-    grupo= cur.fetchall()
-    conn.close()
-    print(contacts)
-    return render_template('contact_info.html', contact=contacts, grupo=grupo, grupos=grupos)
-   except psycopg2.Error as e:
-        error_msg = f"Erro ao fazer a transacao: {e}"
-        return render_template('erro.html', error=error_msg) 
+    org_id = session['last_org']
+    try:
+        # Connecting to the database and fetching detailed information for a specific contact
+        conn = psycopg2.connect(POSTGRES_URL)
+        cur = conn.cursor()
+        query = f"""
+            SELECT *
+            FROM contacts c
+            JOIN contact_org r ON c.id = r.id_cont
+            JOIN grupo g ON r.grupo_id = g.id
+            WHERE c.id = {id};
+        """
+        cur.execute(query)
+        contacts = cur.fetchone()
+
+        # Fetching groups associated with the organization
+        cur.execute(f"SELECT * FROM grupo WHERE id IN (SELECT grupo_id FROM contact_org WHERE org_id = '{org_id}');")
+        grupos = cur.fetchall()
+
+        # Fetching groups associated with the contact
+        cur.execute(f"SELECT * FROM grupo WHERE id IN (SELECT grupo_id FROM contact_org WHERE id_cont = {id});")
+        grupo = cur.fetchall()
+        conn.close()
+        
+        print(contacts)
+        return render_template('contact_info.html', contact=contacts, grupo=grupo, grupos=grupos)
+    except psycopg2.Error as e:
+        error_msg = f"Error while performing transaction: {e}"
+        return render_template('erro.html', error=error_msg)
 
 
-@app.route('/add_group/<int:id>', methods=['GET','POST'])
+#---------------------------------
+# Service: all
+# input: id (contact ID from URL), group (group ID from form), last_org (organization ID from session)
+# output: Inserts a record into the contact_org table linking a contact to a group
+# Tries to insert a new record associating the given contact ID with the selected group in the database.
+# Redirects to the 'contact_info' page upon success or shows an error page if the transaction fails.
+#---------------------------------------------
+@app.route('/add_group/<int:id>', methods=['GET', 'POST'])
 @is_logged_in
 def add_group(id):
-   grupo_id = request.form['group']
-   org_id = session['last_org']
-   try:
-    conn = psycopg2.connect(POSTGRES_URL)
-    cursor = conn.cursor()
-    insert_query = f"insert into contact_org values( {id},'{org_id}',{grupo_id});"
+    grupo_id = request.form['group']
+    org_id = session['last_org']
+    try:
+        conn = psycopg2.connect(POSTGRES_URL)
+        cursor = conn.cursor()
+        insert_query = f"INSERT INTO contact_org (contact_id, org_id, group_id) VALUES ({id}, '{org_id}', {grupo_id});"
+        cursor.execute(insert_query)
+        conn.commit()
+        conn.close()
+        return redirect(url_for('contact_info', id=int(id)))
+    except psycopg2.Error as e:
+        error_msg = f"Error while performing the transaction: {e}"
+        return render_template('error.html', error=error_msg) 
 
-    cursor.execute(insert_query)
-    conn.commit()
-    conn.close()
-    return redirect(url_for('contact_info',id=int(id)))
-   except psycopg2.Error as e:
-        error_msg = f"Erro ao fazer a transacao: {e}"
-        return render_template('erro.html', error=error_msg) 
-   
-@app.route('/remove_group/<int:id>', methods=['GET','POST'])
+#---------------------------------
+# Service: all
+# input: id (contact ID from URL)
+# output: Deletes a record from the contact_group table
+# Attempts to remove the association of a contact from a group by deleting the record from the database.
+# Redirects to the 'contact_info' page upon success or shows an error page if the transaction fails.
+#---------------------------------------------
+@app.route('/remove_group/<int:id>', methods=['GET', 'POST'])
 def remove_group(id):
-   try:
-    conn = psycopg2.connect(POSTGRES_URL)
-    cursor = conn.cursor()
-    cursor.execute('DELETE FROM contact_group WHERE id_cont=%s;', (id,))
-    conn.commit()
-    conn.close()
-    sucesso = "Cliente Removido com sucesso"
-    return redirect(url_for('contact_info',id=int(id)))
-   except psycopg2.Error as e:
-        error_msg = f"Erro ao fazer a transacao: {e}"
-        return render_template('erro.html', error=error_msg)    
+    try:
+        conn = psycopg2.connect(POSTGRES_URL)
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM contact_group WHERE id_cont = %s;', (id,))
+        conn.commit()
+        conn.close()
+        sucesso = "Client removed successfully"
+        return redirect(url_for('contact_info', id=int(id)))
+    except psycopg2.Error as e:
+        error_msg = f"Error while performing the transaction: {e}"
+        return render_template('error.html', error=error_msg)    
 
 
-# Proforma Invoice
 
-@app.route('/proforma_invoice',methods=['GET', 'POST'])
+#---------------------------------
+# Serviço: external
+# Método: GET, POST
+# Entrada: Dados do formulário de fatura proforma
+# Saída: Gera um PDF com a fatura proforma e retorna como resposta
+# Caso o método seja POST e o formulário for válido, cria um PDF com os dados da fatura proforma e o retorna para visualização no navegador.
+#---------------------------------------------
+@app.route('/proforma_invoice', methods=['GET', 'POST'])
 def proforma_invoice():
-     form = ProformaInvoiceForm()
+    form = ProformaInvoiceForm()
 
-     if request.method == 'POST' and form.validate_on_submit():
+    if request.method == 'POST' and form.validate_on_submit():
         invoice_data = {
             'invoice_number': form.invoice_number.data,
             'date': form.date.data,
@@ -1125,16 +1184,22 @@ def proforma_invoice():
 
         return response
 
-     return render_template('proforma_invoice.html', form=form)
+    return render_template('proforma_invoice.html', form=form)
 
-
+#---------------------------------
+# Serviço: external
+# Método: GET
+# Entrada: Nenhuma
+# Saída: Gera e retorna um PDF de fatura com dados predefinidos para download
+# Gera um PDF de fatura com dados estáticos e o retorna como resposta para visualização no navegador.
+#---------------------------------------------
 @app.route('/download')
 def download():
     invoice_data = {
         'invoice_number': 'PRO-123',
         'date': '2023-10-10',
         'customer_name': 'John Doe',
-        # Add more data as needed
+        # Adicione mais dados conforme necessário
     }
 
     pdf_content = generate_pdf(invoice_data)
@@ -1145,13 +1210,20 @@ def download():
 
     return response
 
+#---------------------------------
+# Função: external
+# Entrada: Dados da fatura (invoice_data)
+# Saída: Conteúdo PDF gerado
+# Cria um PDF com os dados da fatura, incluindo número, data, nome do cliente e itens.
+# Configura o estilo e a formatação do PDF e retorna o conteúdo gerado.
+#---------------------------------------------
 def generate_pdf(invoice_data):
     buffer = BytesIO()
 
-    # Create the PDF object, using BytesIO as its file
+    # Cria o objeto PDF, usando BytesIO como seu arquivo
     pdf = SimpleDocTemplate(buffer, pagesize=letter)
 
-    # Styles and content
+    # Estilos e conteúdo
     styles = getSampleStyleSheet()
     heading_style = ParagraphStyle(
         'Heading1',
@@ -1170,7 +1242,7 @@ def generate_pdf(invoice_data):
         spaceAfter=6,
     )
 
-    # Content with table
+    # Conteúdo com tabela
     content = [
         Paragraph("Proforma Invoice", heading_style),
         Spacer(1, 12),
@@ -1197,33 +1269,42 @@ def generate_pdf(invoice_data):
         ),
     ]
 
-    # Build PDF
+    # Gera o PDF
     pdf.build(content)
 
-    # Move the buffer's cursor to the beginning
+    # Move o cursor do buffer para o início
     buffer.seek(0)
 
     return buffer.read()
 
+#---------------------------------
+# Serviço: external
+# Método: GET
+# Entrada: Nenhuma
+# Saída: Lista de tarefas filtradas e informações do usuário
+# Obtém e exibe tarefas com base na data de vencimento, status de conclusão e data atual.
+# Adiciona as informações de privilégios do usuário à sessão e renderiza a página de tarefas.
+#---------------------------------------------
 @app.route('/tasks')
 @is_logged_in
-
 def tasks():
-    
     connection = psycopg2.connect(POSTGRES_URL)
 
     create_table_if_not_exists(connection)
     
     cursor = connection.cursor()
     
-    query = "SELECT "+'"'+ "id"+'"'+" ,title, due_date, accepted_time, completed_time, responsible, completed, accepted FROM tasks where due_date = Current_date OR completed = false OR completed_time = Current_date ORDER BY responsible;"
-    
-    
+    query = """
+    SELECT id, title, due_date, accepted_time, completed_time, responsible, completed, accepted 
+    FROM tasks 
+    WHERE due_date = CURRENT_DATE OR completed = FALSE OR completed_time = CURRENT_DATE 
+    ORDER BY responsible;
+    """
    
     cursor.execute(query)
     tasks = cursor.fetchall() 
 
-    # Get today's date
+    # Obtém a data de hoje
     today = datetime.now().date()
 
     cursor.execute('SELECT privileges FROM usuarios WHERE "user" = %s', (session['username'],))
@@ -1233,9 +1314,15 @@ def tasks():
     
     return render_template('tasks.html', tasks=tasks, today=today)
 
+#---------------------------------
+# Service: external
+# Method: POST
+# Input: Task title, due date, and responsible person
+# Output: Redirects to the tasks page after adding the new task to the database
+# Receives form data and inserts a new task into the 'tasks' table.
+#---------------------------------------------
 @app.route('/add_task', methods=['POST'])
 @is_logged_in
-
 def add_task():
     task_title = request.form.get('task_title')
     due_date = request.form.get('due_date')
@@ -1245,6 +1332,7 @@ def add_task():
 
     cursor = connection.cursor()
 
+    # Prepare and execute the insertion of the new task
     insert_query = sql.SQL("INSERT INTO tasks (title, due_date, responsible) VALUES ({}, {}, {})")
     cursor.execute(insert_query.format(sql.Literal(task_title), sql.Literal(due_date), sql.Literal(selected_agent)))
 
@@ -1254,17 +1342,22 @@ def add_task():
 
     return redirect(url_for('tasks'))
 
-
+#---------------------------------
+# Service: external
+# Method: GET
+# Input: Task ID
+# Output: Redirects to the tasks page after updating the task status to completed
+# Updates the specified task as completed and sets the completion time to the current time.
+#---------------------------------------------
 @app.route('/complete_task/<int:task_id>')
 @is_logged_in
-
 def complete_task(task_id):
     connection = psycopg2.connect(POSTGRES_URL)
 
     cursor = connection.cursor()
 
-
-    update_query = str("UPDATE tasks SET completed = TRUE, completed_time = now() WHERE "+'"'+ "id"+'"'+" = " + str(task_id))
+    # Prepare and execute the update of the task status
+    update_query = str("UPDATE tasks SET completed = TRUE, completed_time = now() WHERE id = " + str(task_id))
     cursor.execute(update_query)
     
     print(update_query)
@@ -1275,6 +1368,13 @@ def complete_task(task_id):
 
     return redirect(url_for('tasks'))
 
+#---------------------------------
+# Service: external
+# Method: GET
+# Input: Task ID
+# Output: Redirects to the tasks page after marking the task as accepted
+# Updates the specified task as accepted and sets the acceptance time to the current time.
+#---------------------------------------------
 @app.route('/accept_task/<int:task_id>')
 @is_logged_in
 def accept_task(task_id):
@@ -1282,8 +1382,7 @@ def accept_task(task_id):
 
     cursor = connection.cursor()
 
-    #responsible = session['username']
-
+    # Prepare and execute the update of the task status
     update_query = sql.SQL('UPDATE tasks SET accepted_time = now(), accepted = true WHERE "id" = {}').format(sql.Literal(task_id))
     cursor.execute(update_query)
     
@@ -1292,7 +1391,6 @@ def accept_task(task_id):
     connection.close()
 
     return redirect(url_for('tasks'))
-
 
 
 
@@ -1382,6 +1480,13 @@ def send_sms(msg,dst,sender_id):
   conn.commit()
   return message.sid
 
+#---------------------------------
+# Service: external
+# input: None
+# output: Displays the current balance and the last 10 transactions
+# Creates the 'transacoes' table if it doesn't exist, calculates the balance,
+# formats it, and retrieves the last 10 transactions to display on 'saldo.html'
+#---------------------------------------------
 @app.route('/saldo', methods=['GET', 'POST'])
 @is_logged_in
 def saldo():
@@ -1394,6 +1499,13 @@ def saldo():
 
     return render_template('saldo.html', saldo=saldo_formatted, last_10_transactions=last_10_transactions)
 
+#---------------------------------
+# Service: external
+# input: valor (amount)
+# output: Inserts an entry into the transactions database
+# Registers an entry with the provided amount, updating the cumulative balance
+# and then redirects to the 'saldo' page
+#---------------------------------------------
 @app.route('/registrar_entrada', methods=['POST'])
 @is_logged_in
 def registrar_entrada():
@@ -1408,6 +1520,13 @@ def registrar_entrada():
 
     return redirect(url_for('saldo'))
 
+#---------------------------------
+# Service: external
+# input: valor (amount), evidencia (evidence)
+# output: Inserts a withdrawal into the transactions database
+# Registers a withdrawal with the provided amount and evidence, updating the cumulative balance
+# and then redirects to the 'saldo' page
+#---------------------------------------------
 @app.route('/registrar_saida', methods=['POST'])
 @is_logged_in
 def registrar_saida():
@@ -1416,22 +1535,31 @@ def registrar_saida():
     # Insert the withdrawal into the database with the updated cumulative balance
     conn = psycopg2.connect(POSTGRES_URL)
     cur = conn.cursor()
-    cur.execute("INSERT INTO transacoes (tipo, valor, saldo, evidencia) VALUES (%s, %s, %s, %s)", ("Saída", valor, calculate_balance() -  Decimal(valor),request.form['evidencia']))
+    cur.execute("INSERT INTO transacoes (tipo, valor, saldo, evidencia) VALUES (%s, %s, %s, %s)", ("Saída", valor, calculate_balance() - Decimal(valor), request.form['evidencia']))
     conn.commit()
     cur.close()
 
     return redirect(url_for('saldo'))
 
-
+#---------------------------------
+# Service: Home Page
+# input: None
+# output: Renders the home page
+# Displays the 'home.html' template
+#---------------------------------------------
 @app.route('/')
 @is_logged_in
 def home():
-
     return render_template('home.html')
 
+#---------------------------------
+# Service: Dashboard
+# input: None
+# output: Renders the dashboard page
+# Displays the 'dashboard.html' template
+#---------------------------------------------
 @app.route('/db')
 def db():
-
     return render_template('dashboard.html')
 
 
@@ -1466,14 +1594,17 @@ def campanhas():
 
 
 
-# Funcoes Referentes a Aba "Campanhas"
-@app.route('/get_call_day/<day>', methods=['GET'])
+#---------------------------------
+# Service: all
+# Function: Get Call Day
+# input: day (int)
+# output: redirects to the call_status route with day and csv parameters
+#---------------------------------------------
+@app.route('/get_call_day/<int:day>', methods=['GET'])
 @is_logged_in
 def get_call_day(day):
-    # Converte o parâmetro 'day' para inteiro
-    day = int(day)    
-    
-    # Redireciona para a rota 'call_status' com parâmetros 'day' e 'csv' definidos
+   
+    # Redirects to the 'call_status' route with 'day' and 'csv' parameters set
     return redirect(url_for('call_status', day=day, csv=0))
 
 @app.route('/get_call', methods=['GET'])
@@ -1518,62 +1649,68 @@ def gerar_csv(call_statuses, filename='call_statuses.csv'):
         # Fecha o TextIOWrapper sem fechar o BytesIO
         text_io.detach()
 
+
+#---------------------------------
+# Service: all
+# input: day (string), csv (string)
+# output: Depending on the value of 'csv', either generates a CSV file or renders the 'teste2.html' template with call status data.
+#---------------------------------------------
 @app.route('/call_status/<day>/<csv>', methods=['GET'])
 @is_logged_in
 def call_status(day, csv):
-    # Inicializa uma lista para armazenar os status das chamadas
+    # Initialize a list to store call statuses
     call_statuses = []
     dados = {}
     org_id = session['last_org']
 
-    # Conecta ao banco de dados PostgreSQL
+    # Connect to the PostgreSQL database
     conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()
     
-    # Obtém os contatos associados à organizacao do usuário logado
-    cursor.execute(f"SELECT * FROM contacts WHERE id in (select id_cont from contact_org where org_id = '{org_id}') LIMIT 1;")
+    # Fetch contacts associated with the logged-in user's organization
+    cursor.execute(f"SELECT * FROM contacts WHERE id in (SELECT id_cont FROM contact_org WHERE org_id = '{org_id}') LIMIT 1;")
     contacts = cursor.fetchone()
     cursor.close()
     conn.close()
 
-    # Inicializa o dicionário dados com valores padrao
+    # Initialize the 'dados' dictionary with default values
     for key, dado in contacts[6].items():
         dados[key] = 'No data'
 
-    # Converte o parâmetro 'day' para inteiro
+    # Convert the 'day' parameter to an integer
     day = int(day)  
     print(day)
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
     
-    # Reabre a conexao com o banco de dados
+    # Reopen the connection to the database
     conn = psycopg2.connect(POSTGRES_URL)
     cursor = conn.cursor()  
 
-    # Consulta os logs de chamadas com base na data fornecida
+    # Query call logs based on the provided date
     if day > 0:
         start_date = datetime.now() - timedelta(days=day)
 
-        # Filtra as chamadas desde a data de início até a data atual  
+        # Filter calls from the start date to the current date  
         cursor.execute(f"SELECT * FROM call_logs cl JOIN contacts ct ON cl.contact_id = ct.id WHERE cl.start_time > '{start_date}';")
         calls = cursor.fetchall()
     else:    
-        # Obtém todos os logs de chamadas
+        # Fetch all call logs
         cursor.execute(f"SELECT * FROM call_logs cl JOIN contacts ct ON cl.contact_id = ct.id;")
         calls = cursor.fetchall()
     
-    # Inicializa um dicionário para armazenar os dados dos contatos
+    # Initialize a dictionary to store contact data
     dados_contact = {}
     if calls is not None:
         for call in calls:
-            # Certifica-se de que contact tem pelo menos 7 elementos (índice 6 existe)
+            # Ensure 'contact' has at least 7 elements (index 6 exists)
             if len(call) > 6 and isinstance(call[13], dict):
                 dados_contact = {}
                 for key, dado in call[13].items():
                     dados_contact[key] = dado
                 
-            # Cria o dicionário call_status
+            # Create the 'call_status' dictionary
             call_status = {
-                **dados_contact,  # Mescla os dados do dicionário dados_contact
+                **dados_contact,  # Merge the data from 'dados_contact' dictionary
                 'status': call[2],
                 'phone_number': call[3],
                 'start_time': call[4],
@@ -1582,17 +1719,17 @@ def call_status(day, csv):
             }
             call_statuses.append(call_status) 
     
-    # Se 'csv' é '1', gera e retorna o CSV
+    # If 'csv' is '1', generate and return the CSV file
     if csv == '1':
        return gerar_csv(call_statuses)
     else:
-        # Caso contrário, renderiza o template 'teste2.html' com os dados
+        # Otherwise, render the 'teste2.html' template with the data
        return render_template('teste2.html', dados=dados, call_statuses=call_statuses, day=day)
 
 
 
 #---------------------------------
-# Service: Activate Campaigns
+# Service: Campaigns
 # input: None
 # output: fetches and displays active campaigns of type 'simple' for the organization
 #---------------------------------------------
@@ -1615,13 +1752,13 @@ def activate_campaign():
 
 
 #---------------------------------
-# Service: Create Survey Active
+# Service: Survey
 # input: None
 # output: fetches and displays active campaigns of type 'create_survey' for the organization
 #---------------------------------------------
-@app.route('/create_survey_ativo')
+@app.route('/survey_ativo')
 @is_logged_in
-def create_survey_ativo():
+def survey_ativo():
     org_id = session['last_org']
     conn = psycopg2.connect(POSTGRES_URL)
 
@@ -1638,7 +1775,7 @@ def create_survey_ativo():
 
 
 #---------------------------------
-# Service: Active Training
+# Service:Training
 # input: None
 # output: fetches and displays active campaigns of type 'formacao' (training) for the organization
 #---------------------------------------------
@@ -1660,75 +1797,76 @@ def active_training():
     return render_template('campanhas.html', campanhas=dados, type='Remote Training')
 
 
+#---------------------------------
+# Service: external
+# input: None
+# output: Fetches pending items from the database and displays them
+# Retrieves all pending items from the database and renders them in the 'pendentes.html' template
+#---------------------------------------------
 @app.route('/pendentes')
 @is_logged_in
 def pendentes():
-
     conn = psycopg2.connect(POSTGRES_URL)
-
     cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM pendentes where estado ='pendente' ORDER BY id_pendentes")
-
-    dados=cursor.fetchall()
-
-    # Close connection
+    cursor.execute("SELECT * FROM pendentes WHERE estado = 'pendente' ORDER BY id_pendentes")
+    dados = cursor.fetchall()
     conn.close()
+    return render_template('pendentes.html', pendentes=dados)
 
-    return render_template('pendentes.html', pendentes = dados)
-
-
+#---------------------------------
+# Service: external
+# input: None
+# output: Fetches SMS records from the database and displays them
+# Retrieves all SMS records from the database and renders them in the 'sms.html' template
+#---------------------------------------------
 @app.route('/sms')
 @is_logged_in
 def sms():
-
     conn = psycopg2.connect(POSTGRES_URL)
- 
     cursor = conn.cursor()
-
     cursor.execute('SELECT * FROM sms ORDER BY id_sms')
-
-    dados=cursor.fetchall()
-
-    # Close connection
+    dados = cursor.fetchall()
     conn.close()
+    return render_template('sms.html', sms=dados)
 
-    return render_template('sms.html', sms = dados)
-
-
+#---------------------------------
+# Service: external
+# input: None
+# output: Fetches pending requests from the database and displays them
+# Retrieves all requests with status 'pending' from the database and renders them in the 'requisicoes.html' template
+#---------------------------------------------
 @app.route('/requisicoes')
 @is_logged_in
 def requisicoes():
-
     conn = psycopg2.connect(POSTGRES_URL)
-
     cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM requisicao where estado ='pendente' ORDER BY id_requisicao")
-
-    dados=cursor.fetchall()
-
-    # Close connection
+    cursor.execute("SELECT * FROM requisicao WHERE estado = 'pendente' ORDER BY id_requisicao")
+    dados = cursor.fetchall()
     conn.close()
+    return render_template('requisicoes.html', requisicoes=dados)
 
-    return render_template('requisicoes.html', requisicoes = dados)
-
-
+#---------------------------------
+# Service: external
+# input: None
+# output: Fetches invoice records from the database and displays them
+# Retrieves all invoice records from the database and renders them in the 'cobrancas.html' template
+#---------------------------------------------
 @app.route('/cobrancas')
 @is_logged_in
 def cobrancas():
     conn = psycopg2.connect(POSTGRES_URL)
-
     cursor = conn.cursor()
-
     cursor.execute('SELECT * FROM cobrancas ORDER BY id_cobrancas')
+    dados = cursor.fetchall()
+    conn.close()
+    return render_template('cobrancas.html', cobrancas=dados)
 
-    dados=cursor.fetchall()
-
-    return render_template('cobrancas.html', cobrancas = dados)
-
-
-
+#---------------------------------
+# Service: external
+# input: None
+# output: Renders the 'about.html' template
+# Displays static content on the 'about.html' page
+#---------------------------------------------
 @app.route('/about')
 def about():
     return render_template('about.html')
@@ -1849,68 +1987,83 @@ class propostasForm(Form):
     pasta= StringField('Pasta:')
     contexto= TextAreaField('Contexto:',[validators.Length(min=40),validators.DataRequired()])
     
-
+#---------------------------------
+# Service: external
+# input: form data (site, activity description, responsible person)
+# output: Handles the submission of an application, adds it to the database
+# Saves the submitted application details and redirects back to the application submission page
+#---------------------------------------------
 @app.route('/aprocida', methods=['GET', 'POST'])
 def aprocida():
-    
     form = AprocidaForm(request.form)
     
     if request.method == 'POST':
+        # Uncomment the following lines to enable database connection and data insertion
+        # current_dateTime = datetime.now()
+        # current_dateTime = str(datetime.date(current_dateTime)) + " " + str(datetime.time(current_dateTime))
 
-        #current_dateTime = datetime.now()
-        #current_dateTime = str(datetime.date(current_dateTime))+" "+str(datetime.time(current_dateTime))
+        # conn = psycopg2.connect(POSTGRES_URL)
+        # cursor = conn.cursor()
 
-        #conn = psycopg2.connect(POSTGRES_URL)
-
-        #cursor = conn.cursor()
-
-        # Execute query
-        #cursor.execute("INSERT INTO pendentes(site, descricao_actividade, responsavel, data) VALUES (%s,%s,%s,%s)",(form.site.data,form.ticket.data,session['username'],current_dateTime))
+        # Execute the query to insert a new record
+        # cursor.execute("INSERT INTO pendentes(site, descricao_actividade, responsavel, data) VALUES (%s, %s, %s, %s)",
+        #                (form.site.data, form.ticket.data, session['username'], current_dateTime))
         
-        # Commit to DB
-        #conn.commit()
+        # Commit the transaction to the database
+        # conn.commit()
 
-        # Close connection
-        #conn.close()
+        # Close the database connection
+        # conn.close()
 
-        flash('Inscricao feita com Successo', 'success')
+        # Flash a success message to the user
+        flash('Application submitted successfully', 'success')
 
+        # Redirect back to the application submission page
         return redirect(url_for('aprocida'))
 
-    return render_template('aprocida.html', form = form)   
+    # Render the application submission form
+    return render_template('aprocida.html', form=form)
+  
     
 
+#---------------------------------
+# Service: external
+# input: form data (client, linker, context, requester)
+# output: Adds a proposal request to the database
+# Saves the proposal information provided by the user and redirects to the proposal listing page
+#---------------------------------------------
 @app.route('/addproposal', methods=['GET', 'POST'])
 @is_logged_in
 def addproposal():
-    
     form = propostasForm(request.form)
-
     
     if request.method == 'POST': 
-
+        # Get the current date and time
         current_dateTime = datetime.now()
-        current_dateTime = str(datetime.date(current_dateTime))+" "+str(datetime.time(current_dateTime))
+        current_dateTime = str(datetime.date(current_dateTime)) + " " + str(datetime.time(current_dateTime))
 
+        # Connect to the database
         conn = psycopg2.connect(POSTGRES_URL)
-
         cursor = conn.cursor()
 
-        # Execute query
-        cursor.execute("INSERT INTO propostas(cliente, linker, contexto, requisitante) VALUES (%s,%s,%s,%s)",(form.cliente.data,form.pasta.data,form.contexto.data,session['username']))
+        # Execute the query to insert a new proposal
+        cursor.execute("INSERT INTO propostas(cliente, linker, contexto, requisitante) VALUES (%s, %s, %s, %s)",
+                       (form.cliente.data, form.pasta.data, form.contexto.data, session['username']))
         
-        # Commit to DB
+        # Commit the transaction to the database
         conn.commit()
 
-        # Close connection
+        # Close the database connection
         conn.close()
 
-        flash('Pedido de proposta adicinado com Successo', 'success')
+        # Flash a success message to the user
+        flash('Proposal request added successfully', 'success')
 
+        # Redirect to the proposals page
         return redirect(url_for('propostas'))
 
-    return render_template('addproposal.html', form = form)
-
+    # Render the proposal addition form
+    return render_template('addproposal.html', form=form)
 
 @app.route('/addticket', methods=['GET', 'POST'])
 @is_logged_in
@@ -1943,54 +2096,78 @@ def addticket():
     return render_template('addticket.html', form = form)
 
        
-
-@app.route('/add_update/<int:invoice_id>', methods=['GET','POST'])
+#---------------------------------
+# Service: external
+# input: invoice_id (ID da fatura), update_text (texto da atualização), sales_team_member (nome do membro da equipe de vendas)
+# output: Adiciona uma atualização a uma fatura específica e redireciona para a página de faturas
+# Este serviço permite adicionar uma nova atualização a uma fatura específica no banco de dados.
+#---------------------------------------------
+@app.route('/add_update/<int:invoice_id>', methods=['GET', 'POST'])
 def add_update(invoice_id):
     if request.method == 'POST':
+        # Obter o texto da atualização do formulário
         update_text = request.form['update_text']
-        sales_team_member = session['username']  # Replace with actual user information
 
+        # Pegar o nome do membro da equipe de vendas da sessão atual
+        sales_team_member = session['username']  # Substitua com informações reais do usuário
+
+        # Conectar ao banco de dados PostgreSQL
         conn = psycopg2.connect(POSTGRES_URL)
         cursor = conn.cursor()
 
-        # Insert update into the updates table
-        cursor.execute('INSERT INTO updates (invoice_id, update_date, sales_team_member, update_text) VALUES (%s, CURRENT_DATE, %s, %s)',
-                       (invoice_id, sales_team_member, update_text))
+        # Inserir a atualização na tabela de atualizações
+        cursor.execute(
+            'INSERT INTO updates (invoice_id, update_date, sales_team_member, update_text) VALUES (%s, CURRENT_DATE, %s, %s)',
+            (invoice_id, sales_team_member, update_text)
+        )
 
+        # Confirmar a transação no banco de dados
         conn.commit()
+
+        # Fechar a conexão com o banco de dados
         conn.close()
 
+        # Mostrar mensagem de sucesso
         flash('Update added successfully', 'success')
 
+    # Redirecionar para a página de faturas
     return redirect(url_for('invoices'))
 
 
 
+
+#---------------------------------
+# Service: external
+# input: None (data is fetched from the database)
+# output: Renders the invoices2.html template with invoice data and their updates
+# This function retrieves all invoices and their associated updates from the database.
+# The updates are organized by invoice ID and passed to the template for rendering.
+#---------------------------------------------
 @app.route('/invoices', methods=['GET'])
 @is_logged_in
 def invoices():
-
+    # Connect to the PostgreSQL database
     conn = psycopg2.connect(POSTGRES_URL)
 
+    # Create cursor
     cursor = conn.cursor()
 
-     # Execute query to get all updates
+    # Execute query to get all updates
     cursor.execute('SELECT invoice_id, update_text, update_date, sales_team_member FROM updates')
 
+    # Fetch all results from the executed query
     data = cursor.fetchall()
-
-    
 
     # Organize the data into a dictionary with invoice_id as keys and a list of updates as values
     invoice_updates = {}
     for row in data:
-        invoice_id = row[0]
-        update_text = row[1]
-        update_date = row[2]
-        sales_team_member = row[3]
+        invoice_id = row[0]              # Get invoice_id
+        update_text = row[1]             # Get update text
+        update_date = row[2]             # Get update date
+        sales_team_member = row[3]       # Get sales team member
 
         if invoice_id not in invoice_updates:
-            invoice_updates[invoice_id] = []
+            invoice_updates[invoice_id] = []  # Initialize list if invoice_id not already in dictionary
 
         invoice_updates[invoice_id].append({
             'update_text': update_text,
@@ -1999,13 +2176,15 @@ def invoices():
         })
     
     # Execute query to get all invoices
-    cursor.execute('SELECT faturas.id_faturas, faturas.cliente, faturas.descricao,  faturas.valor, faturas.estado FROM faturas ORDER BY faturas.cliente')
+    cursor.execute('SELECT faturas.id_faturas, faturas.cliente, faturas.descricao, faturas.valor, faturas.estado FROM faturas ORDER BY faturas.cliente')
 
+    # Fetch all results from the executed query
     data = cursor.fetchall()
 
-    # Close connection
+    # Close database connection
     conn.close()
 
+    # Render the invoices2.html template with the fetched data
     return render_template('invoices2.html', dados=data, invoice_updates=invoice_updates)
 
 
@@ -2015,158 +2194,200 @@ class crentesForm(Form):
     telemovel = StringField('Contacto:',[validators.Length(min=9, max=9),validators.DataRequired()])
 
 
+#---------------------------------
+# Service: external
+# input: form data (from crentesForm)
+# output: Adds a new believer to the database and redirects to the add believer page
+# This function checks if the provided phone number already exists in the database.
+# If it does, it shows an error message; if not, it adds the new believer's data to the database.
+#---------------------------------------------
 @app.route('/addcrentes', methods=['GET', 'POST'])
 def addcrentes():
-    
+    # Create form instance
     form = crentesForm(request.form)
     
     if request.method == 'POST':
-
+        # Connect to the database
         conn = psycopg2.connect(POSTGRES_URL)
 
+        # Create cursor
         cursor = conn.cursor() 
 
-        # Check if telemovel already exists
+        # Check if phone number already exists
         cursor.execute('SELECT telemovel FROM crentes_divina WHERE telemovel = %s', (int(form.telemovel.data),))
         existing_telemovel = cursor.fetchone()
 
         if existing_telemovel:
-            # Telemovel already registered, show flash message
+            # Phone number already registered, show flash message
             conn.close()
-            flash('Este número de telefone já está registrado.', 'danger')
+            flash('This phone number is already registered.', 'danger')
             return redirect(url_for('addcrentes'))
 
-        # If telemovel is not registered, proceed with insertion
-        cursor.execute('INSERT INTO crentes_divina(telemovel, nome, apelido) VALUES(%s, %s, %s)', (int(form.telemovel.data), form.nome.data, form.apelido.data))
+        # If phone number is not registered, proceed with insertion
+        cursor.execute('INSERT INTO crentes_divina(telemovel, nome, apelido) VALUES(%s, %s, %s)', 
+                       (int(form.telemovel.data), form.nome.data, form.apelido.data))
 
-        # Commit to DB
+        # Commit changes to the database
         conn.commit()
 
-        # Close connection
+        # Close the database connection
         conn.close()
 
-        flash('Dados adicionados com sucesso', 'success')
+        # Flash success message
+        flash('Data added successfully', 'success')
 
+        # Redirect to the add believers page
         return redirect(url_for('addcrentes'))
 
+    # Render the add believers form template
     return render_template('divina.html', form=form)
 
 
+#---------------------------------
+# Service: external
+# input: form data (from AddInvoiceForm)
+# output: Adds a new invoice to the database and redirects to the invoices page
+# This function handles the addition of a new invoice. It collects form data, 
+# inserts a new record into the database, and redirects the user to the invoices page upon success.
+#---------------------------------------------
 
 @app.route('/addinvoices', methods=['GET', 'POST'])
 @is_logged_in
 def addinvoices():
-    
+    # Create form instance
     form = AddInvoiceForm(request.form)
     
     if request.method == 'POST':
-
+        # Connect to the database
         conn = psycopg2.connect(POSTGRES_URL)
 
+        # Create cursor
         cursor = conn.cursor() 
 
-        # Execute query
-        cursor.execute('INSERT INTO faturas(id_faturas,cliente,descricao,valor,data,estado, mes) VALUES(%s,%s,%s,%s,%s,%s,%s)',(form.numero.data,form.cliente.data,form.descricao.data,form.valor.data,form.date.data,form.estado.data, form.mes.data))
+        # Execute insert query
+        cursor.execute(
+            'INSERT INTO faturas(id_faturas, cliente, descricao, valor, data, estado, mes) VALUES(%s, %s, %s, %s, %s, %s, %s)',
+            (form.numero.data, form.cliente.data, form.descricao.data, form.valor.data, form.date.data, form.estado.data, form.mes.data)
+        )
         
-        # Commit to DB
+        # Commit changes to the database
         conn.commit()
 
-        # Close connection
+        # Close the database connection
         conn.close()
 
-        flash('Factura adicinada com Successo', 'success')
+        # Flash success message
+        flash('Invoice added successfully', 'success')
 
+        # Redirect to the invoices page
         return redirect(url_for('invoices'))
 
-    return render_template('addinvoices.html', form = form)
+    # Render the add invoice form template
+    return render_template('addinvoices.html', form=form)
 
-
+#---------------------------------
+# Service: external
+# input: form data (from RequisicaoForm)
+# output: Adds a new request to the database and redirects to the requests page
+# This function handles the addition of a new request. It collects form data, 
+# inserts a new record into the database, and redirects the user to the requests page upon success.
+#---------------------------------------------
 @app.route('/addrequest', methods=['GET', 'POST'])
 @is_logged_in
 def addrequest():
-    
+    # Create form instance
     form = RequisicaoForm(request.form)
     
     if request.method == 'POST':
-
+        # Get current date and time
         current_dateTime = datetime.now()
-        current_dateTime = str(datetime.date(current_dateTime))+" "+str(datetime.time(current_dateTime))
+        current_dateTime = str(datetime.date(current_dateTime)) + " " + str(datetime.time(current_dateTime))
 
+        # Connect to the database
         conn = psycopg2.connect(POSTGRES_URL)
 
+        # Create cursor
         cursor = conn.cursor()
 
-        # Execute query
-        cursor.execute("INSERT INTO requisicao(requisicao,cliente, valor, data_pagamento, estado) VALUES (%s,%s,%s,%s,%s)",(form.requisicao.data,form.cliente.data,form.valor.data,current_dateTime,form.estado.data))
+        # Execute insert query
+        cursor.execute(
+            "INSERT INTO requisicao(requisicao, cliente, valor, data_pagamento, estado) VALUES (%s, %s, %s, %s, %s)",
+            (form.requisicao.data, form.cliente.data, form.valor.data, current_dateTime, form.estado.data)
+        )
         
-        # Commit to DB
+        # Commit changes to the database
         conn.commit()
 
-        # Close connection
+        # Close the database connection
         conn.close()
 
-        flash('Pedido adicinado com Successo', 'success')
+        # Flash success message
+        flash('Request added successfully', 'success')
 
+        # Redirect to the requests page
         return redirect(url_for('requisicoes'))
 
-    return render_template('addrequest.html', form = form)
+    # Render the add request form template
+    return render_template('addrequest.html', form=form)
 
-# Edit Request
+
+
+#---------------------------------
+# Service: external
+# input: id
+# output: Fetches the request by id, populates the form, and updates the request in the database
+#---------------------------------------------
 @app.route('/edit_request/<string:id>', methods=['GET', 'POST'])
 @is_logged_in
 def edit_request(id):
 
+    # Connect to the database
     conn = psycopg2.connect(POSTGRES_URL)
     
     # Create cursor
     cursor = conn.cursor()
 
-    # Get article by id
+    # Get request by id
     result = cursor.execute("SELECT * FROM requisicao WHERE id_requisicao = %s", [id])
-
     requisicao = cursor.fetchone()
     
-    #conn.close()
-    
     # Get form
-
     form = RequisicaoForm(request.form)
 
-    # Populate tikrts form fields
+    # Populate form fields with the request data
     form.cliente.data = requisicao[3]
     form.requisicao.data = requisicao[1]
     form.valor.data = Decimal(requisicao[5])
-
 
     if request.method == 'POST':
         requisicao = request.form['requisicao']
         cliente = request.form['cliente']
         valor = request.form['valor']
 
-
-        #current_dateTime = datetime.now()
-
-        # Create Cursor
+        # Create cursor
         cursor = conn.cursor()
-        #app.logger.info(title)
         
-        # Execute
-        cursor.execute("UPDATE requisicao SET cliente=%s, requisicao=%s, valor=%s WHERE id_requisicao=%s",(cliente,requisicao,valor,id))
+        # Execute update query
+        cursor.execute("UPDATE requisicao SET cliente=%s, requisicao=%s, valor=%s WHERE id_requisicao=%s", (cliente, requisicao, valor, id))
         
-        # Commit to DB
+        # Commit changes to the database
         conn.commit()
 
-        #Close connection
+        # Close connection
         conn.close()
 
+        # Flash success message
         flash('Request Updated', 'success')
 
+        # Redirect to the requests page
         return redirect(url_for('requisicoes'))
 
+    # Render the edit request page with the form
     return render_template('edit_request.html', form=form)
 
 
-# Service: SMS Testing
+
+# Service: all
 # Input: SMS content, contact, site
 # Output: Sends an SMS and stores the status in the database
 # - Fetches SMS data from the form
@@ -2218,7 +2439,7 @@ def testes():
 
 
 #------------------------------------------------------
-# Service: Send SMS to Group
+# Service: external
 # Input: Group ID, message, sender ID
 # Output: Sends SMS to all contacts in the specified group and stores their statuses
 # - Fetches group details and SMS message from the request
@@ -2266,7 +2487,7 @@ def enviar_sms_grupo():
 
 
 # """
-# Service: SMS Success
+# Service: external
 # Input: None
 # Output: Displays success message and redirects back to the test page
 # - Flash success message
@@ -2282,7 +2503,7 @@ def sucesso_sms():
 
 
 # """
-#     Service: Check SMS Status
+#     Service: external
 #     Input: Message SID
 #     Output: Retrieves and returns the status of the SMS
 #     - Fetches the message status from Twilio API
@@ -2296,7 +2517,7 @@ def status_sms(message_sid):
 
 
 #---------------------------------
-# Service: Manage User Privileges
+# Service: external
 # input: user_id, privileges (list of privileges)
 # output: updates user privileges and redirects to the privileges management page
 # Retrieves the list of users and current user's privileges
@@ -2451,136 +2672,8 @@ def login():
     return render_template('login.html')
 
 
-# Edit ticket
-@app.route('/edit_ticket/<string:id>', methods=['GET', 'POST'])
-@is_logged_in
-def edit_ticket(id):
-
-    conn = psycopg2.connect(POSTGRES_URL)
-    
-    # Create cursor
-    cursor = conn.cursor()
-
-    # Get article by id
-    result = cursor.execute("SELECT * FROM pendentes WHERE id_pendentes = %s", [id])
-
-    ticket = cursor.fetchone()
-    
-    #conn.close()
-    
-    # Get form
-
-    form = TicketForm(request.form)
-
-    # Populate tikrts form fields
-    form.site.data = ticket[1]
-    form.ticket.data = ticket[2]
-
-    if request.method == 'POST':
-        site = request.form['site']
-        ticket = request.form['ticket']
-
-        #current_dateTime = datetime.now()
-
-        # Create Cursor
-        cursor = conn.cursor()
-        #app.logger.info(title)
-        
-        # Execute
-        cursor.execute("UPDATE pendentes SET site=%s, descricao_actividade=%s WHERE id_pendentes=%s",(site,ticket,id))
-        
-        # Commit to DB
-        conn.commit()
-
-        #Close connection
-        conn.close()
-
-        flash('Ticket Updated', 'success')
-
-        return redirect(url_for('pendentes'))
-
-    return render_template('edit_ticket.html', form=form)
-
-# Assign ticket
-@app.route('/assign_ticket/<string:id>', methods=['GET', 'POST'])
-@is_logged_in
-def assign_ticket(id):
-
-    conn = psycopg2.connect(POSTGRES_URL)
-    
-    # Create cursor
-    cursor = conn.cursor()
-
-    # Get article by id
-    result = cursor.execute("SELECT * FROM pendentes WHERE id_pendentes = %s", [id])
-
-    ticket = cursor.fetchone()
-    
-    #conn.close()
-    
-    # Get form
-
-    form = TicketForm(request.form)
-
-    # Populate tikrts form fields
-    form.site.data = ticket[1]
-    form.ticket.data = ticket[2]
-    form.responsavel.data = ticket[14]
-
-    if request.method == 'POST':
-        site = request.form['site']
-        ticket = request.form['ticket']
-        responsavel = request.form['responsavel']
-
-
-        #current_dateTime = datetime.now()
-
-        # Create Cursor
-        cursor = conn.cursor()
-        #app.logger.info(title)
-        
-        # Execute
-        cursor.execute("UPDATE pendentes SET site=%s, descricao_actividade=%s, responsavel=%s WHERE id_pendentes=%s",(site,ticket,responsavel,id))
-        
-        # Commit to DB
-        conn.commit()
-
-        #Close connection
-        conn.close()
-
-        flash('Ticket Assigned', 'success')
-
-        return redirect(url_for('pendentes'))
-
-    return render_template('assign_ticket.html', form=form)
-
-
-
-# Delete Tiket
-@app.route('/del_tiket/<string:id>', methods=['POST'])
-@is_logged_in
-def del_tiket(id):
-    # Create cursor
-    conn = psycopg2.connect(POSTGRES_URL)
-
-    cursor = conn.cursor()
-
-    # Execute
-    cursor.execute("UPDATE pendentes SET estado='resolvido' WHERE id_pendentes = %s", [id])
-
-    # Commit to DB
-    conn.commit()
-
-    #Close connection
-    conn.close()
-
-    flash('Ticket Deleted', 'success')
-
-    return redirect(url_for('pendentes'))
-
-
 #---------------------------------
-# Servico: campanhas
+# Servico: all
 # input: id da questao e o tipo da campanha
 # output: redericiona a visualizacao das questoes pelo methods Post, ou a pagina da adicao de opcao
 # cria ou adiciona uma opcoes as questoes
@@ -2658,7 +2751,7 @@ def fetch_audio(id):
 
 
 #---------------------------------
-# Service: Delete Audio
+# Service: all
 # input: id of the audio to be deleted
 # output: deletes the audio reference from the database and redirects to the campaign page
 #---------------------------------------------
@@ -2684,7 +2777,7 @@ def deletar_audio(id):
 
 
 #---------------------------------
-# Service: Load Questions
+# Service: all
 # input: id of the campaign or question group
 # output: loads the questions associated with the given id and returns them as JSON
 #---------------------------------------------
@@ -2696,6 +2789,7 @@ def load_questions(id):
 
 
 #---------------------------------
+# # Service: all
 # Helper Function: Retrieve Questions
 # input: id of the campaign or question group
 # output: retrieves questions from the database and formats them for JSON response
@@ -2721,7 +2815,7 @@ def questoes(id):
 
 
 #---------------------------------
-# Service: Campaign Information
+# Service: all
 # input: id (campaign ID) and type (campaign type)
 # output: redirects to a page that displays campaign details based on the type and ID
 # Retrieves information about the campaign and renders it in a template
@@ -2765,7 +2859,7 @@ def campanha_n(id, type):
 
 
 #---------------------------------
-# Service: Add Question
+# Service: all
 # input: id, type
 # output: Inserts a new question into the appropriate table based on the campaign type
 # If type is 'formacao', insert into 'aula_info' table for training. 
@@ -2799,7 +2893,7 @@ def add_question(id, type):
 
 
 #---------------------------------
-# Service: Manage Audios
+# Service: all
 # input: id, type
 # output: Retrieves audio data from the database based on the campaign type and id
 # Initializes the audio form and renders the 'audios.html' template with the audio data
@@ -2828,7 +2922,7 @@ def audios(id, type):
 
 
 #---------------------------------
-# Service: campaigns
+# Service: all
 # input: campaign id and campaign type
 # output: redirects to the page where the content of the campaign is displayed (introduction, questions, etc.)
 # adds audio to campaign questions
@@ -2979,7 +3073,7 @@ def create_lesson(id, tema, intro, base, con, audio_intro, audio_base, audio_con
 
 
 #---------------------------------
-# Service: simple campaigns
+# Service: campaign
 # input: campaign id, lesson theme, introduction, lesson content, conclusion, and respective audios
 # output: returns a message in case of success or failure
 # creates a simple campaign
@@ -3057,7 +3151,7 @@ def create_survey(id, tema, intro, con, audio_intro, audio_con, audio_lingua):
 
 
 #---------------------------------
-# Service: Create Campaign
+# Service: all
 # Input: 
 # - type: The type of campaign being created (e.g., 'create_survey', 'formacao', etc.)
 # - id: ID of the campaign (0 for new campaign, or an existing ID)
@@ -3129,7 +3223,7 @@ def create_campaign(type, id):
 
 
 #---------------------------------
-# Service: Create Module
+# Service: Training
 # input: id - ID of the campaign (0 means create a new campaign)
 # output: redirects to the campaign creation page after creating a module
 # If the ID is 0, it creates a new campaign, otherwise, it inserts a new module into an existing campaign
@@ -3259,28 +3353,9 @@ def start_campaign(id):
 
 
 
-@app.route('/campanha/<int:id>/<type>', methods=['GET'])
-@is_logged_in
-def campanha(id, type):
-    print(id)
-    
-    # Conectar ao banco de dados
-    connection = psycopg2.connect(POSTGRES_URL)
-    cursor = connection.cursor()
-    
-    # Se o tipo for 'formacao', selecionar as aulas associadas
-    if type == 'formacao':
-        cursor.execute(f"SELECT * FROM aulas WHERE id={id};")
-        result = cursor.fetchall()
-        return render_template('campanha.html', campanha=result, id=id, tipo=type)
-    
-    # Redirecionar para a visualizacao da campanha
-    return redirect(url_for('campanha_n', id=id, type=type))
-
-
 
 #---------------------------------
-# Service: Questions
+# Service: all
 # input: id and type of the campaign
 # output: renders the page to add options
 # retrieves data related to the specified question ID
@@ -3324,7 +3399,7 @@ def survey_dashboard():
 
 
 #---------------------------------
-# Service: Dashboard
+# Service: all
 # input: id and type of the campaign
 # output: redirects to the page displaying a chart related to a given question
 # visualizes the data in a pie chart based on options chosen in calls
@@ -3367,18 +3442,6 @@ def dashboard2(id, type):
     return render_template('dashboard2.html', labels=labels, counts=counts, table_name=table_name)
 
 
-# Route to render the survey form
-@app.route('/survey/<string:survey_name>')
-def survey(survey_name):
-    # Connect to the database
-    conn = psycopg2.connect(POSTGRES_URL)
-    cursor = conn.cursor()
-    
-    # Fetch survey title and column titles from the database
-    survey_title, questions = get_survey_data(cursor, survey_name)
-
-    return render_template('survey.html', survey_title=survey_title, questions=questions)
-
 
 # Logout
 @app.route('/logout')
@@ -3396,7 +3459,7 @@ def get_db_connection():
     return psycopg2.connect(POSTGRES_URL)
 
 #---------------------------------
-# Service: Retrieve Organization Information
+# Service: all
 # Input: User's session data (username) to get user ID
 # Output: JSON response with organization information for the logged-in user
 # Retrieves organization details based on whether the user is associated with 'Demo_Org'
@@ -3432,7 +3495,7 @@ def saltar_org_id():
 
 
  #---------------------------------
-    # Service: Retrieve Available Groups
+    # Service: all
     # Input: None
     # Output: JSON response with a list of available groups
     # Retrieves all groups from the 'grupo' table and returns them in JSON format
@@ -3453,7 +3516,7 @@ def selecionar_group():
 
 
 #---------------------------------
-    # Service: Add a New Language to Organization
+    # Service: all
     # Input: Form data with 'lingua' and 'abreviatura'
     # Output: Redirects to the same page or shows a flash message
     # Handles the addition of a new language and its abbreviation to the 'org_linguas' table
@@ -3491,19 +3554,20 @@ def adicionar_lingua():
     return render_template('org_information.html', idiomas=choices, linguas=linguas)
 
 
-@app.route('/get_org/<org_id>', methods=['GET'])
-def get_org(org_id):
-    #---------------------------------
-    # Service: Redirect to Selected Organization
+#---------------------------------
+    # Service: all
     # Input: Organization ID
     # Output: Redirects to the route that handles the selected organization
     # Redirects the user to the route 'org_id' with the specified 'org_id' to configure the selected organization
     #---------------------------------
-    return redirect(url_for('org_id', org_id=org_id))
+   
+@app.route('/get_org/<org_id>', methods=['GET'])
+def get_org(org_id):
+     return redirect(url_for('org_id', org_id=org_id))
 
 
  #---------------------------------
-    # Service: Set Selected Organization in User Session
+    # Service: all
     # Input: Organization ID
     # Output: Renders the 'tasks.html' template or redirects based on organization status
     # Configures the selected organization in the user session and displays the associated tasks
@@ -3533,66 +3597,72 @@ def org_id(org_id):
 
 
 
+#---------------------------------
+# Service: external
+# input: None
+# output: displays a list of clients that are not ONG or have ONG set to false
+# Retrieves and displays clients from the 'cliente_vendas' table where 'ong' is NULL or false, ordered by name
+#---------------------------------------------
 @app.route('/cliente', methods=['GET'])
 @is_logged_in
 def clientecad():
-
     conn = psycopg2.connect(POSTGRES_URL)
-
     cursor = conn.cursor()
 
-    # Execute query
+    # Execute query to get clients where ONG is NULL or false
     cursor.execute('SELECT * FROM cliente_vendas WHERE ong IS NULL OR ong = false ORDER BY nome;')
-        
-    dados=cursor.fetchall()
+    dados = cursor.fetchall()
 
     # Close connection
     conn.close()
 
-    return render_template('cad-cliente.html', dados = dados)
+    return render_template('cad-cliente.html', dados=dados)
 
-
+#---------------------------------
+# Service: external
+# input: None
+# output: displays a list of clients with 'srv' set to true
+# Retrieves and displays clients from the 'cliente_vendas' table where 'srv' is true, ordered by name
+#---------------------------------------------
 @app.route('/cliente_srv', methods=['GET'])
 @is_logged_in
 def cliente_srv():
-
     conn = psycopg2.connect(POSTGRES_URL)
-
     cursor = conn.cursor()
 
-    # Execute query
+    # Execute query to get clients with 'srv' set to true
     cursor.execute('SELECT * FROM cliente_vendas WHERE srv = true ORDER BY nome;')
-        
-    dados=cursor.fetchall()
+    dados = cursor.fetchall()
 
     # Close connection
     conn.close()
 
-    return render_template('cad-cliente_srv.html', dados = dados)
+    return render_template('cad-cliente_srv.html', dados=dados)
 
-
+#---------------------------------
+# Service: external
+# input: None
+# output: displays a list of clients with 'ong' set to true
+# Retrieves and displays clients from the 'cliente_vendas' table where 'ong' is true, ordered by name
+#---------------------------------------------
 @app.route('/cliente_ong', methods=['GET'])
 @is_logged_in
 def cliente_ong():
-
     conn = psycopg2.connect(POSTGRES_URL)
-
     cursor = conn.cursor()
 
-    # Execute query
+    # Execute query to get clients with 'ong' set to true
     cursor.execute("SELECT * FROM cliente_vendas WHERE ong = true ORDER BY nome;")
-        
-    dados=cursor.fetchall()
+    dados = cursor.fetchall()
 
     # Close connection
     conn.close()
 
-    return render_template('cad-cliente_ong.html', dados = dados)
-
+    return render_template('cad-cliente_ong.html', dados=dados)
 
 #cadastro_cliente
 #---------------------------------
-# Service: Client Registration
+# Service: external
 # Input: Form data from client registration
 # Output: Redirects to the client registration page after adding the client to the database
 # Inserts a new client record into the 'cliente_vendas' table
@@ -3644,7 +3714,7 @@ def register():
 
 
 #---------------------------------
-# Service: ONGs
+# Service: external
 # input: NGO ID
 # output: redirects to the page where the ONGs follow-ups are created
 # inserts data related to the members of an organization
@@ -3674,7 +3744,7 @@ def depedencias(id):
 
 
 #---------------------------------
-# Service: Add Call
+# Service: external
 # input: id (of the client or campaign)
 # output: Handles the addition of follow-ups for the client or campaign
 # Creates actions, calendar events, and tasks in the system
@@ -3746,7 +3816,7 @@ def add_call(id):
 
 
 #---------------------------------
-# Service: Activity management
+# Service: external
 # input: date
 # output: redirects to the page and displays graphs that monitor activities
 # filters data according to daily activities and creates a dashboard
@@ -3758,7 +3828,7 @@ def tarefas_diarias_data(data):
 
 
 #---------------------------------
-# Service: Daily Tasks Management
+# Service: external
 # input: data (date)
 # output: redirects to a page that displays graphs controlling daily activities
 # filters data according to the activities performed daily and creates a dashboard
@@ -3813,112 +3883,105 @@ def tarefas_diarias(data):
     print(Sara)
     return render_template('tarefas.html', datas=datas, categorias=categorias, Marta=Marta, Sara=Sara)
 
-
+#---------------------------------
+# Service: Payment
+# input: id (request ID)
+# output: redirects to the 'requisicoes' page after processing the payment request
+# Retrieves the payment request details, updates the request status, and inserts payment details
+#---------------------------------------------
 @app.route('/pagamento/<string:id>', methods=['GET', 'POST'])
 @is_logged_in
 def pagamento(id):
-        
+    conn = psycopg2.connect(POSTGRES_URL)
+    cursor = conn.cursor()
 
-        conn = psycopg2.connect(POSTGRES_URL)
+    cursor.execute('SELECT * FROM requisicao WHERE id_requisicao = %s', (id,))
+    requisicao = cursor.fetchone()
 
-        cursor = conn.cursor()
-
-        cursor.execute('SELECT * FROM requisicao WHERE id_requisicao = %s', (id,))
-
-        requisicao = cursor.fetchone()
-
-        form = RequisicaoForm(request.form)
-        form.cliente.data = requisicao[3]
-        form.requisicao.data = requisicao[1]
-        form.valor.data = Decimal(requisicao[5])
-        form.estado.data = requisicao[7]
-        
+    form = RequisicaoForm(request.form)
+    form.cliente.data = requisicao[3]
+    form.requisicao.data = requisicao[1]
+    form.valor.data = Decimal(requisicao[5])
+    form.estado.data = requisicao[7]
    
-        if request.method == 'POST':
-                estado = request.form['estado']
+    if request.method == 'POST':
+        estado = request.form['estado']
 
+        cursor.execute("INSERT INTO pagamento(destinatario, observacao, estado, valor) VALUES (%s, %s, %s, %s)",
+                       (form.destinatario.data, form.observacao.data, form.estado1.data, form.valor.data))
                 
-                cursor.execute("INSERT INTO pagamento(destinatario,observacao, estado, valor) VALUES (%s,%s,%s,%s)",(form.destinatario.data,form.observacao.data, form.estado1.data,form.valor.data))  
-                
-                
-                cursor.execute("UPDATE requisicao SET estado=%s WHERE id_requisicao=%s", [estado, id])
-
-
-                conn.commit()
-                
-                conn.close()
-                return redirect(url_for('requisicoes'))
+        cursor.execute("UPDATE requisicao SET estado=%s WHERE id_requisicao=%s", [estado, id])
+        conn.commit()
+        conn.close()
+        return redirect(url_for('requisicoes'))
    
-        return render_template('pagamento.html', form = form)
+    return render_template('pagamento.html', form=form)
 
-
-
-
+#---------------------------------
+# Service: external
+# input: None
+# output: displays the credentials from the 'credenciais' table
+# Retrieves and displays all credentials from the database
+#---------------------------------------------
 @app.route('/credencial')
 @is_logged_in
 def credencial():
-
     conn = psycopg2.connect(POSTGRES_URL)
-
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM credenciais ORDER BY id_credencial")
-
-    dados=cursor.fetchall()
-
+    dados = cursor.fetchall()
 
     conn.close()
+    return render_template('credencial.html', credencial=dados)
 
-    return render_template('credencial.html', credencial = dados)
-
+#---------------------------------
+# Service: external
+# input: None
+# output: displays the proposals from the 'propostas' table
+# Retrieves and displays all proposals from the database
+#---------------------------------------------
 @app.route('/propostas')
 @is_logged_in
 def propostas():
-
     conn = psycopg2.connect(POSTGRES_URL)
-
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM propostas")
-
-    dados=cursor.fetchall()
-
+    dados = cursor.fetchall()
 
     conn.close()
+    return render_template('propostas.html', dados=dados)
 
-    return render_template('propostas.html', dados = dados)
-
-
+#---------------------------------
+# Service: external
+# input: Form data for adding new credentials
+# output: redirects to 'credencial' page after adding a new credential
+# Inserts new credentials into the 'credenciais' table
+#---------------------------------------------
 @app.route('/addcredencial', methods=['GET', 'POST'])
 @is_logged_in
 def addcredencial():
-    
     form = addcredencialForm(request.form)
     
     if request.method == 'POST':
-
         current_dateTime = datetime.now()
-        current_dateTime = str(datetime.date(current_dateTime))+" "+str(datetime.time(current_dateTime))
+        current_dateTime = str(datetime.date(current_dateTime)) + " " + str(datetime.time(current_dateTime))
         print(current_dateTime)
 
         conn = psycopg2.connect(POSTGRES_URL)
-
         cursor = conn.cursor()
 
-   
-        cursor.execute("INSERT INTO credenciais(cliente, password, local, usuario, ip_adress, ip_publico,senha_wifi,user_router,senha_router,ipadress_router) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(str(form.cliente.data),str(form.password.data),str(form.local.data),str(form.user.data),str(form.ipadress.data), str (form.ippublico.data),str(form.senha_wifi.data),str(form.user_router.data),str(form.senha_router.data),str(form.ipadress_router)))
-        
+        cursor.execute("INSERT INTO credenciais(cliente, password, local, usuario, ip_adress, ip_publico, senha_wifi, user_router, senha_router, ipadress_router) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                       (str(form.cliente.data), str(form.password.data), str(form.local.data), str(form.user.data), str(form.ipadress.data), str(form.ippublico.data), str(form.senha_wifi.data), str(form.user_router.data), str(form.senha_router.data), str(form.ipadress_router)))
         
         conn.commit()
-
-        
         conn.close()
 
-        flash('Pedido adicinado com Successo', 'success')
-
+        flash('Request added successfully', 'success')
         return redirect(url_for('credencial'))
 
-    return render_template('addcredencial.html', form = form)
+    return render_template('addcredencial.html', form=form)
 
 
 #App de envio de chamadas com o Twillo
@@ -3929,7 +3992,7 @@ def ivr_test():
 
 
 #---------------------------------
-# Service: IVR Audio Delivery
+# Service: all
 # input: campaign_ref
 # output: sends selected audios for the call based on the campaign
 # starts the call, sends the introduction audios, and gathers user input for survey or training
@@ -3958,7 +4021,7 @@ def ivr(campaign):
 
 
 #---------------------------------
-# Service: Handle User Input in IVR
+# Service: all
 # input: campaign_ref, phone_number, current_question_index
 # output: processes digit entry, handles exceptions, and continues the survey or training flow
 #---------------------------------------------
@@ -4030,7 +4093,7 @@ def handle_question_fromacao():
 from datetime import datetime
 
 #---------------------------------
-# Service: Calculate call duration
+# Service: all
 # input: start_time_str, end_time_str
 # output: returns the call duration in minutes
 #---------------------------------------------
@@ -4044,7 +4107,7 @@ def get_call_duration(start_time_str, end_time_str):
 
 
 #---------------------------------
-# Service: Campaign status page
+# Service: all
 # input: None
 # output: renders the campaign status page
 #---------------------------------------------
@@ -4055,7 +4118,7 @@ def campaign_status():
 
 
 #---------------------------------
-# Service: Get Call Status
+# Service: all
 # input: None (uses session data)
 # output: Retrieves the status of recent calls, stores them in the database, and displays the results
 # Fetches data from Twilio API, matches it with contact data from the database, and logs the results
@@ -4166,10 +4229,8 @@ def get_call_status():
     return render_template('campaign_status.html', call_statuses=call_statuses, dados=dados)
 
 
-
-# Start IVR campaign route
 #---------------------------------
-# Service: Start IVR Campaign
+# Service: all
 # input: phone_numbers (list of phone numbers), campaign (campaign reference)
 # output: Initiates a call to each phone number with the selected campaign's IVR logic
 #---------------------------------------------
@@ -4211,7 +4272,7 @@ def start_ivr_campaign():
     return redirect(url_for('get_call_status'))
 
 #---------------------------------
-# Service: Start IVR Group Campaign
+# Service: all
 # input: grupo (group ID)
 # output: Initiates a call to each phone number in the group with a test campaign's IVR logic
 #---------------------------------------------
@@ -4251,7 +4312,7 @@ def start_ivr_group():
 
 
 #---------------------------------
-# Service: Save Survey Response
+# Service: all
 # Input: phone_number (str), selected_option (int), campaign (int)
 # Output: Updates survey response and option counts in the database
 # Connects to the database, creates a table if it does not exist, and updates response counts based on the campaign type
@@ -4284,7 +4345,7 @@ def save_survey_response2(phone_number, selected_option, campaign):
     """, (phone_number, campaign, current_dateTime))
 
     # Fetch campaign details to determine table for updating options
-    cur.execute(f"SELECT * FROM aulas WHERE campanha_ref = %s", (campaign,))
+    cur.execute(f"SELECT * FROM campanhas WHERE campanha_ref = %s", (campaign,))
     camp = cur.fetchone()
 
     if camp[5] != 'formacao':
@@ -4314,9 +4375,9 @@ def serve_audio(filename):
 
 
 
-# Assign Campaign
+
 #---------------------------------
-# Service: Assign Campaign
+# Service: all
 # input: id (campaign ID)
 # output: displays and updates campaign details
 # Allows updating the project field of a campaign
@@ -4357,7 +4418,7 @@ def assign_camp(id):
     return render_template('assign_camp.html', form=form)
 
 #---------------------------------
-# Service: Assign Question
+# Service: all
 # input: camp (campaign ID), id (question ID), type (type of operation)
 # output: displays and updates question details
 # Allows updating the description of a question and manages language options
@@ -4409,6 +4470,13 @@ def assign_question(camp, id, type):
     return render_template('assign_question.html', form=form, type=type, camp=camp, id=id, options=options)
 
 
+#---------------------------------
+# Service: external
+# Method: GET, POST
+# Input: Function details from the form
+# Output: Redirects to the 'funcao' page after adding the new function to the database
+# Handles form submission to add a new function to the 'funcao_software' table with current date and time.
+#---------------------------------------------
 @app.route('/addfunction', methods=['GET', 'POST'])
 @is_logged_in
 def addfunction():
@@ -4417,26 +4485,31 @@ def addfunction():
     
     if request.method == 'POST':
 
+        # Get current date and time
         current_dateTime = datetime.now()
-        current_dateTime = str(datetime.date(current_dateTime))+" "+str(datetime.time(current_dateTime))
+        current_dateTime = str(datetime.date(current_dateTime)) + " " + str(datetime.time(current_dateTime))
         print(current_dateTime)
 
+        # Connect to the PostgreSQL database
         conn = psycopg2.connect(POSTGRES_URL)
 
         cursor = conn.cursor()
 
-   
-        cursor.execute("INSERT INTO funcao_software(funcao, estado, usuario, data1) VALUES (%s,%s,%s,%s)",(str(form.funcao.data),str(form.estado.data), session['username'],current_dateTime))
+        # Insert the new function into the 'funcao_software' table
+        cursor.execute("INSERT INTO funcao_software(funcao, estado, usuario, data1) VALUES (%s, %s, %s, %s)",
+                       (str(form.funcao.data), str(form.estado.data), session['username'], current_dateTime))
         
-        
+        # Commit the transaction to the database
         conn.commit()
 
-        
+        # Close the database connection
         conn.close()
 
+        # Redirect to the 'funcao' page
         return redirect(url_for('funcao'))
 
-    return render_template('addfunction.html', form = form)
+    # Render the form for adding a new function
+    return render_template('addfunction.html', form=form)
 
 
 
@@ -5730,9 +5803,6 @@ def submit_inscricao(idioma):
     else:
       return render_template('inscricao_pastoral_PT.html', idioma = idioma)
    
-
-
-
     
 if __name__ == '__main__':
     app.secret_key='secret123'
