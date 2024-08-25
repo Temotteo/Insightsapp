@@ -75,7 +75,7 @@ def teardown_request(exception):
     if exception:
         app.logger.error(f"Erro: {exception}")
         usuario = session.get('username')
-        flash(f'erro: {exception}', 'warning')
+        #flash(f'erro: {exception}', 'warning')
         #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transacao', exception,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
         return render_template('erro.html'), 500
     
@@ -84,7 +84,7 @@ def teardown_request(exception):
 def handle_exception(e):
     app.logger.error(f"Erro inesperado: {e}")
     usuario = session.get('username')
-    flash(f'erro: {e}', 'warning')
+    #flash(f'erro: {e}', 'warning')
     #enviar_email('temoteo.tembe@cardinalt.com', 'Erro ao executar a transacao', e,usuario,'smatsinhe223@gmail.com' , 'adxr olgy gews evyo')
     return render_template('erro.html'), 500   
 
@@ -3422,15 +3422,15 @@ def dashboard2(id, type):
         cursor.execute(f"SELECT opcao, count FROM campanha_option WHERE questao = {id}")
         rows = cursor.fetchall()
         cursor.execute(f"SELECT descricao FROM campanha_question WHERE questao_id = {id}")
-        table_name = cursor.fetchone()
+        table_name = cursor.fetchone()[0]
     else:
         # If 'type' is 'formacao', select data from 'aula_opcoes' and 'aula_info'
         cursor.execute(f"SELECT opcao, count FROM aula_opcoes WHERE questao = {id}")
-        rows = cursor.fetchall()[0]
+        rows = cursor.fetchall()
         cursor.execute(f"SELECT descricao FROM aula_info WHERE questao_id = {id}")
         table_name = cursor.fetchone()[0]
     
-    print(rows[1])
+    print(rows)
 
     # Prepare data for chart
     labels = [row[0] for row in rows]
@@ -4044,7 +4044,7 @@ def handle_question():
             return redirect(url_for('ivr', current_question_index=current_question_index))
 
         # Save the survey response to the database
-        # save_survey_response(phone_number, current_question_index, selected_option, campaign)
+        save_survey_response(phone_number, current_question_index, selected_option, campaign)
 
         # Continue with the next question
         next_question_index = current_question_index + 1
