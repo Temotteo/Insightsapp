@@ -116,7 +116,7 @@ survey_responses = [
 TWILIO_ACCOUNT_SID = os.getenv('APP_CONFIGS__TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('APP_CONFIGS__TWILIO_AUTH_TOKEN')
 TWILIO_PHONE_NUMBER = os.getenv('APP_CONFIGS__TWILIO_PHONE_NUMBER')
-POSTGRES_URL = os.getenv('APP_CONFIGS__POSTGRES_URL')
+POSTGRES_URL = 'postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy' #os.getenv('APP_CONFIGS__POSTGRES_URL')
 
 # URLs of audio files for each question
 QUESTION_AUDIO_URLS = [
@@ -3660,7 +3660,7 @@ def cliente_ong():
 
     return render_template('cad-cliente_ong.html', dados=dados)
 
-#cadastro_cliente
+
 #---------------------------------
 # Service: external
 # Input: Form data from client registration
@@ -3668,7 +3668,7 @@ def cliente_ong():
 # Inserts a new client record into the 'cliente_vendas' table
 # Creates a new task and action record related to the client registration
 #---------------------------------
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/cadastro', methods=['GET', 'POST'])
 @is_logged_in
 def register():
     form = CadastroForm(request.form)
@@ -4518,10 +4518,11 @@ def addfunction():
 
 #===================================================================#
 
-#                 APPS EXTERNAS DA PLATAFORMA                    *
+#                 SERVICOS EXTERNOS DA PLATAFORMA                    *
 
 #===================================================================# 
 
+# app de candidatura a agentes de SRV
 @app.route('/candidaturas')
 def formulario():
     return render_template('formulario.html')
@@ -4555,6 +4556,7 @@ def submit():
     conn.commit()
     conn.close()
     return 'Respostas enviadas com sucesso!'
+
 
 
 @app.route('/contacts_by_collaborator', methods=['GET', 'POST'])
@@ -4754,139 +4756,173 @@ def relatorio_obra_db_connection():
 
 
 
+#---------------------------------
+# Service: Report Form - Retrieves all clients
+# input: None
+# output: Renders a template with a list of all clients
+# Connects to the PostgreSQL database, retrieves all clients from the 'cliente' table,
+# and renders the 'formulario_de_obra.html' template with the list of clients.
+#---------------------------------------------
 @app.route('/Relatorio_obra')
 @is_logged_in
 def Relatorio_obra():
     try:
-        # Conectar ao banco de dados PostgreSQL
-       with relatorio_obra_db_connection() as conn:
-        cur = conn.cursor()
-        
-        # Recuperar todos os clientes
-        cur.execute("SELECT * FROM cliente")
-        clientes = cur.fetchall()
-        
-        conn.commit()
-        cur.close()
-        conn.close()
-        
-        # Renderiza o template com a lista de clientes
-        return render_template('formulario_de_obra.html', clientes=clientes)
+        # Connect to the PostgreSQL database
+        with relatorio_obra_db_connection() as conn:
+            cur = conn.cursor()
+            
+            # Retrieve all clients
+            cur.execute("SELECT * FROM cliente")
+            clientes = cur.fetchall()
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            # Render the template with the list of clients
+            return render_template('formulario_de_obra.html', clientes=clientes)
     except psycopg2.Error as e:
-        # Exibe uma página de erro caso ocorra um problema
+        # Render an error page if there's an issue
         return render_template('formulario_de_obra.html')
 
-
+#---------------------------------
+# Service: View Report - Retrieves details of a specific report
+# input: id (integer) - ID of the report to view
+# output: Renders a template with the details of the specific report
+# Connects to the PostgreSQL database, retrieves report details, associated client, and difficulties,
+# and renders the 'ver_relatorio.html' template with these details.
+#---------------------------------------------
 @app.route('/ver_relatorio/<int:id>')
 @is_logged_in
 def ver_relatorio(id):
     try:
-        # Conectar ao banco de dados PostgreSQL
-       with relatorio_obra_db_connection() as conn:
-        cur = conn.cursor()
-        
-        # Recuperar detalhes do relatório, cliente e dificuldades associadas ao relatório
-        cur.execute("""
-            SELECT
-                relatorios.id AS relatorio_id,
-                relatorios.relatorio,
-                relatorios.status AS status_relatorio,
-                relatorios.hora_entrada,
-                relatorios.hora_saida,
-                relatorios.data,
-                cliente.id AS cliente_id,
-                cliente.nome AS cliente_nome,
-                dificuldades.id AS dificuldade_id,
-                dificuldades.dificuldade,
-                dificuldades.status AS status_dificuldade
-            FROM
-                relatorios
-            JOIN
-                cliente ON relatorios.cliente_id = cliente.id
-            JOIN
-                dificuldades ON relatorios.id = dificuldades.rel_id
-            WHERE
-                relatorios.id = %s
-        """, (id,))
-        relatorios = cur.fetchall()
-        
-        cur.close()
-        conn.close()
-        
-        # Renderiza o template com os detalhes do relatório
-        return render_template('ver_relatorio.html', relatorios=relatorios)
+        # Connect to the PostgreSQL database
+        with relatorio_obra_db_connection() as conn:
+            cur = conn.cursor()
+            
+            # Retrieve details of the report, client, and associated difficulties
+            cur.execute("""
+                SELECT
+                    relatorios.id AS relatorio_id,
+                    relatorios.relatorio,
+                    relatorios.status AS status_relatorio,
+                    relatorios.hora_entrada,
+                    relatorios.hora_saida,
+                    relatorios.data,
+                    cliente.id AS cliente_id,
+                    cliente.nome AS cliente_nome,
+                    dificuldades.id AS dificuldade_id,
+                    dificuldades.dificuldade,
+                    dificuldades.status AS status_dificuldade
+                FROM
+                    relatorios
+                JOIN
+                    cliente ON relatorios.cliente_id = cliente.id
+                JOIN
+                    dificuldades ON relatorios.id = dificuldades.rel_id
+                WHERE
+                    relatorios.id = %s
+            """, (id,))
+            relatorios = cur.fetchall()
+            
+            cur.close()
+            conn.close()
+            
+            # Render the template with the report details
+            return render_template('ver_relatorio.html', relatorios=relatorios)
     except psycopg2.Error as e:
-        # Exibe uma página de erro caso ocorra um problema
-        error_msg = f"Erro ao fazer a transacao: {e}"
+        # Render an error page if there's an issue
+        error_msg = f"Error during transaction: {e}"
         return render_template('erro.html', error=error_msg)
 
 
+#---------------------------------
+# Service: Generate PDF Report - Retrieves all reports ordered by date
+# input: None
+# output: Renders a template for generating a PDF report with all reports
+# Connects to the PostgreSQL database, retrieves all reports ordered by date from the 'relatorios' table,
+# and renders the 'relatorio_de_obra_pdf.html' template with the list of reports and the current date.
+#---------------------------------------------
 @app.route('/pdf_obra')
 @is_logged_in
 def pdf_obra():
     user = True
     try:
-        # Conectar ao banco de dados PostgreSQL
-       with relatorio_obra_db_connection() as conn:
-        cur = conn.cursor()
-        
-        # Recuperar todos os relatórios ordenados por data
-        cur.execute("""
-            SELECT 
-                relatorios.id,
-                relatorios.relatorio,
-                relatorios.status,
-                relatorios.hora_entrada,
-                relatorios.hora_saida,
-                relatorios.data,
-                relatorios.cliente_id,
-                cliente.nome AS nome_cliente
-            FROM 
-                relatorios
-            JOIN 
-                cliente ON relatorios.cliente_id = cliente.id 
-            ORDER BY relatorios.data;
-        """)
-        relatoriopdf = cur.fetchall()
-        
-        conn.close()
-        
-        today = datetime.now().date()
-        
-        # Renderiza o template com os dados dos relatórios
-        return render_template('relatorio_de_obra_pdf.html', user=user, relatorios=relatoriopdf, today=today)
+        # Connect to the PostgreSQL database
+        with relatorio_obra_db_connection() as conn:
+            cur = conn.cursor()
+            
+            # Retrieve all reports ordered by date
+            cur.execute("""
+                SELECT 
+                    relatorios.id,
+                    relatorios.relatorio,
+                    relatorios.status,
+                    relatorios.hora_entrada,
+                    relatorios.hora_saida,
+                    relatorios.data,
+                    relatorios.cliente_id,
+                    cliente.nome AS nome_cliente
+                FROM 
+                    relatorios
+                JOIN 
+                    cliente ON relatorios.cliente_id = cliente.id 
+                ORDER BY relatorios.data;
+            """)
+            relatoriopdf = cur.fetchall()
+            
+            conn.close()
+            
+            today = datetime.now().date()
+            
+            # Render the template with the report data
+            return render_template('relatorio_de_obra_pdf.html', user=user, relatorios=relatoriopdf, today=today)
     except psycopg2.Error as e:
-        # Exibe uma página de erro caso ocorra um problema
-        error_msg = f"Erro ao fazer a transacao: {e}"
+        # Render an error page if there's an issue
+        error_msg = f"Error during transaction: {e}"
         return render_template('erro.html', error=error_msg)
 
 
-@app.route('/deletar_relatorio/<int:id>', methods=['GET','POST'])
+
+#---------------------------------
+# Service: Delete Report - Deletes a report and its associated difficulties
+# input: id (int) - ID of the report to be deleted
+# output: Redirects to the PDF report page or shows an error page if there is an issue
+# Connects to the PostgreSQL database, deletes the difficulties associated with the specified report ID,
+# and then deletes the report itself. Redirects to the 'pdf_obra' page if successful, or shows an error page if an error occurs.
+#---------------------------------------------
+@app.route('/deletar_relatorio/<int:id>', methods=['GET', 'POST'])
 def deletar_relatorio(id):
     try:
-        # Conectar ao banco de dados PostgreSQL
-       with relatorio_obra_db_connection() as conn:
-        cur = conn.cursor()
-        
-        # Deletar dificuldades associadas ao relatório
-        cur.execute("DELETE FROM dificuldades WHERE rel_id = %s;", (id,))
-        conn.commit()
-        
-        # Deletar o relatório
-        cur.execute("DELETE FROM relatorios WHERE id = %s;", (id,))
-        conn.commit()
-        
-        conn.close()
-        
-        flash = "Relatório removido com sucesso"
-        return redirect(url_for('pdf_obra'))
+        # Connect to the PostgreSQL database
+        with relatorio_obra_db_connection() as conn:
+            cur = conn.cursor()
+            
+            # Delete difficulties associated with the report
+            cur.execute("DELETE FROM dificuldades WHERE rel_id = %s;", (id,))
+            conn.commit()
+            
+            # Delete the report
+            cur.execute("DELETE FROM relatorios WHERE id = %s;", (id,))
+            conn.commit()
+            
+            conn.close()
+            
+            flash("Relatório removido com sucesso")  # Success message
+            return redirect(url_for('pdf_obra'))
     except psycopg2.Error as e:
-        # Exibe uma página de erro caso ocorra um problema
-        error_msg = f"Erro ao fazer a transacao: {e}"
+        # Render an error page if there's an issue
+        error_msg = f"Error during transaction: {e}"
         return render_template('erro.html', error=error_msg)
 
 
-# Funcao para submissao de relatório de obra
+#---------------------------------
+# Service: Submit Report - Inserts a new report and its associated difficulty into the database
+# input: relatorio, cliente, status, dificuldade, hora_chegada, hora_saida
+# output: Renders the PDF report page with the new report details or shows an error page if there is an issue
+# Connects to the PostgreSQL database, inserts a new report and its associated difficulty,
+# and retrieves information about the associated client. Renders the 'relatorio_de_obra_pdf.html' template with the report ID and client details.
+#---------------------------------------------
 @app.route('/submit_rel', methods=['POST'])
 def submit_rel():
     relatorio = request.form['relatorio']
@@ -4898,40 +4934,45 @@ def submit_rel():
     data_atual = datetime.now().date()
 
     try:
-        # Conectar ao banco de dados PostgreSQL
-       with relatorio_obra_db_connection() as conn:
-        cur = conn.cursor()
-        
-        # Inserir novo relatório
-        cur.execute("INSERT INTO relatorios(relatorio, status, hora_entrada, hora_saida, data, cliente_id) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id", (relatorio, status, hora_chegada, hora_saida, data_atual, cliente,))
-        relatorio_id = cur.fetchone()[0]
-        conn.commit()
-        
-        # Inserir dificuldade associada ao relatório
-        cur.execute("INSERT INTO dificuldades(rel_id, dificuldade, status) VALUES (%s, %s, %s)", (relatorio_id, dificuldade, 'Pendentes',))
-        conn.commit()
-        
-        cur.close()
-        cur = conn.cursor()
-        
-        # Recuperar informacões do cliente associado
-        cur.execute("SELECT * FROM cliente WHERE id = %s", (cliente,))
-        cliente = cur.fetchone()
-        cur.close()
-        conn.close()
-        
-        sucesso = "O seu relatório foi concluído com sucesso"
-        return render_template('relatorio_de_obra_pdf.html', relatorio_id=relatorio_id, cliente=cliente)
+        # Connect to the PostgreSQL database
+        with relatorio_obra_db_connection() as conn:
+            cur = conn.cursor()
+            
+            # Insert a new report
+            cur.execute("INSERT INTO relatorios(relatorio, status, hora_entrada, hora_saida, data, cliente_id) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id", (relatorio, status, hora_chegada, hora_saida, data_atual, cliente,))
+            relatorio_id = cur.fetchone()[0]
+            conn.commit()
+            
+            # Insert associated difficulty
+            cur.execute("INSERT INTO dificuldades(rel_id, dificuldade, status) VALUES (%s, %s, %s)", (relatorio_id, dificuldade, 'Pendentes',))
+            conn.commit()
+            
+            cur.close()
+            cur = conn.cursor()
+            
+            # Retrieve information about the associated client
+            cur.execute("SELECT * FROM cliente WHERE id = %s", (cliente,))
+            cliente_info = cur.fetchone()
+            cur.close()
+            conn.close()
+            
+            sucesso = "O seu relatório foi concluído com sucesso"  # Success message
+            return render_template('relatorio_de_obra_pdf.html', relatorio_id=relatorio_id, cliente=cliente_info)
     except psycopg2.Error as e:
-        # Exibe uma página de erro caso ocorra um problema
-        error_msg = f"Erro ao fazer a transacao: {e}"
+        # Render an error page if there's an issue
+        error_msg = f"Error during transaction: {e}"
         return render_template('erro.html', error=error_msg)
- 
 
+#---------------------------------
+# Service: Manage Clients
+# input: None
+# output: displays the list of clients from the 'cliente' table
+# Retrieves and displays all clients from the database
+#---------------------------------------------
 @app.route('/Gerir_clientes')
 @is_logged_in
 def gerir_clientes():
-    #Exibe a lista de clientes
+    # Displays the list of clients
     try:
         with relatorio_obra_db_connection() as conn:
             with conn.cursor() as cur:
@@ -4939,15 +4980,21 @@ def gerir_clientes():
                 clientes = cur.fetchall()
         return render_template('gestao_clientes.html', clientes=clientes)
     except psycopg2.Error as e:
-        error_msg = f"Erro ao fazer a transacao: {e}"
+        error_msg = f"Error while performing the transaction: {e}"
         return render_template('erro.html', error=error_msg)
 
+#---------------------------------
+# Service: Add New Client
+# input: client name (from form data)
+# output: redirects to the 'gerir_clientes' page with success or error message
+# Adds a new client to the 'cliente' table
+#---------------------------------------------
 @app.route('/novo_cliente', methods=['POST'])
 def novo_cliente():
-    #Adiciona um novo cliente
+    # Adds a new client
     cliente = request.form.get('cliente')
     if not cliente:
-        flash("Nome do cliente é obrigatório", 'error')
+        flash("Client name is required", 'error')
         return redirect(url_for('gerir_clientes'))
 
     try:
@@ -4957,18 +5004,24 @@ def novo_cliente():
                 conn.commit()
                 cur.execute("SELECT * FROM cliente")
                 clientes = cur.fetchall()
-        flash("Cliente inserido com sucesso", 'success')
+        flash("Client successfully added", 'success')
         return render_template('gestao_clientes.html', clientes=clientes)
     except psycopg2.Error as e:
-        error_msg = f"Erro ao fazer a transacao: {e}"
+        error_msg = f"Error while performing the transaction: {e}"
         return render_template('erro.html', error=error_msg)
 
+#---------------------------------
+# Service: Edit Existing Client
+# input: client ID, updated client name (from form data)
+# output: redirects to the 'gerir_clientes' page with success or error message
+# Updates an existing client in the 'cliente' table
+#---------------------------------------------
 @app.route('/edit_cliente/<int:id>', methods=['POST'])
 def edit_cliente(id):
-    #Atualiza um cliente existente
+    # Updates an existing client
     cliente = request.form.get('cliente')
     if not cliente:
-        flash("Nome do cliente é obrigatório", 'error')
+        flash("Client name is required", 'error')
         return redirect(url_for('gerir_clientes'))
 
     try:
@@ -4978,10 +5031,10 @@ def edit_cliente(id):
                 conn.commit()
                 cur.execute("SELECT * FROM cliente")
                 clientes = cur.fetchall()
-        flash("Cliente atualizado com sucesso", 'success')
+        flash("Client successfully updated", 'success')
         return render_template('gestao_clientes.html', clientes=clientes)
     except psycopg2.Error as e:
-        error_msg = f"Erro ao fazer a transacao: {e}"
+        error_msg = f"Error while performing the transaction: {e}"
         return render_template('erro.html', error=error_msg)
 
 @app.route('/delete_cliente/<int:id>', methods=['POST'])
@@ -5302,8 +5355,6 @@ def atualizar(id):
     conn.close()    
 
     return redirect('/videos')
-
-
 
 
 @app.route('/Link_video/<int:testemunho_id>',methods=['GET'])
@@ -5806,6 +5857,6 @@ def submit_inscricao(idioma):
     
 if __name__ == '__main__':
     app.secret_key='secret123'
-    #app.run(debug=True)
-    http_server = WSGIServer(('', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('', 5000), app)
+    #http_server.serve_forever()
