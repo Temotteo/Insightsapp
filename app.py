@@ -116,7 +116,7 @@ survey_responses = [
 TWILIO_ACCOUNT_SID = os.getenv('APP_CONFIGS__TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('APP_CONFIGS__TWILIO_AUTH_TOKEN')
 TWILIO_PHONE_NUMBER = os.getenv('APP_CONFIGS__TWILIO_PHONE_NUMBER')
-POSTGRES_URL = 'postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy' #os.getenv('APP_CONFIGS__POSTGRES_URL')
+POSTGRES_URL = os.getenv('APP_CONFIGS__POSTGRES_URL')
 
 # URLs of audio files for each question
 QUESTION_AUDIO_URLS = [
@@ -5857,6 +5857,6 @@ def submit_inscricao(idioma):
     
 if __name__ == '__main__':
     app.secret_key='secret123'
-    app.run(debug=True)
-    #http_server = WSGIServer(('', 5000), app)
-    #http_server.serve_forever()
+    #app.run(debug=True)
+    http_server = WSGIServer(('', 5000), app)
+    http_server.serve_forever()
