@@ -3660,7 +3660,7 @@ def cliente_ong():
 
     return render_template('cad-cliente_ong.html', dados=dados)
 
-
+#cadastro_cliente
 #---------------------------------
 # Service: external
 # Input: Form data from client registration
@@ -3668,7 +3668,7 @@ def cliente_ong():
 # Inserts a new client record into the 'cliente_vendas' table
 # Creates a new task and action record related to the client registration
 #---------------------------------
-@app.route('/cadastro', methods=['GET', 'POST'])
+@app.route('/register', methods=['GET', 'POST'])
 @is_logged_in
 def register():
     form = CadastroForm(request.form)
