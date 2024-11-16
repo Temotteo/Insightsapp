@@ -5815,7 +5815,7 @@ class Registration(db.Model):
     def __repr__(self):
         return f'<Registration {self.name}>'
     
-@app.route('/submit_inscricao/<idioma>', methods=['POST','GET'])
+@app.route('/submeter_inscricao/<idioma>', methods=['POST','GET'])
 def submit_inscricao(idioma):
       #  endereco = request.form['endereco']
        # cidade = request.form['cidade']
