@@ -1,6 +1,7 @@
 import os
 import csv
 from twilio.rest import Client
+from sqlalchemy import func
 from twilio.twiml.voice_response import VoiceResponse
 
 from flask import Flask, render_template, request,  flash, session, logging, url_for, redirect, Response,  send_from_directory, jsonify, send_file
@@ -5875,12 +5876,117 @@ def confirmation(registration_id):
     return render_template('confirmation.html', registration=registration)
 
 # Rota para listar todas as inscrições (área administrativa)
+
+@app.route('/admin/dashboard')
+@is_logged_in
+def dashboard():
+    # Estatísticas gerais
+    total_registrations = Registration.query.count()
+    today_registrations = Registration.query.filter(
+        func.date(Registration.created_at) == date.today()
+    ).count()
+    pastor_count = Registration.query.filter_by(role='pastor').count()
+    church_count = db.session.query(func.count(func.distinct(Registration.church))).scalar()
+
+    # Últimas inscrições
+    recent_registrations = Registration.query.order_by(
+        Registration.created_at.desc()
+    ).limit(10).all()
+
+    return render_template('dashboardConf..html',
+                         total_registrations=total_registrations,
+                         today_registrations=today_registrations,
+                         pastor_count=pastor_count,
+                         church_count=church_count,
+                         registrations=recent_registrations)
+
+
 @app.route('/admin/registrations')
+@is_logged_in
 def list_registrations():
-    registrations = Registration.query.order_by(Registration.created_at.desc()).all()
-    return render_template('admin/registrations.html', registrations=registrations)
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+    registrations = Registration.query.order_by(
+        Registration.created_at.desc()
+    ).paginate(page=page, per_page=per_page)
+    total_registrations = Registration.query.count()
+    today_registrations = Registration.query.filter(
+        func.date(Registration.created_at) == date.today()
+    ).count()
+    pastor_count = Registration.query.filter_by(role='pastor').count()
+    church_count = db.session.query(func.count(func.distinct(Registration.church))).scalar()
 
+    # Últimas inscrições
+    recent_registrations = Registration.query.order_by(
+        Registration.created_at.desc()
+    ).limit(10).all()
+    return render_template('registrations.html', registrations=registrations,
+                         total_registrations=total_registrations,
+                         today_registrations=today_registrations,
+                         pastor_count=pastor_count,
+                         church_count=church_count,
+                         registrationsall=recent_registrations)
 
+@app.route('/admin/registration/<int:id>', methods=['GET', 'POST'])
+@is_logged_in
+def edit_registration(id):
+    registration = Registration.query.get_or_404(id)
+    if request.method == 'POST':
+        try:
+            registration.name = request.form['name']
+            registration.email = request.form['email']
+            registration.phone = request.form['phone']
+            registration.church = request.form['church']
+            registration.role = request.form['role']
+            
+            db.session.commit()
+            flash('Inscrição atualizada com sucesso!', 'success')
+            return redirect(url_for('admin.list_registrations'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Erro ao atualizar inscrição.', 'danger')
+    
+    return render_template('admin/edit_registration.html', registration=registration)
+
+@app.route('/admin/registration/<int:id>/delete', methods=['POST','GET'])
+@is_logged_in
+def delete_registration(id):
+    registration = Registration.query.get_or_404(id)
+    try:
+        db.session.delete(registration)
+        db.session.commit()
+        flash('Inscrição excluída com sucesso!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Erro ao excluir inscrição.', 'danger')
+    
+    return redirect(url_for('list_registrations'))
+
+@app.route('/admin/export')
+@is_logged_in
+def export_registrations():
+    import csv
+    from io import StringIO
+    from flask import make_response
+    
+    si = StringIO()
+    cw = csv.writer(si)
+    
+    # Escrever cabeçalho
+    cw.writerow(['ID', 'Nome', 'Email', 'Telefone', 'Igreja', 'Cargo', 'Data de Inscrição'])
+    
+    # Escrever dados
+    registrations = Registration.query.all()
+    for r in registrations:
+        cw.writerow([
+            r.id, r.name, r.email, r.phone, r.church, r.role,
+            r.created_at.strftime('%d/%m/%Y %H:%M')
+        ])
+    
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=inscricoes.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
 
 
 if __name__ == '__main__':
