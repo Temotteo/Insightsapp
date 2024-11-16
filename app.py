@@ -116,7 +116,7 @@ survey_responses = [
 TWILIO_ACCOUNT_SID = os.getenv('APP_CONFIGS__TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('APP_CONFIGS__TWILIO_AUTH_TOKEN')
 TWILIO_PHONE_NUMBER = os.getenv('APP_CONFIGS__TWILIO_PHONE_NUMBER')
-POSTGRES_URL = os.getenv('APP_CONFIGS__POSTGRES_URL')
+POSTGRES_URL = 'postgresql://fezjdtyy:BxOZhSdBMyYrUDpNzs5Rxmh9sW9STTbv@mouse.db.elephantsql.com/fezjdtyy'
 
 # URLs of audio files for each question
 QUESTION_AUDIO_URLS = [
@@ -5800,21 +5800,28 @@ def idioma_inscricao(idioma):
     return redirect(url_for('submit_inscricao', idioma= idioma))
 
 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos'
+db = SQLAlchemy(app)
+
+class Registration(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    church = db.Column(db.String(100))
+    role = db.Column(db.String(50))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Registration {self.name}>'
+    
 @app.route('/submit_inscricao/<idioma>', methods=['POST','GET'])
 def submit_inscricao(idioma):
-
-    if request.method == 'POST': 
-        nome = request.form['nome']
-        titulo = request.form['titulo']
-        igreja = request.form['igreja']
-        cargo = request.form['cargo']
       #  endereco = request.form['endereco']
        # cidade = request.form['cidade']
         #estado = request.form['estado']
         #codigoPostal = request.form['codigoPostal']
       #  pais = request.form['pais']
-        telefone = request.form['telefone']
-        email = request.form['email']
        # acomodacao = request.form['acomodacao']
        # restricoesAlimentares = request.form.get('restricoesAlimentares', '')
        # contatoEmergencia = request.form['contatoEmergencia']
@@ -5833,20 +5840,28 @@ def submit_inscricao(idioma):
        # nomeCartao = request.form.get('nomeCartao', '')
        # comentariosAdicionais = request.form.get('comentariosAdicionais', '')
     
+    if request.method == 'POST': 
+      new_registration = Registration(
+            name=request.form['nome'],
+            email=request.form['email'],
+            phone=request.form['telefone'],
+            church=request.form['igreja'],
+            role=request.form['cargo']
+        )
+
+      try:  
         # Conectando ao banco de dados e inserindo os dados
-        conn = psycopg2.connect('postgresql://admin:AXjwTaMmH88i7x0G1rNwzSwhmnhYlIdo@dpg-co2n3ggl6cac73br3680-a.frankfurt-postgres.render.com/Videos')
-        cur = conn.cursor()
-        cur.execute('''
-            INSERT INTO inscricoes2 (nome, titulo, igreja, cargo,  telefone, email)
-            VALUES (%s, %s, %s, %s, %s,%s)
-        ''', (nome, titulo, igreja, cargo, telefone, email))
-        conn.commit()
-        cur.close()
-        conn.close()
+        db.create_all()
+
+        db.session.add(new_registration)
+        db.session.commit()
         
         flash('Dados inseridos com sucesso', 'success')
 
-        return redirect(url_for('submit_inscricao', idioma = idioma))
+        return redirect(url_for('confirmation', registration_id=new_registration.id))
+      except Exception as e:
+        db.session.rollback()
+        print(f'Erro ao processar inscrição. Por favor, tente novamente. {e}')
 
     
     if idioma == 'en':
@@ -5854,7 +5869,20 @@ def submit_inscricao(idioma):
     else:
       return render_template('inscricao_pastoral_PT.html', idioma = idioma)
    
-    
+@app.route('/confirmation/<int:registration_id>')
+def confirmation(registration_id):
+    registration = Registration.query.get_or_404(registration_id)
+    return render_template('confirmation.html', registration=registration)
+
+# Rota para listar todas as inscrições (área administrativa)
+@app.route('/admin/registrations')
+def list_registrations():
+    registrations = Registration.query.order_by(Registration.created_at.desc()).all()
+    return render_template('admin/registrations.html', registrations=registrations)
+
+
+
+
 if __name__ == '__main__':
     app.secret_key='secret123'
     #app.run(debug=True)

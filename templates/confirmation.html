@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Confirmação de Inscrição - Conferência Ebenezer</title>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <!-- Success Icon -->
+                        <div class="text-center mb-4">
+                            <div class="display-1 text-success mb-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                </svg>
+                            </div>
+                            <h2 class="h3 text-success mb-3">Inscrição Confirmada!</h2>
+                            <p class="text-muted">Sua inscrição para a Conferência Ebenezer foi realizada com sucesso.</p>
+                        </div>
+
+                        <!-- Registration Details -->
+                        <div class="mb-4">
+                            <h3 class="h5 text-primary mb-3">Suas Informações</h3>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <tbody>
+                                        <tr>
+                                            <th class="bg-light" style="width: 140px">Nome:</th>
+                                            <td>{{ registration.name }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Email:</th>
+                                            <td>{{ registration.email }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Telefone:</th>
+                                            <td>{{ registration.phone }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Igreja:</th>
+                                            <td>{{ registration.church }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Cargo:</th>
+                                            <td>{{ registration.role }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Event Details -->
+                        <div class="bg-light p-4 rounded-3 mb-4">
+                            <h3 class="h5 text-primary mb-3">Detalhes do Evento</h3>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Data:</strong></p>
+                                    <p class="text-muted">22 & 23 de Novembro</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Horário:</strong></p>
+                                    <p class="text-muted">8:00 - 13:00</p>
+                                </div>
+                                <div class="col-12">
+                                    <p class="mb-1"><strong>Local:</strong></p>
+                                    <p class="text-muted">Av. da Igreja em estrada circular, nr.222, Chiango-bairro</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="alert alert-info" role="alert">
+                            <h4 class="alert-heading h6">Informações Importantes!</h4>
+                            <p class="small mb-0">
+                                - Chegue com 15 minutos de antecedência<br>
+                                - Traga sua Bíblia e material para anotações<br>
+                                - Em caso de dúvidas, entre em contato: +258 84 101 8103
+                            </p>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                            <button class="btn btn-primary me-md-2" onclick="window.print()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer me-2" viewBox="0 0 16 16">
+                                    <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1"/>
+                                    <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
+                                </svg>
+                                Imprimir Confirmação
+                            </button>
+                            <a href="/submit_inscricao/pt" class="btn btn-outline-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house me-2" viewBox="0 0 16 16">
+                                    <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.707 1.5ZM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5 5 5Z"/>
+                                </svg>
+                                Voltar para Página Inicial
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
