@@ -5816,7 +5816,7 @@ class Registration(db.Model):
     def __repr__(self):
         return f'<Registration {self.name}>'
     
-@app.route('/submeter_inscricao/<idioma>', methods=['POST','GET'])
+@app.route('/submit_inscricao/<idioma>', methods=['POST','GET'])
 def submit_inscricao(idioma):
       #  endereco = request.form['endereco']
        # cidade = request.form['cidade']
@@ -5878,7 +5878,6 @@ def confirmation(registration_id):
 # Rota para listar todas as inscrições (área administrativa)
 
 @app.route('/admin/dashboard')
-@is_logged_in
 def dashboard():
     # Estatísticas gerais
     total_registrations = Registration.query.count()
@@ -5902,7 +5901,6 @@ def dashboard():
 
 
 @app.route('/admin/registrations')
-@is_logged_in
 def list_registrations():
     page = request.args.get('page', 1, type=int)
     per_page = 20
@@ -5928,7 +5926,6 @@ def list_registrations():
                          registrationsall=recent_registrations)
 
 @app.route('/admin/registration/<int:id>', methods=['GET', 'POST'])
-@is_logged_in
 def edit_registration(id):
     registration = Registration.query.get_or_404(id)
     if request.method == 'POST':
@@ -5949,7 +5946,6 @@ def edit_registration(id):
     return render_template('admin/edit_registration.html', registration=registration)
 
 @app.route('/admin/registration/<int:id>/delete', methods=['POST','GET'])
-@is_logged_in
 def delete_registration(id):
     registration = Registration.query.get_or_404(id)
     try:
@@ -5963,7 +5959,6 @@ def delete_registration(id):
     return redirect(url_for('list_registrations'))
 
 @app.route('/admin/export')
-@is_logged_in
 def export_registrations():
     import csv
     from io import StringIO
