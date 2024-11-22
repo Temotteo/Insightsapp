@@ -5880,6 +5880,62 @@ def confirmation(registration_id):
 
 # Rota para listar todas as inscrições (área administrativa)
 
+UPLOAD_FOLDER = 'static/C_PASTORES'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+@app.route('/upload-excel', methods=['POST'])
+def upload_excel():
+    # Verifica se o arquivo foi enviado
+    if 'file' not in request.files:
+        return {"message": "Nenhum arquivo enviado."}, 400
+
+    file = request.files['file']
+
+    # Verifica se o arquivo possui um nome válido
+    if file.filename == '':
+        return {"message": "Nome de arquivo inválido."}, 400
+
+    # Verifica se o arquivo tem a extensão correta
+    if not file.filename.endswith('.xlsx'):
+        return {"message": "Formato de arquivo não suportado. Envie um arquivo .xlsx"}, 400
+
+    # Salva o arquivo no servidor (opcional)
+    filename = secure_filename(file.filename)
+    file_path = f"{UPLOAD_FOLDER}/{filename}"
+    file.save(file_path)
+
+    try:
+        # Lê o arquivo Excel usando pandas
+        df = pd.read_excel(file_path)
+        df = df.applymap(lambda x: None if isinstance(x, float) and np.isnan(x) else x)
+        print("Colunas do arquivo Excel:", df.columns.tolist())  # Exibe as colunas
+
+
+        # Itera pelas linhas do DataFrame e insere os dados na tabela
+        for index, row in df.iterrows():
+            new_registration = Registration(
+                name=row['nome'],
+                email=row['email'],
+                phone=row['telefone'],
+                church=row['igreja'],
+                role=row['cargo'],
+                session=None  
+            )
+            db.session.add(new_registration)
+
+        db.session.commit()
+        return {"message": "Dados importados com sucesso!"}, 201
+
+    except Exception as e:
+        db.session.rollback()
+        return {"message": f"Ocorreu um erro: {str(e)}"}, 500
+
+    finally:
+        # Remova o arquivo carregado, se necessário
+        import os
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
 @app.route('/admin/dashboard')
 def dashboard():
     # Estatísticas gerais
@@ -5920,8 +5976,8 @@ def list_registrations():
     # Últimas inscrições
     recent_registrations = Registration.query.order_by(
         Registration.created_at.desc()
-    ).limit(10).all()
-    return render_template('registrations.html', registrations=registrations,
+    ).all()
+    return render_template('registrations.html', registrations=recent_registrations,
                          total_registrations=total_registrations,
                          today_registrations=today_registrations,
                          pastor_count=pastor_count,

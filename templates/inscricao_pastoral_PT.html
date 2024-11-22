@@ -100,6 +100,12 @@
 
                         <!-- Contact Info -->
                         <div class="mt-4 text-center">
+                            <form action="/upload-excel" method="POST" enctype="multipart/form-data">
+                                <label for="file">Carregar arquivo Excel:</label>
+                                <input type="file" name="file" id="file" accept=".xlsx" required>
+                                <button type="submit">Enviar</button>
+                            </form>
+                            
                             <p class="text-muted small">
                                 Para mais informações: <br>
                                 Tel: +258 84 101 8103 <br>
