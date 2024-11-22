@@ -5811,6 +5811,7 @@ class Registration(db.Model):
     phone = db.Column(db.String(20), nullable=False)
     church = db.Column(db.String(100))
     role = db.Column(db.String(50))
+    session = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
@@ -5819,7 +5820,7 @@ class Registration(db.Model):
 @app.route('/submit_inscricao/<idioma>', methods=['POST','GET'])
 def submit_inscricao(idioma):
       #  endereco = request.form['endereco']
-       # cidade = request.form['cidade']
+      # cidade = request.form['cidade']
         #estado = request.form['estado']
         #codigoPostal = request.form['codigoPostal']
       #  pais = request.form['pais']
@@ -5842,12 +5843,14 @@ def submit_inscricao(idioma):
        # comentariosAdicionais = request.form.get('comentariosAdicionais', '')
     
     if request.method == 'POST': 
+      session = request.form.get('session') == 'on'
       new_registration = Registration(
             name=request.form['nome'],
             email=request.form['email'],
             phone=request.form['telefone'],
             church=request.form['igreja'],
-            role=request.form['cargo']
+            role=request.form['cargo'],
+            session = session
         )
 
       try:  
